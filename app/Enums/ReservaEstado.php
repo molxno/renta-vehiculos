@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Enums;
+
+enum ReservaEstado: string
+{
+    case Confirmada = 'confirmada';
+    case Entregada = 'entregada';
+    case Devuelta = 'devuelta';
+    case Facturada = 'facturada';
+    case Pagada = 'pagada';
+    case Cancelada = 'cancelada';
+}
