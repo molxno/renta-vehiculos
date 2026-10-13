@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\VehiculoEstado;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Vehiculo extends Model
+{
+    protected $table = 'vehiculos';
+
+    protected $fillable = ['placa', 'marca', 'modelo', 'anio', 'tipo', 'estado'];
+
+    protected function casts(): array
+    {
+        return ['estado' => VehiculoEstado::class, 'anio' => 'integer'];
+    }
+
+    /** @return HasMany<Poliza, $this> */
+    public function polizas(): HasMany
+    {
+        return $this->hasMany(Poliza::class);
+    }
+
+    /** @return HasMany<Reserva, $this> */
+    public function reservas(): HasMany
+    {
+        return $this->hasMany(Reserva::class);
+    }
+
+    /** @return HasMany<Tarifa, $this> */
+    public function tarifas(): HasMany
+    {
+        return $this->hasMany(Tarifa::class);
+    }
+}

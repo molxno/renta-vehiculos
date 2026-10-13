@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\FacturaEstado;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Factura extends Model
+{
+    protected $table = 'facturas';
+
+    protected $fillable = [
+        'reserva_id', 'numero', 'estado', 'subtotal_centavos',
+        'impuestos_centavos', 'total_centavos', 'moneda', 'desglose',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'estado' => FacturaEstado::class,
+            'subtotal_centavos' => 'integer',
+            'impuestos_centavos' => 'integer',
+            'total_centavos' => 'integer',
+            'desglose' => 'array',
+        ];
+    }
+
+    /** @return BelongsTo<Reserva, $this> */
+    public function reserva(): BelongsTo
+    {
+        return $this->belongsTo(Reserva::class);
+    }
+}
