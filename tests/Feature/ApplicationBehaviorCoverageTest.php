@@ -101,11 +101,11 @@ test('all documented write routes validate and redirect', function () {
 
 test('requests expose authorization and validation contracts', function () {
     $requests = [
-        [new ConfirmarReservaRequest(), []],
-        [new StoreActaDevolucionRequest(), ['devuelto_at', 'checklist', 'observaciones']],
-        [new StoreActaEntregaRequest(), ['entregado_at', 'checklist', 'observaciones']],
-        [new StorePagoRequest(), ['metodo', 'monto_centavos', 'numero_tarjeta']],
-        [new StoreReservaRequest(), ['user_id', 'vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
+        [new ConfirmarReservaRequest, []],
+        [new StoreActaDevolucionRequest, ['devuelto_at', 'checklist', 'observaciones']],
+        [new StoreActaEntregaRequest, ['entregado_at', 'checklist', 'observaciones']],
+        [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
+        [new StoreReservaRequest, ['user_id', 'vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
     ];
 
     foreach ($requests as [$request, $fields]) {
@@ -116,17 +116,17 @@ test('requests expose authorization and validation contracts', function () {
 
 test('models expose their casts and relationships', function () {
     $models = [
-        [new ActaDevolucion(), ['devuelto_at', 'checklist'], ['reserva' => BelongsTo::class]],
-        [new ActaEntrega(), ['entregado_at', 'checklist'], ['reserva' => BelongsTo::class]],
-        [new Contrato(), ['condiciones', 'firmado_at'], ['reserva' => BelongsTo::class]],
-        [new Convenio(), ['descuento_porcentaje', 'activo'], ['reservas' => HasMany::class]],
-        [new Dano(), ['monto_centavos'], ['reserva' => BelongsTo::class]],
-        [new Factura(), ['estado', 'subtotal_centavos', 'impuestos_centavos', 'total_centavos', 'desglose'], ['reserva' => BelongsTo::class]],
-        [new LicenciaConduccion(), ['fecha_vencimiento'], ['user' => BelongsTo::class]],
-        [new Multa(), ['monto_centavos'], ['reserva' => BelongsTo::class]],
-        [new Pago(), ['estado', 'metodo', 'monto_centavos'], ['reserva' => BelongsTo::class]],
-        [new Poliza(), ['vigencia_desde', 'vigencia_hasta'], ['vehiculo' => BelongsTo::class]],
-        [new Reserva(), ['estado', 'inicio', 'fin', 'total_centavos'], [
+        [new ActaDevolucion, ['devuelto_at', 'checklist'], ['reserva' => BelongsTo::class]],
+        [new ActaEntrega, ['entregado_at', 'checklist'], ['reserva' => BelongsTo::class]],
+        [new Contrato, ['condiciones', 'firmado_at'], ['reserva' => BelongsTo::class]],
+        [new Convenio, ['descuento_porcentaje', 'activo'], ['reservas' => HasMany::class]],
+        [new Dano, ['monto_centavos'], ['reserva' => BelongsTo::class]],
+        [new Factura, ['estado', 'subtotal_centavos', 'impuestos_centavos', 'total_centavos', 'desglose'], ['reserva' => BelongsTo::class]],
+        [new LicenciaConduccion, ['fecha_vencimiento'], ['user' => BelongsTo::class]],
+        [new Multa, ['monto_centavos'], ['reserva' => BelongsTo::class]],
+        [new Pago, ['estado', 'metodo', 'monto_centavos'], ['reserva' => BelongsTo::class]],
+        [new Poliza, ['vigencia_desde', 'vigencia_hasta'], ['vehiculo' => BelongsTo::class]],
+        [new Reserva, ['estado', 'inicio', 'fin', 'total_centavos'], [
             'user' => BelongsTo::class,
             'vehiculo' => BelongsTo::class,
             'convenio' => BelongsTo::class,
@@ -138,12 +138,12 @@ test('models expose their casts and relationships', function () {
             'multas' => HasMany::class,
             'danos' => HasMany::class,
         ]],
-        [new Tarifa(), ['valor_diario_centavos', 'vigente_desde', 'vigente_hasta'], ['vehiculo' => BelongsTo::class]],
-        [new User(), ['email_verified_at', 'password', 'rol'], [
+        [new Tarifa, ['valor_diario_centavos', 'vigente_desde', 'vigente_hasta'], ['vehiculo' => BelongsTo::class]],
+        [new User, ['email_verified_at', 'password', 'rol'], [
             'licenciaConduccion' => HasOne::class,
             'reservas' => HasMany::class,
         ]],
-        [new Vehiculo(), ['estado', 'anio'], [
+        [new Vehiculo, ['estado', 'anio'], [
             'polizas' => HasMany::class,
             'reservas' => HasMany::class,
             'tarifas' => HasMany::class,
