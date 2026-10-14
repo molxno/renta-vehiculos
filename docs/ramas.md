@@ -30,6 +30,11 @@ El job **Pruebas y cobertura** ejecuta `vendor/bin/pest --coverage` en CI con
 PCOV y publica el porcentaje por archivo en los logs. El hook local ejecuta
 `composer test:coverage` solo cuando detecta PCOV o Xdebug; sin driver muestra
 un aviso y no bloquea. La medición canónica se hace en CI.
+El umbral actual es **100 %**: la tercera medición alcanzó 100 % en todos
+los archivos incluidos, por lo que `composer test:coverage` conserva
+`--min=100`. Las iteraciones anteriores alcanzaron 56.6 % y 96.8 %; se
+completó la cobertura pendiente de `AppServiceProvider` con pruebas de sus
+defaults de producción.
 
 El alcance de `phpunit.xml` incluye `app/`. Solo se excluyen `app/Contracts`,
 porque contiene interfaces sin implementación ejecutable, y
