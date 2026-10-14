@@ -32,6 +32,7 @@ COPY --from=vendor /app/vendor ./vendor
 COPY . .
 RUN cp .env.example .env \
     && php artisan key:generate --force \
+    && php artisan wayfinder:generate --with-form -vvv \
     && npm run build
 
 FROM dunglas/frankenphp:php8.5-bookworm
