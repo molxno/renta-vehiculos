@@ -211,3 +211,20 @@ PR3a publicará estos requests, sin duplicar reglas en controladores:
 Las interfaces no cambian por una implementación fake. Las historias pueden
 construir sus casos contra estos contratos y sustituir el binding del
 contenedor en tests.
+
+## Mapa de historias, rutas y props
+
+| Historia                         | Ruta(s)                                                                | Página Inertia                                       | Props principales                                             |
+| -------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| Crear y consultar reservas       | `reservas.index`, `reservas.create`, `reservas.store`, `reservas.show` | `Reservas/Index`, `Reservas/Create`, `Reservas/Show` | `reservations`, `filters`, `vehicles`, `quote`, `reservation` |
+| Confirmar o cancelar una reserva | `reservas.confirmar`, `reservas.cancelar`                              | redirección a `Reservas/Show`                        | `reservation`                                                 |
+| Registrar entrega                | `entregas.create`, `entregas.store`                                    | `Entregas/Create`                                    | `reservation`, `checklist`                                    |
+| Registrar devolución             | `devoluciones.create`, `devoluciones.store`                            | `Devoluciones/Create`                                | `reservation`, `checklist`, `estimatedChargesCents`           |
+| Consultar factura                | `facturas.show`                                                        | `Facturas/Show`                                      | `invoice`                                                     |
+| Registrar pago                   | `pagos.create`, `pagos.store`                                          | `Pagos/Create` y redirección                         | `reservation`, `amountCents`, `currency`, `methods`           |
+
+Los controladores de esta fase son esqueletos HTTP: publican los nombres de
+ruta, la página y la forma de props para que las historias puedan avanzar sin
+duplicar contratos. Las implementaciones de negocio quedan detrás de los
+contratos de `app/Contracts` y, durante esta fase, usan fakes enlazados por el
+contenedor.
