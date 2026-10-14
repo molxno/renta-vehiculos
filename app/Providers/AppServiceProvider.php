@@ -2,16 +2,6 @@
 
 namespace App\Providers;
 
-use App\Contracts\CalculadoraDevolucion;
-use App\Contracts\DisponibilidadService;
-use App\Contracts\GeneradorQr;
-use App\Contracts\PasarelaPago;
-use App\Contracts\TarifaService;
-use App\Fakes\FakeCalculadoraDevolucion;
-use App\Fakes\FakeDisponibilidadService;
-use App\Fakes\FakeGeneradorQr;
-use App\Fakes\FakePasarelaPago;
-use App\Fakes\FakeTarifaService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -25,11 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(DisponibilidadService::class, FakeDisponibilidadService::class);
-        $this->app->bind(TarifaService::class, FakeTarifaService::class);
-        $this->app->bind(PasarelaPago::class, FakePasarelaPago::class);
-        $this->app->bind(GeneradorQr::class, FakeGeneradorQr::class);
-        $this->app->bind(CalculadoraDevolucion::class, FakeCalculadoraDevolucion::class);
+        foreach (config('servicios.bindings', []) as $contract => $implementation) {
+            $this->app->bind($contract, $implementation);
+        }
     }
 
     /**

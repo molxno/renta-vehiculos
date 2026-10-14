@@ -4,15 +4,22 @@ import Button from '@/components/ui/Button.vue';
 
 withDefaults(
     defineProps<{
-        role?: 'admin' | 'operador' | 'cliente';
+        role?:
+            | 'cliente'
+            | 'coordinador'
+            | 'cajero'
+            | 'administrador'
+            | 'gerente';
     }>(),
-    { role: 'operador' },
+    { role: 'cliente' },
 );
 
 const navigation = {
-    admin: ['Dashboard', 'Usuarios', 'Reportes'],
-    operador: ['Reservas', 'Entregas', 'Devoluciones'],
     cliente: ['Mis reservas', 'Facturas', 'Pagos'],
+    coordinador: ['Reservas', 'Entregas', 'Devoluciones'],
+    cajero: ['Facturas', 'Pagos', 'Cierres de caja'],
+    administrador: ['Dashboard', 'Usuarios', 'Reportes'],
+    gerente: ['Dashboard', 'Reportes', 'Indicadores'],
 } as const;
 </script>
 

@@ -12,7 +12,7 @@ const search = defineModel<string>({ default: '' });
 
 <template>
     <Head title="Inicio" />
-    <AppLayout role="operador">
+    <AppLayout role="coordinador">
         <div class="flex flex-col gap-8">
             <div
                 class="flex flex-col justify-between gap-4 md:flex-row md:items-end"

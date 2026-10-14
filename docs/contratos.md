@@ -212,6 +212,21 @@ Las interfaces no cambian por una implementación fake. Las historias pueden
 construir sus casos contra estos contratos y sustituir el binding del
 contenedor en tests.
 
+## Implementaciones configurables
+
+Los bindings de contratos se declaran en `config/servicios.php`, con una línea
+por interfaz. Para cambiar una implementación, cada desarrollador modifica
+únicamente la línea del contrato que necesita y no `AppServiceProvider`, lo que
+reduce conflictos entre historias. El proveedor registra automáticamente ese
+mapa al iniciar la aplicación.
+
+## Estado del panel inicial
+
+El panel de reservas de la interfaz inicial es únicamente un placeholder
+visual. Sus métricas, filas y búsqueda son datos estáticos de demostración; no
+ejecuta lógica de negocio ni consulta datos reales. Las historias posteriores
+deben sustituirlo por props provenientes de los controladores contractuales.
+
 ## Mapa de historias, rutas y props
 
 | Historia                         | Ruta(s)                                                                | Página Inertia                                       | Props principales                                             |
