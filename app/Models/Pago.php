@@ -4,11 +4,16 @@ namespace App\Models;
 
 use App\Enums\MetodoPago;
 use App\Enums\PagoEstado;
+use Database\Factories\PagoFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Pago extends Model
 {
+    /** @use HasFactory<PagoFactory> */
+    use HasFactory;
+
     protected $table = 'pagos';
 
     protected $fillable = [

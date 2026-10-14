@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\PolizaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Poliza extends Model
 {
+    /** @use HasFactory<PolizaFactory> */
+    use HasFactory;
+
     protected $table = 'polizas';
 
     protected $fillable = [

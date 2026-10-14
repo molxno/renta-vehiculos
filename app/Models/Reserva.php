@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\ReservaEstado;
+use Database\Factories\ReservaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Reserva extends Model
 {
+    /** @use HasFactory<ReservaFactory> */
+    use HasFactory;
+
     protected $table = 'reservas';
 
     protected $fillable = [

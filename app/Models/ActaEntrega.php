@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\ActaEntregaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ActaEntrega extends Model
 {
+    /** @use HasFactory<ActaEntregaFactory> */
+    use HasFactory;
+
     protected $table = 'actas_entrega';
 
     protected $fillable = ['reserva_id', 'entregado_at', 'checklist', 'observaciones'];
