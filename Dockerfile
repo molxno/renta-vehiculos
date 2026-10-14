@@ -17,6 +17,8 @@ FROM dunglas/frankenphp:php8.3-bookworm AS frontend
 
 WORKDIR /app
 
+RUN install-php-extensions pdo_sqlite
+
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 
@@ -28,7 +30,9 @@ RUN npm ci
 
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
-RUN npm run build
+RUN cp .env.example .env \
+    && php artisan key:generate --force \
+    && npm run build
 
 FROM dunglas/frankenphp:php8.3-bookworm
 
