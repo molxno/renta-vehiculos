@@ -1,13 +1,3 @@
-FROM node:24-bookworm-slim AS frontend
-
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
 FROM composer:2 AS vendor
 
 WORKDIR /app
@@ -21,7 +11,32 @@ RUN composer install \
     --optimize-autoloader \
     --no-scripts
 
-FROM dunglas/frankenphp:php8.3-bookworm
+FROM node:24-bookworm-slim AS node
+
+FROM dunglas/frankenphp:php8.5-bookworm AS frontend
+
+WORKDIR /app
+
+RUN install-php-extensions pdo_sqlite
+
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+RUN printf '#!/bin/sh\nexec node /usr/local/lib/node_modules/npm/bin/npm-cli.js "$@"\n' > /usr/local/bin/npm \
+    && chmod +x /usr/local/bin/npm
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY --from=vendor /app/vendor ./vendor
+COPY . .
+RUN cp .env.example .env \
+    && mkdir -p bootstrap/cache storage/framework/cache/data storage/framework/sessions storage/framework/views \
+    && php artisan key:generate --force \
+    && php artisan wayfinder:generate --with-form \
+    && npm run build
+
+FROM dunglas/frankenphp:php8.5-bookworm
 
 WORKDIR /app
 

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Fakes;
 
 use App\Contracts\CalculadoraDevolucion;
 use DateTimeInterface;
 
-class FakeCalculadoraDevolucion implements CalculadoraDevolucion
+final class FakeCalculadoraDevolucion implements CalculadoraDevolucion
 {
     public function calcular(
         int $reservaId,

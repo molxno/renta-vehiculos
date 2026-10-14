@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Fakes;
 
 use App\Contracts\GeneradorQr;
 
-class FakeGeneradorQr implements GeneradorQr
+final class FakeGeneradorQr implements GeneradorQr
 {
     public function generar(int $reservaId): string
     {

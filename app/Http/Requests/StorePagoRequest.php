@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\MetodoPago;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StorePagoRequest extends FormRequest
+final class StorePagoRequest extends FormRequest
 {
     public function authorize(): bool
     {

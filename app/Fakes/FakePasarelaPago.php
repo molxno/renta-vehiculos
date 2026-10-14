@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Fakes;
 
 use App\Contracts\PasarelaPago;
 
-class FakePasarelaPago implements PasarelaPago
+final class FakePasarelaPago implements PasarelaPago
 {
     public function autorizar(
         int $reservaId,

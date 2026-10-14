@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Database\Factories\ActaDevolucionFactory;
@@ -7,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ActaDevolucion extends Model
+final class ActaDevolucion extends Model
 {
     /** @use HasFactory<ActaDevolucionFactory> */
     use HasFactory;

@@ -19,10 +19,20 @@
    **Finalizado** con comentario de evidencia.
 4. Nadie abre PR a `main` sin la petición explícita de Santiago.
 
-Las ramas `dev` y `qa` deben exigir el check exacto `tests / ci` antes de
-permitir la integración. La configuración de los rulesets se realiza
+Las ramas `dev` y `qa` deben exigir los checks exactos documentados en la tabla
+de esta página antes de permitir la integración.
+La configuración de los rulesets se realiza
 manualmente cuando el check esté estable; este documento no modifica la
 configuración de GitHub.
+
+## Checks obligatorios por rama
+
+| Rama                    | Checks obligatorios                                                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `feature/*` hacia `dev` | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+| `dev`                   | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+| `qa`                    | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+| `main`                  | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
 
 ## Cobertura
 

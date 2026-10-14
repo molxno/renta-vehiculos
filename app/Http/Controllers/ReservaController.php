@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ConfirmarReservaRequest;
@@ -8,7 +10,7 @@ use App\Models\Reserva;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 
-class ReservaController extends Controller
+final class ReservaController extends Controller
 {
     public function index(): Response
     {
