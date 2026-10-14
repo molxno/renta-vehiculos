@@ -173,7 +173,8 @@ test('enums preserve the domain vocabulary', function () {
 });
 
 test('production provider defaults are configured', function () {
-    config(['app.env' => 'production']);
+    $environment = app()->environment();
+    app()->instance('env', 'production');
 
     $method = new ReflectionMethod(AppServiceProvider::class, 'configureDefaults');
     $provider = new AppServiceProvider(app());
@@ -182,6 +183,6 @@ test('production provider defaults are configured', function () {
     expect(Date::now())->toBeInstanceOf(CarbonImmutable::class)
         ->and(Password::defaults())->toBeInstanceOf(Password::class);
 
-    config(['app.env' => 'testing']);
+    app()->instance('env', $environment);
     $method->invoke($provider);
 });
