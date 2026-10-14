@@ -59,32 +59,28 @@ pertenece a `DisponibilidadService`.
 Las rutas siguientes son el contrato HTTP de las historias. PR0 solo las
 documenta; serán registradas con controladores placeholder en PR3a.
 
-| Nombre | Método | URI | Página |
-| --- | --- | --- | --- |
-| `home` | GET | `/` | `Welcome` |
-| `reservas.index` | GET | `/reservas` | `Reservas/Index` |
-| `reservas.create` | GET | `/reservas/crear` | `Reservas/Create` |
-| `reservas.store` | POST | `/reservas` | redirección a `reservas.show` |
-| `reservas.show` | GET | `/reservas/{reserva}` | `Reservas/Show` |
-| `reservas.confirmar` | POST | `/reservas/{reserva}/confirmar` | redirección |
-| `reservas.cancelar` | POST | `/reservas/{reserva}/cancelar` | redirección |
-| `entregas.create` | GET | `/reservas/{reserva}/entrega` | `Entregas/Create` |
-| `entregas.store` | POST | `/reservas/{reserva}/entrega` | redirección |
-| `devoluciones.create` | GET | `/reservas/{reserva}/devolucion` | `Devoluciones/Create` |
-| `devoluciones.store` | POST | `/reservas/{reserva}/devolucion` | redirección |
-| `facturas.show` | GET | `/facturas/{factura}` | `Facturas/Show` |
-| `pagos.create` | GET | `/reservas/{reserva}/pago` | `Pagos/Create` |
-| `pagos.store` | POST | `/reservas/{reserva}/pago` | redirección |
+| Nombre                | Método | URI                              | Página                        |
+| --------------------- | ------ | -------------------------------- | ----------------------------- |
+| `home`                | GET    | `/`                              | `Welcome`                     |
+| `reservas.index`      | GET    | `/reservas`                      | `Reservas/Index`              |
+| `reservas.create`     | GET    | `/reservas/crear`                | `Reservas/Create`             |
+| `reservas.store`      | POST   | `/reservas`                      | redirección a `reservas.show` |
+| `reservas.show`       | GET    | `/reservas/{reserva}`            | `Reservas/Show`               |
+| `reservas.confirmar`  | POST   | `/reservas/{reserva}/confirmar`  | redirección                   |
+| `reservas.cancelar`   | POST   | `/reservas/{reserva}/cancelar`   | redirección                   |
+| `entregas.create`     | GET    | `/reservas/{reserva}/entrega`    | `Entregas/Create`             |
+| `entregas.store`      | POST   | `/reservas/{reserva}/entrega`    | redirección                   |
+| `devoluciones.create` | GET    | `/reservas/{reserva}/devolucion` | `Devoluciones/Create`         |
+| `devoluciones.store`  | POST   | `/reservas/{reserva}/devolucion` | redirección                   |
+| `facturas.show`       | GET    | `/facturas/{factura}`            | `Facturas/Show`               |
+| `pagos.create`        | GET    | `/reservas/{reserva}/pago`       | `Pagos/Create`                |
+| `pagos.store`         | POST   | `/reservas/{reserva}/pago`       | redirección                   |
 
 ### Props comunes
 
 ```ts
 export type UserRole =
-    | 'cliente'
-    | 'coordinador'
-    | 'cajero'
-    | 'administrador'
-    | 'gerente';
+    'cliente' | 'coordinador' | 'cajero' | 'administrador' | 'gerente';
 
 export interface AuthUser {
     id: number;
