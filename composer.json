@@ -58,10 +58,10 @@
             "@php artisan dev"
         ],
         "lint": [
-            "pint --parallel"
+            "@php -d opcache.enable_cli=0 vendor/bin/pint --parallel"
         ],
         "lint:check": [
-            "pint --parallel --test"
+            "@php -d opcache.enable_cli=0 vendor/bin/pint --parallel --test"
         ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
@@ -82,7 +82,7 @@
             "@php artisan test"
         ],
         "test:coverage": [
-            "@php artisan test --coverage --min=100"
+            "@php scripts/check-coverage.php"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
