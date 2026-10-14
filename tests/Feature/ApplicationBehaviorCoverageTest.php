@@ -25,9 +25,13 @@ use App\Models\Reserva;
 use App\Models\Tarifa;
 use App\Models\User;
 use App\Models\Vehiculo;
+use App\Providers\AppServiceProvider;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Validation\Rules\Password;
 
 test('all documented pages expose their Inertia contracts', function () {
     $reservation = Reserva::factory()->create();
@@ -166,4 +170,18 @@ test('enums preserve the domain vocabulary', function () {
         ->and(UsuarioRol::cases())->toHaveCount(5)
         ->and(VehiculoEstado::cases())->toHaveCount(4)
         ->and(MetodoPago::cases())->toHaveCount(3);
+});
+
+test('production provider defaults are configured', function () {
+    config(['app.env' => 'production']);
+
+    $method = new ReflectionMethod(AppServiceProvider::class, 'configureDefaults');
+    $provider = new AppServiceProvider(app());
+    $method->invoke($provider);
+
+    expect(Date::now())->toBeInstanceOf(CarbonImmutable::class)
+        ->and(Password::defaults())->toBeInstanceOf(Password::class);
+
+    config(['app.env' => 'testing']);
+    $method->invoke($provider);
 });
