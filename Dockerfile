@@ -13,7 +13,7 @@ RUN composer install \
 
 FROM node:24-bookworm-slim AS node
 
-FROM dunglas/frankenphp:php8.3-bookworm AS frontend
+FROM dunglas/frankenphp:php8.5-bookworm AS frontend
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN cp .env.example .env \
     && php artisan key:generate --force \
     && npm run build
 
-FROM dunglas/frankenphp:php8.3-bookworm
+FROM dunglas/frankenphp:php8.5-bookworm
 
 WORKDIR /app
 
