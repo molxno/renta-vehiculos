@@ -10,6 +10,7 @@ use App\Fakes\FakeDisponibilidadService;
 use App\Fakes\FakeGeneradorQr;
 use App\Fakes\FakePasarelaPago;
 use App\Fakes\FakeTarifaService;
+use App\Models\Reserva;
 use Illuminate\Support\Facades\Route;
 
 test('contract routes expose the documented pages and redirects', function () {
@@ -42,4 +43,29 @@ test('application contracts resolve to the phase fakes', function () {
         ->and(app(PasarelaPago::class))->toBeInstanceOf(FakePasarelaPago::class)
         ->and(app(GeneradorQr::class))->toBeInstanceOf(FakeGeneradorQr::class)
         ->and(app(CalculadoraDevolucion::class))->toBeInstanceOf(FakeCalculadoraDevolucion::class);
+});
+
+test('reservation pages expose their documented Inertia props', function () {
+    $reservation = Reserva::factory()->create();
+
+    $headers = [
+        'X-Inertia' => 'true',
+        'X-Inertia-Version' => hash_file(
+            'xxh128',
+            public_path('build/manifest.json'),
+        ),
+        'X-Requested-With' => 'XMLHttpRequest',
+    ];
+
+    $this->withHeaders($headers)
+        ->get(route('reservas.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Reservas/Index')
+        ->assertJsonStructure(['props' => ['reservations', 'filters']]);
+
+    $this->withHeaders($headers)
+        ->get(route('reservas.show', $reservation))
+        ->assertOk()
+        ->assertJsonPath('component', 'Reservas/Show')
+        ->assertJsonPath('props.reservation.id', $reservation->id);
 });
