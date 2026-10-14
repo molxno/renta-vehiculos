@@ -1,3 +1,10 @@
 #!/usr/bin/env sh
 
-composer ci:check
+if command -v composer >/dev/null 2>&1; then
+    composer ci:check
+elif command -v composer.bat >/dev/null 2>&1; then
+    composer.bat ci:check
+else
+    echo "No se encontró Composer en PATH." >&2
+    exit 1
+fi
