@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\TarifaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Tarifa extends Model
 {
+    /** @use HasFactory<TarifaFactory> */
+    use HasFactory;
+
     protected $table = 'tarifas';
 
     protected $fillable = [

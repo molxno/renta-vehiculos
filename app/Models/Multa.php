@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\MultaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Multa extends Model
 {
+    /** @use HasFactory<MultaFactory> */
+    use HasFactory;
+
     protected $table = 'multas';
 
     protected $fillable = ['reserva_id', 'concepto', 'monto_centavos'];

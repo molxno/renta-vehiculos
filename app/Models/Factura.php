@@ -3,11 +3,16 @@
 namespace App\Models;
 
 use App\Enums\FacturaEstado;
+use Database\Factories\FacturaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Factura extends Model
 {
+    /** @use HasFactory<FacturaFactory> */
+    use HasFactory;
+
     protected $table = 'facturas';
 
     protected $fillable = [

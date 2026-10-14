@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\ConvenioFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Convenio extends Model
 {
+    /** @use HasFactory<ConvenioFactory> */
+    use HasFactory;
+
     protected $table = 'convenios';
 
     protected $fillable = ['nombre', 'descuento_porcentaje', 'activo'];
