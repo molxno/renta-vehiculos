@@ -23,3 +23,21 @@ Las ramas `dev` y `qa` deben exigir el check exacto `tests / ci` antes de
 permitir la integración. La configuración de los rulesets se realiza
 manualmente cuando el check esté estable; este documento no modifica la
 configuración de GitHub.
+
+## Cobertura
+
+El job **Pruebas y cobertura** ejecuta `vendor/bin/pest --coverage` en CI con
+PCOV y publica el porcentaje por archivo en los logs. El hook local ejecuta
+`composer test:coverage` solo cuando detecta PCOV o Xdebug; sin driver muestra
+un aviso y no bloquea. La medición canónica se hace en CI.
+El umbral actual es **100 %**: la tercera medición alcanzó 100 % en todos
+los archivos incluidos, por lo que `composer test:coverage` conserva
+`--min=100`. Las iteraciones anteriores alcanzaron 56.6 % y 96.8 %; se
+completó la cobertura pendiente de `AppServiceProvider` con pruebas de sus
+defaults de producción.
+
+El alcance de `phpunit.xml` incluye `app/`. Solo se excluyen `app/Contracts`,
+porque contiene interfaces sin implementación ejecutable, y
+`app/Http/Controllers/Controller.php`, porque es el controlador base vacío del
+framework. No se excluyen modelos, enums, requests, fakes, providers ni
+controladores concretos: contienen comportamiento o reglas verificables.
