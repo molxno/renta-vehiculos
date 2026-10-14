@@ -31,8 +31,9 @@ RUN npm ci
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
 RUN cp .env.example .env \
+    && mkdir -p bootstrap/cache storage/framework/cache/data storage/framework/sessions storage/framework/views \
     && php artisan key:generate --force \
-    && php artisan wayfinder:generate --with-form -vvv \
+    && php artisan wayfinder:generate --with-form \
     && npm run build
 
 FROM dunglas/frankenphp:php8.5-bookworm
