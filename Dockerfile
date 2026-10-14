@@ -1,13 +1,3 @@
-FROM node:24-bookworm-slim AS frontend
-
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
 FROM composer:2 AS vendor
 
 WORKDIR /app
@@ -20,6 +10,24 @@ RUN composer install \
     --no-progress \
     --optimize-autoloader \
     --no-scripts
+
+FROM node:24-bookworm-slim AS node
+
+FROM dunglas/frankenphp:php8.3-bookworm AS frontend
+
+WORKDIR /app
+
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/bin/npm /usr/local/bin/npm
+COPY --from=node /usr/local/bin/npx /usr/local/bin/npx
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY --from=vendor /app/vendor ./vendor
+COPY . .
+RUN npm run build
 
 FROM dunglas/frankenphp:php8.3-bookworm
 

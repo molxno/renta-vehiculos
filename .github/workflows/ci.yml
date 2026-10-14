@@ -97,12 +97,17 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
+        run: |
+          composer install --prefer-dist --no-interaction --no-progress
+          npm ci
 
       - name: Prepare application
         run: |
           cp .env.example .env
           php artisan key:generate --force
+
+      - name: Build frontend assets
+        run: npm run build
 
       - name: Pruebas y cobertura
         run: vendor/bin/pest --coverage --min=100
