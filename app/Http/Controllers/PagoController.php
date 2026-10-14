@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePagoRequest;
@@ -7,7 +9,7 @@ use App\Models\Reserva;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 
-class PagoController extends Controller
+final class PagoController extends Controller
 {
     public function create(Reserva $reserva): Response
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\FacturaEstado;
@@ -8,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Factura extends Model
+final class Factura extends Model
 {
     /** @use HasFactory<FacturaFactory> */
     use HasFactory;

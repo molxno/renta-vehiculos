@@ -25,6 +25,15 @@ La configuración de los rulesets se realiza
 manualmente cuando el check esté estable; este documento no modifica la
 configuración de GitHub.
 
+## Checks obligatorios por rama
+
+| Rama                    | Checks obligatorios                                                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `feature/*` hacia `dev` | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+| `dev`                   | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+| `qa`                    | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+| `main`                  | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+
 ## Cobertura
 
 El job **Pruebas y cobertura** ejecuta `vendor/bin/pest --coverage` en CI con

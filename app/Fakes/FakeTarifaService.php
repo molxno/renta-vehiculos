@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Fakes;
 
 use App\Contracts\TarifaService;
 use DateTimeInterface;
 
-class FakeTarifaService implements TarifaService
+final class FakeTarifaService implements TarifaService
 {
     public function cotizar(
         int $vehiculoId,

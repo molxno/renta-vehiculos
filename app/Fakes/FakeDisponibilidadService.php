@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Fakes;
 
 use App\Contracts\DisponibilidadService;
 use App\Models\Vehiculo;
 use DateTimeInterface;
 
-class FakeDisponibilidadService implements DisponibilidadService
+final class FakeDisponibilidadService implements DisponibilidadService
 {
     public function consultar(
         DateTimeInterface $inicio,

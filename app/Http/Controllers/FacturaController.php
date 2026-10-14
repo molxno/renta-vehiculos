@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Factura;
 use Inertia\Response;
 
-class FacturaController extends Controller
+final class FacturaController extends Controller
 {
     public function show(Factura $factura): Response
     {

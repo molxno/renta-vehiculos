@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreActaEntregaRequest;
@@ -7,7 +9,7 @@ use App\Models\Reserva;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 
-class EntregaController extends Controller
+final class EntregaController extends Controller
 {
     public function create(Reserva $reserva): Response
     {
