@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 if ! command -v php >/dev/null 2>&1; then
-    echo "No se encontro PHP en PATH." >&2
+    echo "No se encontró PHP en PATH." >&2
     exit 1
 fi
 
@@ -14,7 +14,7 @@ elif command -v composer.bat >/dev/null 2>&1; then
 elif command -v cmd.exe >/dev/null 2>&1; then
     cmd.exe //c composer.bat ci:check || ci_status=$?
 else
-    echo "No se encontro Composer en PATH." >&2
+    echo "No se encontró Composer en PATH." >&2
     exit 1
 fi
 
@@ -31,5 +31,5 @@ if php -m | grep -Eiq '^(pcov|xdebug)$'; then
         cmd.exe //c composer.bat test:coverage
     fi
 else
-    echo "Cobertura omitida: no se detecto PCOV ni Xdebug; se medira en CI."
+    echo "Cobertura omitida: no se detectó PCOV ni Xdebug; se medirá en CI."
 fi
