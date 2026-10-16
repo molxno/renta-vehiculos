@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('tipo_documento', 30);
+            $table->string('numero_documento', 50)->unique();
+            $table->string('telefono', 30);
+            $table->string('rol', 30)->default('cliente')->index();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

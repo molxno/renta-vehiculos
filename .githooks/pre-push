@@ -1,0 +1,35 @@
+#!/usr/bin/env sh
+
+if ! command -v php >/dev/null 2>&1; then
+    echo "No se encontró PHP en PATH." >&2
+    exit 1
+fi
+
+ci_status=0
+
+if command -v composer >/dev/null 2>&1; then
+    composer ci:check || ci_status=$?
+elif command -v composer.bat >/dev/null 2>&1; then
+    composer.bat ci:check || ci_status=$?
+elif command -v cmd.exe >/dev/null 2>&1; then
+    cmd.exe //c composer.bat ci:check || ci_status=$?
+else
+    echo "No se encontró Composer en PATH." >&2
+    exit 1
+fi
+
+if [ "$ci_status" -ne 0 ]; then
+    exit "$ci_status"
+fi
+
+if php -m | grep -Eiq '^(pcov|xdebug)$'; then
+    if command -v composer >/dev/null 2>&1; then
+        composer test:coverage
+    elif command -v composer.bat >/dev/null 2>&1; then
+        composer.bat test:coverage
+    else
+        cmd.exe //c composer.bat test:coverage
+    fi
+else
+    echo "Cobertura omitida: no se detectó PCOV ni Xdebug; se medirá en CI."
+fi
