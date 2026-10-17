@@ -15,12 +15,15 @@ function authInertiaHeaders(): array
 }
 
 describe('inicio de sesión', function () {
-    it('renders the login page', function () {
+    it('renders the login page', function (string $path) {
         $this->withHeaders(authInertiaHeaders())
-            ->get(route('login'))
+            ->get($path)
             ->assertOk()
             ->assertJsonPath('component', 'Auth/Login');
-    });
+    })->with([
+        'ruta en español' => '/iniciar-sesion',
+        'alias en inglés' => '/login',
+    ]);
 
     it('authenticates a seeded user by role', function (string $email, UsuarioRol $rol) {
         $this->seed(MinimumCatalogSeeder::class);
@@ -201,6 +204,10 @@ describe('registro mínimo', function () {
 
         $this->actingAs($user)
             ->get(route('login'))
+            ->assertRedirect(route('home'));
+
+        $this->actingAs($user)
+            ->get('/login')
             ->assertRedirect(route('home'));
 
         $this->actingAs($user)
