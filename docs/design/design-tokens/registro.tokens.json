@@ -1,242 +1,308 @@
 {
-  "$description": "Tokens de diseño del registro de cuenta de RENT-GO. Reutiliza la paleta y tipografía compartidas de Home y Catálogo; las dimensiones específicas se estimaron visualmente desde las capturas disponibles del formulario porque no se dispone de mediciones directas de Figma.",
-  "$extensions": {
-    "com.rent-go.source": [
-      "docs/design/screen-images/registro1.png",
-      "docs/design/screen-images/registro2.png",
-      "docs/design/design-tokens/home.tokens.json",
-      "docs/design/design-tokens/catalog.tokens.json"
-    ],
-    "com.rent-go.route": "/registro",
-    "com.rent-go.generated": false,
-    "com.rent-go.measurement": "Los valores compartidos provienen de los tokens existentes. Las dimensiones específicas de autenticación y del indicador de pasos son aproximaciones visuales; las capturas disponibles muestran el primer paso del registro."
-  },
-  "color": {
-    "$type": "color",
-    "brand": {
-      "navy": { "$value": "#0B1F33" },
-      "blue": { "$value": "#1769AA" },
-      "teal": { "$value": "#00B8A9" },
-      "tealDark": { "$value": "#009E91" }
+    "$description": "Tokens de diseño del registro de cuenta de RENT-GO. Reutiliza la paleta y tipografía compartidas de Home y Catálogo; las dimensiones específicas se estimaron visualmente desde las capturas disponibles del formulario porque no se dispone de mediciones directas de Figma.",
+    "$extensions": {
+        "com.rent-go.source": [
+            "docs/design/screen-images/registro1.png",
+            "docs/design/screen-images/registro2.png",
+            "docs/design/design-tokens/home.tokens.json",
+            "docs/design/design-tokens/catalog.tokens.json"
+        ],
+        "com.rent-go.route": "/registro",
+        "com.rent-go.generated": false,
+        "com.rent-go.measurement": "Los valores compartidos provienen de los tokens existentes. Las dimensiones específicas de autenticación y del indicador de pasos son aproximaciones visuales; las capturas disponibles muestran el primer paso del registro."
     },
-    "neutral": {
-      "white": { "$value": "#FFFFFF" },
-      "background": { "$value": "#F5F7FA" },
-      "ink": { "$value": "#17202A" },
-      "muted": { "$value": "#667085" },
-      "border": { "$value": "#E4E7EC" }
-    },
-    "alpha": {
-      "white10": { "$value": "rgba(255, 255, 255, 0.10)" },
-      "white40": { "$value": "rgba(255, 255, 255, 0.40)" },
-      "white60": { "$value": "rgba(255, 255, 255, 0.60)" },
-      "white80": { "$value": "rgba(255, 255, 255, 0.80)" },
-      "navy60": { "$value": "rgba(11, 31, 51, 0.60)" },
-      "navy80": { "$value": "rgba(11, 31, 51, 0.80)" },
-      "navy90": { "$value": "rgba(11, 31, 51, 0.90)" },
-      "teal10": { "$value": "rgba(0, 184, 169, 0.10)" },
-      "transparent": { "$value": "transparent" }
-    },
-    "semantic": {
-      "pageBackground": { "$value": "{color.neutral.background}" },
-      "surface": { "$value": "{color.neutral.white}" },
-      "textPrimary": { "$value": "{color.neutral.ink}" },
-      "textSecondary": { "$value": "{color.neutral.muted}" },
-      "textInverse": { "$value": "{color.neutral.white}" },
-      "borderDefault": { "$value": "{color.neutral.border}" },
-      "actionPrimary": { "$value": "{color.brand.teal}" },
-      "actionPrimaryHover": { "$value": "{color.brand.tealDark}" },
-      "sectionDark": { "$value": "{color.brand.navy}" },
-      "focus": { "$value": "{color.brand.teal}" }
-    }
-  },
-  "typography": {
-    "fontFamily": {
-      "$type": "fontFamily",
-      "sans": {
-        "$value": ["Manrope", "system-ui", "sans-serif"]
-      }
-    },
-    "fontWeight": {
-      "$type": "fontWeight",
-      "regular": { "$value": 400 },
-      "medium": { "$value": 500 },
-      "semibold": { "$value": 600 },
-      "bold": { "$value": 700 },
-      "extrabold": { "$value": 800 }
-    },
-    "fontSize": {
-      "$type": "dimension",
-      "xs": { "$value": "12px" },
-      "sm": { "$value": "14px" },
-      "base": { "$value": "16px" },
-      "lg": { "$value": "18px" },
-      "xl": { "$value": "20px" },
-      "authHeading": { "$value": "30px" },
-      "authHero": { "$value": "48px" }
-    },
-    "lineHeight": {
-      "$type": "number",
-      "tight": { "$value": 1.25 },
-      "normal": { "$value": 1.5 },
-      "relaxed": { "$value": 1.625 }
-    },
-    "letterSpacing": {
-      "$type": "dimension",
-      "tight": { "$value": "-0.025em" },
-      "normal": { "$value": "0em" },
-      "widest": { "$value": "0.1em" }
-    },
-    "styles": {
-      "heading": {
-        "$type": "typography",
-        "$value": {
-          "fontFamily": "{typography.fontFamily.sans}",
-          "fontSize": "{typography.fontSize.authHeading}",
-          "fontWeight": "{typography.fontWeight.bold}",
-          "letterSpacing": "{typography.letterSpacing.normal}",
-          "lineHeight": "{typography.lineHeight.tight}"
-        }
-      },
-      "hero": {
-        "$type": "typography",
-        "$value": {
-          "fontFamily": "{typography.fontFamily.sans}",
-          "fontSize": "{typography.fontSize.authHero}",
-          "fontWeight": "{typography.fontWeight.extrabold}",
-          "letterSpacing": "{typography.letterSpacing.tight}",
-          "lineHeight": "{typography.lineHeight.tight}"
-        }
-      },
-      "body": {
-        "$type": "typography",
-        "$value": {
-          "fontFamily": "{typography.fontFamily.sans}",
-          "fontSize": "{typography.fontSize.base}",
-          "fontWeight": "{typography.fontWeight.regular}",
-          "letterSpacing": "{typography.letterSpacing.normal}",
-          "lineHeight": "{typography.lineHeight.relaxed}"
-        }
-      },
-      "fieldLabel": {
-        "$type": "typography",
-        "$value": {
-          "fontFamily": "{typography.fontFamily.sans}",
-          "fontSize": "{typography.fontSize.xs}",
-          "fontWeight": "{typography.fontWeight.medium}",
-          "letterSpacing": "{typography.letterSpacing.widest}",
-          "lineHeight": "{typography.lineHeight.normal}"
-        }
-      },
-      "button": {
-        "$type": "typography",
-        "$value": {
-          "fontFamily": "{typography.fontFamily.sans}",
-          "fontSize": "{typography.fontSize.base}",
-          "fontWeight": "{typography.fontWeight.bold}",
-          "letterSpacing": "{typography.letterSpacing.normal}",
-          "lineHeight": "{typography.lineHeight.normal}"
-        }
-      }
-    }
-  },
-  "spacing": {
-    "$type": "dimension",
-    "2": { "$value": "8px" },
-    "3": { "$value": "12px" },
-    "4": { "$value": "16px" },
-    "5": { "$value": "20px" },
-    "6": { "$value": "24px" },
-    "8": { "$value": "32px" },
-    "12": { "$value": "48px" }
-  },
-  "size": {
-    "$type": "dimension",
-    "logoMark": { "$value": "40px" },
-    "authControlHeight": { "$value": "58px" },
-    "authPrimaryButtonHeight": { "$value": "64px" },
-    "stepIndicator": { "$value": "40px" }
-  },
-  "radius": {
-    "$type": "dimension",
-    "control": { "$value": "14px" },
-    "button": { "$value": "24px" },
-    "stepIndicator": { "$value": "9999px" },
-    "full": { "$value": "9999px" }
-  },
-  "layout": {
-    "authSplit": {
-      "$type": "string",
-      "$value": "50% / 50% desktop split, visually estimated from the screenshot"
-    },
-    "formMaxWidth": {
-      "$type": "dimension",
-      "$value": "560px"
-    },
-    "registrationColumns": {
-      "$type": "number",
-      "$value": 2
-    }
-  },
-  "component": {
-    "authLayout": {
-      "brandPanelBackground": {
+    "color": {
         "$type": "color",
-        "$value": "{color.semantic.sectionDark}"
-      },
-      "formPanelBackground": {
-        "$type": "color",
-        "$value": "{color.semantic.pageBackground}"
-      },
-      "brandPanelPadding": {
+        "brand": {
+            "navy": { "$value": "#0B1F33" },
+            "blue": { "$value": "#1769AA" },
+            "teal": { "$value": "#00B8A9" },
+            "tealDark": { "$value": "#009E91" }
+        },
+        "neutral": {
+            "white": { "$value": "#FFFFFF" },
+            "background": { "$value": "#F5F7FA" },
+            "ink": { "$value": "#17202A" },
+            "muted": { "$value": "#667085" },
+            "border": { "$value": "#E4E7EC" }
+        },
+        "alpha": {
+            "white10": { "$value": "rgba(255, 255, 255, 0.10)" },
+            "white40": { "$value": "rgba(255, 255, 255, 0.40)" },
+            "white60": { "$value": "rgba(255, 255, 255, 0.60)" },
+            "white80": { "$value": "rgba(255, 255, 255, 0.80)" },
+            "navy60": { "$value": "rgba(11, 31, 51, 0.60)" },
+            "navy80": { "$value": "rgba(11, 31, 51, 0.80)" },
+            "navy90": { "$value": "rgba(11, 31, 51, 0.90)" },
+            "teal10": { "$value": "rgba(0, 184, 169, 0.10)" },
+            "transparent": { "$value": "transparent" }
+        },
+        "semantic": {
+            "pageBackground": { "$value": "{color.neutral.background}" },
+            "surface": { "$value": "{color.neutral.white}" },
+            "textPrimary": { "$value": "{color.neutral.ink}" },
+            "textSecondary": { "$value": "{color.neutral.muted}" },
+            "textInverse": { "$value": "{color.neutral.white}" },
+            "borderDefault": { "$value": "{color.neutral.border}" },
+            "actionPrimary": { "$value": "{color.brand.teal}" },
+            "actionPrimaryHover": { "$value": "{color.brand.tealDark}" },
+            "sectionDark": { "$value": "{color.brand.navy}" },
+            "focus": { "$value": "{color.brand.teal}" }
+        }
+    },
+    "typography": {
+        "fontFamily": {
+            "$type": "fontFamily",
+            "sans": {
+                "$value": ["Manrope", "system-ui", "sans-serif"]
+            }
+        },
+        "fontWeight": {
+            "$type": "fontWeight",
+            "regular": { "$value": 400 },
+            "medium": { "$value": 500 },
+            "semibold": { "$value": 600 },
+            "bold": { "$value": 700 },
+            "extrabold": { "$value": 800 }
+        },
+        "fontSize": {
+            "$type": "dimension",
+            "xs": { "$value": "12px" },
+            "sm": { "$value": "14px" },
+            "base": { "$value": "16px" },
+            "lg": { "$value": "18px" },
+            "xl": { "$value": "20px" },
+            "authHeading": { "$value": "30px" },
+            "authHero": { "$value": "48px" }
+        },
+        "lineHeight": {
+            "$type": "number",
+            "tight": { "$value": 1.25 },
+            "normal": { "$value": 1.5 },
+            "relaxed": { "$value": 1.625 }
+        },
+        "letterSpacing": {
+            "$type": "dimension",
+            "tight": { "$value": "-0.025em" },
+            "normal": { "$value": "0em" },
+            "widest": { "$value": "0.1em" }
+        },
+        "styles": {
+            "heading": {
+                "$type": "typography",
+                "$value": {
+                    "fontFamily": "{typography.fontFamily.sans}",
+                    "fontSize": "{typography.fontSize.authHeading}",
+                    "fontWeight": "{typography.fontWeight.bold}",
+                    "letterSpacing": "{typography.letterSpacing.normal}",
+                    "lineHeight": "{typography.lineHeight.tight}"
+                }
+            },
+            "hero": {
+                "$type": "typography",
+                "$value": {
+                    "fontFamily": "{typography.fontFamily.sans}",
+                    "fontSize": "{typography.fontSize.authHero}",
+                    "fontWeight": "{typography.fontWeight.extrabold}",
+                    "letterSpacing": "{typography.letterSpacing.tight}",
+                    "lineHeight": "{typography.lineHeight.tight}"
+                }
+            },
+            "body": {
+                "$type": "typography",
+                "$value": {
+                    "fontFamily": "{typography.fontFamily.sans}",
+                    "fontSize": "{typography.fontSize.base}",
+                    "fontWeight": "{typography.fontWeight.regular}",
+                    "letterSpacing": "{typography.letterSpacing.normal}",
+                    "lineHeight": "{typography.lineHeight.relaxed}"
+                }
+            },
+            "fieldLabel": {
+                "$type": "typography",
+                "$value": {
+                    "fontFamily": "{typography.fontFamily.sans}",
+                    "fontSize": "{typography.fontSize.xs}",
+                    "fontWeight": "{typography.fontWeight.medium}",
+                    "letterSpacing": "{typography.letterSpacing.widest}",
+                    "lineHeight": "{typography.lineHeight.normal}"
+                }
+            },
+            "button": {
+                "$type": "typography",
+                "$value": {
+                    "fontFamily": "{typography.fontFamily.sans}",
+                    "fontSize": "{typography.fontSize.base}",
+                    "fontWeight": "{typography.fontWeight.bold}",
+                    "letterSpacing": "{typography.letterSpacing.normal}",
+                    "lineHeight": "{typography.lineHeight.normal}"
+                }
+            }
+        }
+    },
+    "spacing": {
         "$type": "dimension",
-        "$value": "{spacing.12}"
-      },
-      "formMaxWidth": {
+        "2": { "$value": "8px" },
+        "3": { "$value": "12px" },
+        "4": { "$value": "16px" },
+        "5": { "$value": "20px" },
+        "6": { "$value": "24px" },
+        "8": { "$value": "32px" },
+        "12": { "$value": "48px" }
+    },
+    "size": {
         "$type": "dimension",
-        "$value": "{layout.formMaxWidth}"
-      }
+        "logoMark": { "$value": "40px" },
+        "authControlHeight": { "$value": "58px" },
+        "authPrimaryButtonHeight": { "$value": "64px" },
+        "stepIndicator": { "$value": "40px" }
     },
-    "authHero": {
-      "foreground": { "$type": "color", "$value": "{color.semantic.textInverse}" },
-      "overlay": { "$type": "color", "$value": "{color.alpha.navy80}" },
-      "titleStyle": { "$type": "typography", "$value": "{typography.styles.hero}" },
-      "bodyForeground": { "$type": "color", "$value": "{color.alpha.white80}" }
+    "radius": {
+        "$type": "dimension",
+        "control": { "$value": "14px" },
+        "button": { "$value": "24px" },
+        "stepIndicator": { "$value": "9999px" },
+        "full": { "$value": "9999px" }
     },
-    "authControl": {
-      "background": { "$type": "color", "$value": "{color.semantic.pageBackground}" },
-      "foreground": { "$type": "color", "$value": "{color.semantic.textPrimary}" },
-      "placeholder": { "$type": "color", "$value": "{color.semantic.textSecondary}" },
-      "border": { "$type": "color", "$value": "{color.semantic.borderDefault}" },
-      "borderFocus": { "$type": "color", "$value": "{color.semantic.focus}" },
-      "height": { "$type": "dimension", "$value": "{size.authControlHeight}" },
-      "radius": { "$type": "dimension", "$value": "{radius.control}" },
-      "paddingInline": { "$type": "dimension", "$value": "{spacing.4}" }
+    "layout": {
+        "authSplit": {
+            "$type": "string",
+            "$value": "50% / 50% desktop split, visually estimated from the screenshot"
+        },
+        "formMaxWidth": {
+            "$type": "dimension",
+            "$value": "560px"
+        },
+        "registrationColumns": {
+            "$type": "number",
+            "$value": 2
+        }
     },
-    "buttonPrimary": {
-      "background": { "$type": "color", "$value": "{color.semantic.actionPrimary}" },
-      "backgroundHover": { "$type": "color", "$value": "{color.semantic.actionPrimaryHover}" },
-      "foreground": { "$type": "color", "$value": "{color.semantic.textInverse}" },
-      "height": { "$type": "dimension", "$value": "{size.authPrimaryButtonHeight}" },
-      "radius": { "$type": "dimension", "$value": "{radius.button}" },
-      "typography": { "$type": "typography", "$value": "{typography.styles.button}" }
-    },
-    "registrationStepper": {
-      "stepCount": { "$type": "number", "$value": 3 },
-      "indicatorSize": { "$type": "dimension", "$value": "{size.stepIndicator}" },
-      "activeBackground": { "$type": "color", "$value": "{color.neutral.white}" },
-      "activeForeground": { "$type": "color", "$value": "{color.brand.navy}" },
-      "inactiveBackground": { "$type": "color", "$value": "{color.alpha.white10}" },
-      "inactiveForeground": { "$type": "color", "$value": "{color.alpha.white40}" },
-      "activeLabelForeground": { "$type": "color", "$value": "{color.semantic.textInverse}" },
-      "inactiveLabelForeground": { "$type": "color", "$value": "{color.alpha.white60}" },
-      "itemGap": { "$type": "dimension", "$value": "{spacing.4}" },
-      "stepGap": { "$type": "dimension", "$value": "{spacing.6}" }
-    },
-    "registrationForm": {
-      "columnCount": { "$type": "number", "$value": "{layout.registrationColumns}" },
-      "columnGap": { "$type": "dimension", "$value": "{spacing.3}" },
-      "rowGap": { "$type": "dimension", "$value": "{spacing.3}" }
+    "component": {
+        "authLayout": {
+            "brandPanelBackground": {
+                "$type": "color",
+                "$value": "{color.semantic.sectionDark}"
+            },
+            "formPanelBackground": {
+                "$type": "color",
+                "$value": "{color.semantic.pageBackground}"
+            },
+            "brandPanelPadding": {
+                "$type": "dimension",
+                "$value": "{spacing.12}"
+            },
+            "formMaxWidth": {
+                "$type": "dimension",
+                "$value": "{layout.formMaxWidth}"
+            }
+        },
+        "authHero": {
+            "foreground": {
+                "$type": "color",
+                "$value": "{color.semantic.textInverse}"
+            },
+            "overlay": { "$type": "color", "$value": "{color.alpha.navy80}" },
+            "titleStyle": {
+                "$type": "typography",
+                "$value": "{typography.styles.hero}"
+            },
+            "bodyForeground": {
+                "$type": "color",
+                "$value": "{color.alpha.white80}"
+            }
+        },
+        "authControl": {
+            "background": {
+                "$type": "color",
+                "$value": "{color.semantic.pageBackground}"
+            },
+            "foreground": {
+                "$type": "color",
+                "$value": "{color.semantic.textPrimary}"
+            },
+            "placeholder": {
+                "$type": "color",
+                "$value": "{color.semantic.textSecondary}"
+            },
+            "border": {
+                "$type": "color",
+                "$value": "{color.semantic.borderDefault}"
+            },
+            "borderFocus": {
+                "$type": "color",
+                "$value": "{color.semantic.focus}"
+            },
+            "height": {
+                "$type": "dimension",
+                "$value": "{size.authControlHeight}"
+            },
+            "radius": { "$type": "dimension", "$value": "{radius.control}" },
+            "paddingInline": { "$type": "dimension", "$value": "{spacing.4}" }
+        },
+        "buttonPrimary": {
+            "background": {
+                "$type": "color",
+                "$value": "{color.semantic.actionPrimary}"
+            },
+            "backgroundHover": {
+                "$type": "color",
+                "$value": "{color.semantic.actionPrimaryHover}"
+            },
+            "foreground": {
+                "$type": "color",
+                "$value": "{color.semantic.textInverse}"
+            },
+            "height": {
+                "$type": "dimension",
+                "$value": "{size.authPrimaryButtonHeight}"
+            },
+            "radius": { "$type": "dimension", "$value": "{radius.button}" },
+            "typography": {
+                "$type": "typography",
+                "$value": "{typography.styles.button}"
+            }
+        },
+        "registrationStepper": {
+            "stepCount": { "$type": "number", "$value": 3 },
+            "indicatorSize": {
+                "$type": "dimension",
+                "$value": "{size.stepIndicator}"
+            },
+            "activeBackground": {
+                "$type": "color",
+                "$value": "{color.neutral.white}"
+            },
+            "activeForeground": {
+                "$type": "color",
+                "$value": "{color.brand.navy}"
+            },
+            "inactiveBackground": {
+                "$type": "color",
+                "$value": "{color.alpha.white10}"
+            },
+            "inactiveForeground": {
+                "$type": "color",
+                "$value": "{color.alpha.white40}"
+            },
+            "activeLabelForeground": {
+                "$type": "color",
+                "$value": "{color.semantic.textInverse}"
+            },
+            "inactiveLabelForeground": {
+                "$type": "color",
+                "$value": "{color.alpha.white60}"
+            },
+            "itemGap": { "$type": "dimension", "$value": "{spacing.4}" },
+            "stepGap": { "$type": "dimension", "$value": "{spacing.6}" }
+        },
+        "registrationForm": {
+            "columnCount": {
+                "$type": "number",
+                "$value": "{layout.registrationColumns}"
+            },
+            "columnGap": { "$type": "dimension", "$value": "{spacing.3}" },
+            "rowGap": { "$type": "dimension", "$value": "{spacing.3}" }
+        }
     }
-  }
 }
