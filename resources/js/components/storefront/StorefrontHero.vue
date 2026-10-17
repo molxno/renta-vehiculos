@@ -6,6 +6,8 @@ import type { HomeSearch } from '@/types';
 defineProps<{
     search: HomeSearch;
 }>();
+
+const crearReservaUrl = crearReserva.url();
 </script>
 
 <template>
@@ -39,7 +41,7 @@ defineProps<{
         <!-- TODO: REEMPLAZAR MOCK CON PROPS DINÁMICAS DEL BACKEND CUANDO EL CATÁLOGOS/RESERVAS ESTÉ LISTO -->
         <form
             method="get"
-            :action="crearReserva.url()"
+            :action="crearReservaUrl"
             class="relative mx-auto mb-[-4.5rem] grid max-w-5xl gap-3 rounded-2xl bg-white p-4 text-left text-slate-900 shadow-xl md:grid-cols-4"
         >
             <label class="flex flex-col gap-1.5 text-sm font-medium">

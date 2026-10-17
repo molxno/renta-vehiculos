@@ -2,6 +2,8 @@
 import { Link } from '@inertiajs/vue3';
 import { create as crearReserva } from '@/actions/App/Http/Controllers/ReservaController';
 import { mockFleet } from '@/components/storefront/mocks';
+
+const crearReservaUrl = crearReserva.url();
 </script>
 
 <template>
@@ -72,13 +74,13 @@ import { mockFleet } from '@/components/storefront/mocks';
                     </ul>
                     <div class="mt-5 flex gap-3">
                         <Link
-                            :href="crearReserva.url()"
+                            :href="crearReservaUrl"
                             class="inline-flex flex-1 justify-center rounded-lg border border-brand-navy px-3 py-2 text-sm font-semibold text-brand-navy hover:bg-slate-50"
                         >
                             Ver detalles
                         </Link>
                         <Link
-                            :href="crearReserva.url()"
+                            :href="crearReservaUrl"
                             class="inline-flex flex-1 justify-center rounded-lg bg-brand-teal px-3 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
                         >
                             Reservar

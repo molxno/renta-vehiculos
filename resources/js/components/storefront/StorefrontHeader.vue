@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { create as register } from '@/actions/App/Http/Controllers/Auth/RegistroController';
-import {
-    create as login,
-    destroy as logout,
-} from '@/actions/App/Http/Controllers/Auth/SesionController';
+import { login, logout, register } from '@/routes';
 import RentGoLogo from '@/components/storefront/RentGoLogo.vue';
 
 const page = usePage();
 const authUser = computed(() => page.props.auth?.user ?? null);
+const loginUrl = login.url();
+const registerUrl = register.url();
+const logoutUrl = logout.url();
 </script>
 
 <template>
@@ -31,7 +30,7 @@ const authUser = computed(() => page.props.auth?.user ?? null);
             <div class="flex items-center gap-3">
                 <Link
                     v-if="authUser"
-                    :href="logout.url()"
+                    :href="logoutUrl"
                     method="post"
                     class="rounded-lg px-4 py-2 text-sm font-semibold hover:text-brand-teal"
                 >
@@ -39,13 +38,13 @@ const authUser = computed(() => page.props.auth?.user ?? null);
                 </Link>
                 <template v-else>
                     <Link
-                        :href="login.url()"
+                        :href="loginUrl"
                         class="rounded-lg px-4 py-2 text-sm font-semibold hover:text-brand-teal"
                     >
                         Iniciar sesión
                     </Link>
                     <Link
-                        :href="register.url()"
+                        :href="registerUrl"
                         class="rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
                     >
                         Registrarse

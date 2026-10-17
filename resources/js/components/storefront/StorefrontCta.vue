@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { create as register } from '@/actions/App/Http/Controllers/Auth/RegistroController';
+import { register } from '@/routes';
+
+const registerUrl = register.url();
 </script>
 
 <template>
@@ -23,7 +25,7 @@ import { create as register } from '@/actions/App/Http/Controllers/Auth/Registro
                     Explorar catálogo
                 </a>
                 <Link
-                    :href="register.url()"
+                    :href="registerUrl"
                     class="rounded-lg border border-white/30 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
                 >
                     Crear cuenta gratis

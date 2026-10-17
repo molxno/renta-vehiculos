@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import {
-    create as login,
-    destroy as logout,
-} from '@/actions/App/Http/Controllers/Auth/SesionController';
+import { login, logout } from '@/routes';
 import { index as reservasIndex } from '@/actions/App/Http/Controllers/ReservaController';
 import Button from '@/components/ui/Button.vue';
 import type { UserRole } from '@/types';
@@ -32,6 +29,8 @@ const navigationHrefs: Record<string, string> = {
     'Mis reservas': reservasIndex.url(),
     Reservas: reservasIndex.url(),
 };
+const loginUrl = login.url();
+const logoutUrl = logout.url();
 </script>
 
 <template>
@@ -56,10 +55,10 @@ const navigationHrefs: Record<string, string> = {
                         {{ item }}
                     </a>
                 </nav>
-                <Link v-if="authUser" :href="logout.url()" method="post">
+                <Link v-if="authUser" :href="logoutUrl" method="post">
                     <Button variant="secondary">Cerrar sesión</Button>
                 </Link>
-                <Link v-else :href="login.url()">
+                <Link v-else :href="loginUrl">
                     <Button variant="secondary">Iniciar sesión</Button>
                 </Link>
             </div>
