@@ -1,6 +1,9 @@
 export const heroImage =
     'https://images.unsplash.com/photo-1617814086906-d847a8bc6fca?w=1600&h=900&fit=crop&auto=format';
 
+export const loginHeroImage =
+    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&h=1200&fit=crop&auto=format';
+
 export const policyImage =
     'https://images.unsplash.com/photo-1606590526453-9b8ee4569a70?w=800&h=600&fit=crop&auto=format';
 
