@@ -5,7 +5,7 @@ use App\Models\User;
 use Database\Seeders\MinimumCatalogSeeder;
 use Illuminate\Support\Facades\RateLimiter;
 
-function inertiaHeaders(): array
+function authInertiaHeaders(): array
 {
     return [
         'X-Inertia' => 'true',
@@ -16,7 +16,7 @@ function inertiaHeaders(): array
 
 describe('inicio de sesión', function () {
     it('renders the login page', function () {
-        $this->withHeaders(inertiaHeaders())
+        $this->withHeaders(authInertiaHeaders())
             ->get(route('login'))
             ->assertOk()
             ->assertJsonPath('component', 'Auth/Login');
@@ -103,7 +103,7 @@ describe('inicio de sesión', function () {
         $user = User::factory()->coordinador()->create();
 
         $this->actingAs($user)
-            ->withHeaders(inertiaHeaders())
+            ->withHeaders(authInertiaHeaders())
             ->get(route('home'))
             ->assertOk()
             ->assertJsonPath('props.auth.user.id', $user->id)
@@ -130,7 +130,7 @@ describe('cierre de sesión', function () {
 
 describe('registro mínimo', function () {
     it('renders the registration page', function () {
-        $this->withHeaders(inertiaHeaders())
+        $this->withHeaders(authInertiaHeaders())
             ->get(route('register'))
             ->assertOk()
             ->assertJsonPath('component', 'Auth/Register');
