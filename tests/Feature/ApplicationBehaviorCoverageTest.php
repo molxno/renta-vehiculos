@@ -100,9 +100,16 @@ test('all documented write routes validate and redirect', function () {
         'devuelto_at' => now()->toDateTimeString(),
     ])->assertRedirectToRoute('reservas.show', $reservation);
 
+    $reservation->refresh();
+    $reservation->update(['estado' => ReservaEstado::Facturada]);
+    $invoice = $reservation->factura ?? Factura::factory()->create([
+        'reserva_id' => $reservation->id,
+        'total_centavos' => 100,
+    ]);
+
     $this->post(route('pagos.store', $reservation), [
         'metodo' => MetodoPago::Efectivo->value,
-        'monto_centavos' => 100,
+        'monto_centavos' => $invoice->total_centavos,
     ])->assertRedirectToRoute('reservas.show', $reservation);
 });
 
