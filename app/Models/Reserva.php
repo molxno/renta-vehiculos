@@ -11,7 +11,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property ReservaEstado $estado
+ * @property Carbon $inicio
+ * @property Carbon $fin
+ * @property int $total_centavos
+ * @property string $moneda
+ */
 final class Reserva extends Model
 {
     /** @use HasFactory<ReservaFactory> */
@@ -92,5 +100,30 @@ final class Reserva extends Model
     public function danos(): HasMany
     {
         return $this->hasMany(Dano::class);
+    }
+
+    public function estaEntregada(): bool
+    {
+        return $this->estado === ReservaEstado::Entregada;
+    }
+
+    /** @return array<string, mixed> */
+    public function checklistEntrega(): array
+    {
+        if (! $this->actaEntrega()->exists()) {
+            return [];
+        }
+
+        return $this->actaEntrega()->first()->checklist ?? [];
+    }
+
+    /** @return array<string, mixed> */
+    public function condicionesContrato(): array
+    {
+        if (! $this->contrato()->exists()) {
+            return [];
+        }
+
+        return $this->contrato()->first()->condiciones ?? [];
     }
 }

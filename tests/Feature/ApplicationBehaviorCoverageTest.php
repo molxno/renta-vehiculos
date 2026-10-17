@@ -2,6 +2,7 @@
 
 use App\Enums\FacturaEstado;
 use App\Enums\MetodoPago;
+use App\Enums\NivelCombustible;
 use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
@@ -93,6 +94,8 @@ test('all documented write routes validate and redirect', function () {
         'entregado_at' => now()->toDateTimeString(),
     ])->assertRedirectToRoute('reservas.show', $reservation);
 
+    $reservation->update(['estado' => ReservaEstado::Entregada]);
+
     $this->post(route('devoluciones.store', $reservation), [
         'devuelto_at' => now()->toDateTimeString(),
     ])->assertRedirectToRoute('reservas.show', $reservation);
@@ -106,7 +109,17 @@ test('all documented write routes validate and redirect', function () {
 test('requests expose authorization and validation contracts', function () {
     $requests = [
         [new ConfirmarReservaRequest, []],
-        [new StoreActaDevolucionRequest, ['devuelto_at', 'checklist', 'observaciones']],
+        [new StoreActaDevolucionRequest, [
+            'devuelto_at',
+            'checklist',
+            'checklist.kilometraje',
+            'checklist.combustible',
+            'observaciones',
+            'danos',
+            'danos.*.descripcion',
+            'danos.*.monto_centavos',
+            'evidencia',
+        ]],
         [new StoreActaEntregaRequest, ['entregado_at', 'checklist', 'observaciones']],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
         [new StoreReservaRequest, ['user_id', 'vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
@@ -169,7 +182,8 @@ test('enums preserve the domain vocabulary', function () {
         ->and(PagoEstado::cases())->toHaveCount(3)
         ->and(UsuarioRol::cases())->toHaveCount(5)
         ->and(VehiculoEstado::cases())->toHaveCount(4)
-        ->and(MetodoPago::cases())->toHaveCount(3);
+        ->and(MetodoPago::cases())->toHaveCount(3)
+        ->and(NivelCombustible::cases())->toHaveCount(5);
 });
 
 test('production provider defaults are configured', function () {
