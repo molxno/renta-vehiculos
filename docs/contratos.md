@@ -154,6 +154,15 @@ export interface ReservationShowProps extends SharedPageProps {
 export interface DeliveryCreateProps extends SharedPageProps {
     reservation: ReservationSummary;
     checklist: string[];
+    licencia: {
+        numero: string;
+        fecha_vencimiento: string;
+        categoria: string;
+        vigente: boolean;
+    } | null;
+    bloqueo: string | null;
+    anticipoCents: number;
+    currency: string;
 }
 
 export interface ReturnCreateProps extends SharedPageProps {
