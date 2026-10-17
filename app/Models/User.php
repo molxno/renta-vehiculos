@@ -29,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read LicenciaConduccion|null $licenciaConduccion
  */
 #[Fillable([
     'name',
