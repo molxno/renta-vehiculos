@@ -20,6 +20,10 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property string $tipo_documento
+ * @property string $numero_documento
+ * @property string $telefono
+ * @property UsuarioRol $rol
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token

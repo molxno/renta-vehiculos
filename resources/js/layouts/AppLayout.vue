@@ -1,18 +1,24 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import {
+    create as login,
+    destroy as logout,
+} from '@/actions/App/Http/Controllers/Auth/SesionController';
+import { index as reservasIndex } from '@/actions/App/Http/Controllers/ReservaController';
 import Button from '@/components/ui/Button.vue';
+import type { UserRole } from '@/types';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
-        role?:
-            | 'cliente'
-            | 'coordinador'
-            | 'cajero'
-            | 'administrador'
-            | 'gerente';
+        role?: UserRole;
     }>(),
     { role: 'cliente' },
 );
+
+const page = usePage();
+const authUser = computed(() => page.props.auth?.user ?? null);
+const currentRole = computed(() => authUser.value?.role ?? props.role);
 
 const navigation = {
     cliente: ['Mis reservas', 'Facturas', 'Pagos'],
@@ -21,6 +27,11 @@ const navigation = {
     administrador: ['Dashboard', 'Usuarios', 'Reportes'],
     gerente: ['Dashboard', 'Reportes', 'Indicadores'],
 } as const;
+
+const navigationHrefs: Record<string, string> = {
+    'Mis reservas': reservasIndex.url(),
+    Reservas: reservasIndex.url(),
+};
 </script>
 
 <template>
@@ -37,15 +48,20 @@ const navigation = {
                 </Link>
                 <nav class="hidden items-center gap-5 md:flex">
                     <a
-                        v-for="item in navigation[role]"
+                        v-for="item in navigation[currentRole]"
                         :key="item"
-                        href="#"
+                        :href="navigationHrefs[item] ?? '#'"
                         class="text-sm font-medium text-slate-600 hover:text-brand-ink"
                     >
                         {{ item }}
                     </a>
                 </nav>
-                <Button variant="secondary">Mi cuenta</Button>
+                <Link v-if="authUser" :href="logout.url()" method="post">
+                    <Button variant="secondary">Cerrar sesión</Button>
+                </Link>
+                <Link v-else :href="login.url()">
+                    <Button variant="secondary">Iniciar sesión</Button>
+                </Link>
             </div>
         </header>
         <main class="mx-auto max-w-7xl px-6 py-8">

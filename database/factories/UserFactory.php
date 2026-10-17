@@ -47,4 +47,39 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function cliente(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'rol' => UsuarioRol::Cliente,
+        ]);
+    }
+
+    public function coordinador(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'rol' => UsuarioRol::Coordinador,
+        ]);
+    }
+
+    public function cajero(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'rol' => UsuarioRol::Cajero,
+        ]);
+    }
+
+    public function administrador(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'rol' => UsuarioRol::Administrador,
+        ]);
+    }
+
+    public function gerente(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'rol' => UsuarioRol::Gerente,
+        ]);
+    }
 }
