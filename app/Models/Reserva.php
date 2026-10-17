@@ -19,6 +19,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon $fin
  * @property int $total_centavos
  * @property string $moneda
+ * @property User $user
+ * @property Vehiculo $vehiculo
  */
 final class Reserva extends Model
 {
@@ -105,6 +107,41 @@ final class Reserva extends Model
     public function estaEntregada(): bool
     {
         return $this->estado === ReservaEstado::Entregada;
+    }
+
+    public function estaConfirmada(): bool
+    {
+        return $this->estado === ReservaEstado::Confirmada;
+    }
+
+    public function anticipoCentavos(): int
+    {
+        return intdiv($this->total_centavos * (int) config('entrega.anticipo_porcentaje'), 100);
+    }
+
+    public function mensajeBloqueoEntrega(): ?string
+    {
+        $this->loadMissing('user.licenciaConduccion');
+
+        $licencia = $this->user->licenciaConduccion;
+
+        if (! $licencia instanceof LicenciaConduccion) {
+            return 'La licencia de conducción no está registrada.';
+        }
+
+        if (! $licencia->estaVigente()) {
+            return 'La licencia de conducción está vencida.';
+        }
+
+        if ($this->actaEntrega()->exists()) {
+            return 'La reserva ya tiene una entrega registrada.';
+        }
+
+        if (! $this->estaConfirmada()) {
+            return 'Solo se puede registrar la entrega de una reserva confirmada.';
+        }
+
+        return null;
     }
 
     /** @return array<string, mixed> */

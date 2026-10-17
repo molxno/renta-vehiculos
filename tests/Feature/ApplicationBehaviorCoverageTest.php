@@ -71,6 +71,7 @@ test('all documented pages expose their Inertia contracts', function () {
 
 test('all documented write routes validate and redirect', function () {
     $user = User::factory()->create();
+    LicenciaConduccion::factory()->create(['user_id' => $user->id]);
     $vehicle = Vehiculo::factory()->create();
     $reservation = Reserva::factory()->create([
         'user_id' => $user->id,
@@ -92,6 +93,7 @@ test('all documented write routes validate and redirect', function () {
 
     $this->post(route('entregas.store', $reservation), [
         'entregado_at' => now()->toDateTimeString(),
+        'aceptacion' => '1',
     ])->assertRedirectToRoute('reservas.show', $reservation);
 
     $reservation->update(['estado' => ReservaEstado::Entregada]);
@@ -127,7 +129,15 @@ test('requests expose authorization and validation contracts', function () {
             'danos.*.monto_centavos',
             'evidencia',
         ]],
-        [new StoreActaEntregaRequest, ['entregado_at', 'checklist', 'observaciones']],
+        [new StoreActaEntregaRequest, [
+            'entregado_at',
+            'checklist',
+            'checklist.kilometraje',
+            'checklist.combustible',
+            'observaciones',
+            'aceptacion',
+            'foto',
+        ]],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
         [new StoreReservaRequest, ['user_id', 'vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
     ];
