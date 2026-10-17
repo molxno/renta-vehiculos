@@ -117,6 +117,43 @@ describe('registro de pago', function () {
             ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pagada);
     });
 
+    it('rejects a payment when the reservation is not invoiced', function () {
+        [$reservation, $invoice] = facturaPendiente();
+        $reservation->update(['estado' => ReservaEstado::Devuelta]);
+
+        $this->from(route('pagos.create', $reservation))
+            ->post(route('pagos.store', $reservation), [
+                'metodo' => MetodoPago::Efectivo->value,
+                'monto_centavos' => $invoice->total_centavos,
+            ])
+            ->assertRedirect(route('pagos.create', $reservation))
+            ->assertSessionHasErrors([
+                'monto_centavos' => 'Solo se puede pagar una reserva facturada.',
+            ]);
+
+        expect(Pago::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse()
+            ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pendiente)
+            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Devuelta);
+    });
+
+    it('rejects a payment when the reservation has no invoice', function () {
+        $reservation = Reserva::factory()->create([
+            'estado' => ReservaEstado::Facturada,
+        ]);
+
+        $this->from(route('pagos.create', $reservation))
+            ->post(route('pagos.store', $reservation), [
+                'metodo' => MetodoPago::Efectivo->value,
+                'monto_centavos' => 100,
+            ])
+            ->assertRedirect(route('pagos.create', $reservation))
+            ->assertSessionHasErrors([
+                'monto_centavos' => 'La reserva no tiene una factura pendiente.',
+            ]);
+
+        expect(Pago::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse();
+    });
+
     it('rejects an amount that does not match the invoice', function () {
         [$reservation, $invoice] = facturaPendiente();
 
