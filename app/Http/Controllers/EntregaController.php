@@ -23,6 +23,7 @@ final class EntregaController extends Controller
         return inertia('Entregas/Create', [
             'reservation' => $reserva,
             'checklist' => $reserva->checklistEntrega(),
+            'condicionesContrato' => $reserva->condicionesContrato(),
             'licencia' => $this->licenciaProps($licencia),
             'bloqueo' => $reserva->mensajeBloqueoEntrega(),
             'anticipoCents' => $reserva->anticipoCentavos(),

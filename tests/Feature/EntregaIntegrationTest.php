@@ -202,6 +202,7 @@ describe('registro de entrega', function () {
             ->assertJsonPath('props.licencia.numero', 'LIC-VIGENTE')
             ->assertJsonPath('props.licencia.vigente', true)
             ->assertJsonPath('props.bloqueo', null)
+            ->assertJsonPath('props.condicionesContrato', [])
             ->assertJsonPath('props.storeUrl', route('entregas.store', $reservation));
     });
 
@@ -232,7 +233,24 @@ describe('registro de entrega', function () {
         $this->withHeaders(inertiaHeaders())
             ->get(route('entregas.create', $reservation))
             ->assertOk()
-            ->assertJsonPath('props.bloqueo', 'La reserva ya tiene una entrega registrada.');
+            ->assertJsonPath('props.bloqueo', 'La reserva ya tiene una entrega registrada.')
+            ->assertJsonPath('props.condicionesContrato.kilometraje_incluido', 300)
+            ->assertJsonPath('props.condicionesContrato.combustible', 'lleno');
+    });
+
+    it('returns empty delivery and contract details when the stored JSON is null', function () {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Confirmada]);
+        ActaEntrega::factory()->create([
+            'reserva_id' => $reservation->id,
+            'checklist' => null,
+        ]);
+        Contrato::factory()->create([
+            'reserva_id' => $reservation->id,
+            'condiciones' => null,
+        ]);
+
+        expect($reservation->checklistEntrega())->toBe([])
+            ->and($reservation->condicionesContrato())->toBe([]);
     });
 
     it('stores an optional photo in the delivery checklist', function () {

@@ -163,6 +163,7 @@ export interface DeliveryCreateProps extends SharedPageProps {
     bloqueo: string | null;
     anticipoCents: number;
     currency: string;
+    condicionesContrato: Record<string, unknown>;
 }
 
 export interface ReturnCreateProps extends SharedPageProps {

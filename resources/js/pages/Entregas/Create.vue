@@ -15,6 +15,7 @@ const props = defineProps<{
         moneda: string;
     };
     checklist: Record<string, unknown>;
+    condicionesContrato: Record<string, unknown>;
     licencia: {
         numero: string;
         fecha_vencimiento: string;
@@ -131,6 +132,12 @@ function enviar(): void {
                         Se registra como pago en efectivo al confirmar la
                         entrega. Reserva del {{ reservation.inicio }} al
                         {{ reservation.fin }}.
+                    </p>
+                    <p class="mt-2 text-sm text-slate-500">
+                        Kilometraje incluido:
+                        {{ condicionesContrato.kilometraje_incluido ?? 200 }}
+                        km · Combustible:
+                        {{ condicionesContrato.combustible ?? 'lleno' }}
                     </p>
                 </Card>
             </div>
