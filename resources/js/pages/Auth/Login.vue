@@ -2,7 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { store } from '@/actions/App/Http/Controllers/Auth/SesionController';
-import { create as register } from '@/actions/App/Http/Controllers/Auth/RegistroController';
+import { register } from '@/routes';
 import RentGoLogo from '@/components/storefront/RentGoLogo.vue';
 import { loginHeroImage } from '@/components/storefront/mocks';
 
@@ -13,6 +13,7 @@ const form = useForm({
 });
 
 const passwordVisible = ref(false);
+const registerUrl = register.url();
 
 const benefits = [
     'Reservas en minutos',
@@ -98,7 +99,7 @@ function submit(): void {
                 <p class="mt-2 text-slate-600">
                     ¿Sin cuenta?
                     <Link
-                        :href="register.url()"
+                        :href="registerUrl"
                         class="font-semibold text-brand-teal hover:text-brand-teal-dark"
                     >
                         Registrate gratis

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { store } from '@/actions/App/Http/Controllers/Auth/RegistroController';
-import { create as login } from '@/actions/App/Http/Controllers/Auth/SesionController';
+import { login } from '@/routes';
 import Button from '@/components/ui/Button.vue';
 import Card from '@/components/ui/Card.vue';
 import Input from '@/components/ui/Input.vue';
@@ -15,6 +15,8 @@ const form = useForm({
     password: '',
     password_confirmation: '',
 });
+
+const loginUrl = login.url();
 
 function submit(): void {
     form.post(store.url());
@@ -98,7 +100,7 @@ function submit(): void {
             <p class="mt-4 text-sm text-slate-600">
                 ¿Ya tienes cuenta?
                 <Link
-                    :href="login.url()"
+                    :href="loginUrl"
                     class="font-semibold text-brand-ink hover:text-brand-gold"
                 >
                     Iniciar sesión
