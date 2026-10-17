@@ -24,3 +24,5 @@ Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'sto
 Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
 Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
 Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');
+
+require __DIR__.'/auth.php';
