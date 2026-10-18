@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\ReservaEstado;
@@ -33,5 +35,13 @@ class ReservaFactory extends Factory
             'moneda' => 'COP',
             'qr_codigo' => 'QR-'.fake()->unique()->numerify('########'),
         ];
+    }
+
+    public function pendiente(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'estado' => ReservaEstado::Pendiente,
+            'qr_codigo' => null,
+        ]);
     }
 }
