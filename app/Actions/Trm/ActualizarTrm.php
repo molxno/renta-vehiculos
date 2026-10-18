@@ -10,11 +10,17 @@ final class ActualizarTrm
 {
     public function handle(string $fecha, string $valor): Trm
     {
-        $trm = Trm::query()->whereDate('fecha', $fecha)->first() ?? new Trm;
-        $trm->setAttribute('fecha', $fecha);
-        $trm->setAttribute('valor', $valor);
-        $trm->save();
+        $trm = Trm::query()->whereDate('fecha', $fecha)->first();
 
-        return $trm;
+        if ($trm === null) {
+            return Trm::query()->create([
+                'fecha' => $fecha,
+                'valor' => $valor,
+            ]);
+        }
+
+        $trm->update(['valor' => $valor]);
+
+        return $trm->refresh();
     }
 }

@@ -65,24 +65,26 @@ pertenece a `DisponibilidadService`.
 Las rutas siguientes son el contrato HTTP de las historias. PR0 solo las
 documenta; serán registradas con controladores placeholder en PR3a.
 
-| Nombre                | Método | URI                              | Página                        |
-| --------------------- | ------ | -------------------------------- | ----------------------------- |
-| `home`                | GET    | `/`                              | `Welcome`                     |
-| `catalogo`            | GET    | `/catalogo`                      | `Catalogo/Index`              |
-| `reservas.index`      | GET    | `/reservas`                      | `Reservas/Index`              |
-| `reservas.create`     | GET    | `/reservas/crear`                | `Reservas/Create`             |
-| `reservas.store`      | POST   | `/reservas`                      | redirección a `reservas.show` |
-| `reservas.qr`         | GET    | `/reservas/qr/{qrCodigo}`        | redirección a `reservas.show` |
-| `reservas.show`       | GET    | `/reservas/{reserva}`            | `Reservas/Show`               |
-| `reservas.confirmar`  | POST   | `/reservas/{reserva}/confirmar`  | redirección                   |
-| `reservas.cancelar`   | POST   | `/reservas/{reserva}/cancelar`   | redirección                   |
-| `entregas.create`     | GET    | `/reservas/{reserva}/entrega`    | `Entregas/Create`             |
-| `entregas.store`      | POST   | `/reservas/{reserva}/entrega`    | redirección                   |
-| `devoluciones.create` | GET    | `/reservas/{reserva}/devolucion` | `Devoluciones/Create`         |
-| `devoluciones.store`  | POST   | `/reservas/{reserva}/devolucion` | redirección                   |
-| `facturas.show`       | GET    | `/facturas/{factura}`            | `Facturas/Show`               |
-| `pagos.create`        | GET    | `/reservas/{reserva}/pago`       | `Pagos/Create`                |
-| `pagos.store`         | POST   | `/reservas/{reserva}/pago`       | redirección                   |
+| Nombre                | Método | URI                              | Página                         |
+| --------------------- | ------ | -------------------------------- | ------------------------------ |
+| `home`                | GET    | `/`                              | `Welcome`                      |
+| `catalogo`            | GET    | `/catalogo`                      | `Catalogo/Index`               |
+| `reservas.index`      | GET    | `/reservas`                      | `Reservas/Index`               |
+| `reservas.create`     | GET    | `/reservas/crear`                | `Reservas/Create`              |
+| `reservas.store`      | POST   | `/reservas`                      | redirección a `reservas.show`  |
+| `reservas.qr`         | GET    | `/reservas/qr/{qrCodigo}`        | redirección a `reservas.show`  |
+| `reservas.show`       | GET    | `/reservas/{reserva}`            | `Reservas/Show`                |
+| `reservas.confirmar`  | POST   | `/reservas/{reserva}/confirmar`  | redirección                    |
+| `reservas.cancelar`   | POST   | `/reservas/{reserva}/cancelar`   | redirección                    |
+| `entregas.create`     | GET    | `/reservas/{reserva}/entrega`    | `Entregas/Create`              |
+| `entregas.store`      | POST   | `/reservas/{reserva}/entrega`    | redirección                    |
+| `devoluciones.create` | GET    | `/reservas/{reserva}/devolucion` | `Devoluciones/Create`          |
+| `devoluciones.store`  | POST   | `/reservas/{reserva}/devolucion` | redirección                    |
+| `facturas.show`       | GET    | `/facturas/{factura}`            | `Facturas/Show`                |
+| `pagos.create`        | GET    | `/reservas/{reserva}/pago`       | `Pagos/Create`                 |
+| `pagos.store`         | POST   | `/reservas/{reserva}/pago`       | redirección                    |
+| `admin.trm.edit`      | GET    | `/administracion/trm`            | `Administracion/Trm/Edit`      |
+| `admin.trm.update`    | PUT    | `/administracion/trm`            | redirección a `admin.trm.edit` |
 
 ### Props comunes
 
@@ -229,7 +231,10 @@ export interface PaymentCreateProps extends SharedPageProps {
 `reservas.create` y `reservas.store` requieren un cliente autenticado. El
 formulario recibe solo vehículos disponibles para las fechas solicitadas; la
 cotización y la TRM provienen de los servicios y registros configurados en el
-servidor. La respuesta de `reservas.show` incluye los datos del vehículo y el
+servidor. `reservas.store` acepta `moneda` opcional (`COP` o `USD`); en USD
+la cotización usa la última TRM persistida con fecha no futura. Las rutas
+`admin.trm.*` son exclusivas del administrador y no consultan proveedores
+externos. La respuesta de `reservas.show` incluye los datos del vehículo y el
 código QR de demostración.
 
 ## Interfaces de aplicación
@@ -260,6 +265,7 @@ con `php artisan db:seed --class=DisponibilidadSeeder`.
 - `FiltrarCatalogoRequest`
 - `PrepararReservaRequest`
 - `StoreReservaRequest`
+- `UpdateTrmRequest`
 - `ConfirmarReservaRequest`
 - `StoreActaEntregaRequest`
 - `StoreActaDevolucionRequest`

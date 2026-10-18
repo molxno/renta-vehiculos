@@ -54,7 +54,7 @@ final class ReservaController extends Controller
             }
         }
 
-        $trm = Trm::query()->orderByDesc('fecha')->orderByDesc('id')->first();
+        $trm = Trm::query()->vigente()->first();
         $quote = null;
 
         if ($selectedVehicle !== null && $inicio !== '' && $fin !== '') {

@@ -11,7 +11,6 @@ use App\Models\Trm;
 use App\Models\Vehiculo;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
 
 final class FakeTarifaService implements TarifaService
@@ -80,11 +79,7 @@ final class FakeTarifaService implements TarifaService
         $totalCentavos = $subtotalCentavos - $descuentoCentavos + $impuestosCentavos;
 
         if ($moneda === 'USD') {
-            $trm = Trm::query()
-                ->whereDate('fecha', '<=', Date::today())
-                ->orderByDesc('fecha')
-                ->orderByDesc('id')
-                ->first();
+            $trm = Trm::query()->vigente()->first();
 
             if ($trm === null) {
                 throw ValidationException::withMessages([

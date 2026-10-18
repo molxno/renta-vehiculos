@@ -15,11 +15,7 @@ final class TrmController extends Controller
 {
     public function edit(): Response
     {
-        $trm = Trm::query()
-            ->whereDate('fecha', '<=', Date::today())
-            ->orderByDesc('fecha')
-            ->orderByDesc('id')
-            ->first();
+        $trm = Trm::query()->vigente()->first();
 
         return inertia('Administracion/Trm/Edit', [
             'currentTrm' => $trm === null ? null : [

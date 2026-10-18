@@ -109,6 +109,29 @@ describe('creación de reservas', function () {
             ->and($reserva->moneda)->toBe('USD');
     });
 
+    it('shows the current TRM on the reservation form and ignores a future rate', function () {
+        $this->travelTo(Carbon::parse('2026-11-01 10:00:00'));
+        $cliente = User::factory()->cliente()->create();
+        Trm::factory()->create([
+            'fecha' => '2026-10-31',
+            'valor' => '4200.0000',
+        ]);
+        Trm::factory()->create([
+            'fecha' => '2026-11-02',
+            'valor' => '5000.0000',
+        ]);
+
+        $this->actingAs($cliente)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->get(route('reservas.create'))
+            ->assertOk()
+            ->assertJsonPath('props.trm', '4200.0000');
+    });
+
     it('rejects an unsupported reservation currency before creating a reservation', function () {
         $cliente = User::factory()->cliente()->create();
         $vehiculo = Vehiculo::factory()->create();
