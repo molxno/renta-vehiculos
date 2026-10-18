@@ -10,6 +10,7 @@ use App\Fakes\FakeGeneradorQr;
 use App\Fakes\FakePasarelaPago;
 use App\Fakes\FakeTarifaService;
 use App\Models\Reserva;
+use App\Models\User;
 use App\Services\CalculadoraDevolucionEstandar;
 use Illuminate\Support\Facades\Route;
 
@@ -30,12 +31,9 @@ test('contract routes expose the documented pages and redirects', function () {
         ->and($routes->getByName('pagos.create')->methods())->toContain('GET')
         ->and($routes->getByName('pagos.store')->methods())->toContain('POST');
 
-    $this->post(route('reservas.store'), [])->assertSessionHasErrors([
-        'user_id',
-        'vehiculo_id',
-        'inicio',
-        'fin',
-    ]);
+    $this->actingAs(User::factory()->cliente()->create())
+        ->post(route('reservas.store'), [])
+        ->assertSessionHasErrors(['vehiculo_id', 'inicio', 'fin']);
 });
 
 test('application contracts resolve to the phase fakes', function () {

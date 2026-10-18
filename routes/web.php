@@ -13,8 +13,12 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/catalogo', CatalogoController::class)->name('catalogo');
 
 Route::get('/reservas', [ReservaController::class, 'index'])->name('reservas.index');
-Route::get('/reservas/crear', [ReservaController::class, 'create'])->name('reservas.create');
-Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
+Route::get('/reservas/crear', [ReservaController::class, 'create'])
+    ->middleware('auth')
+    ->name('reservas.create');
+Route::post('/reservas', [ReservaController::class, 'store'])
+    ->middleware('auth')
+    ->name('reservas.store');
 Route::get('/reservas/{reserva}', [ReservaController::class, 'show'])->name('reservas.show');
 Route::post('/reservas/{reserva}/confirmar', [ReservaController::class, 'confirmar'])->name('reservas.confirmar');
 Route::post('/reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar'])->name('reservas.cancelar');

@@ -9,6 +9,7 @@ use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
 use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\FiltrarCatalogoRequest;
+use App\Http\Requests\PrepararReservaRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Http\Requests\StoreActaEntregaRequest;
 use App\Http\Requests\StorePagoRequest;
@@ -36,6 +37,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rules\Password;
 
 test('all documented pages expose their Inertia contracts', function () {
+    $user = User::factory()->cliente()->create();
     $reservation = Reserva::factory()->create();
     $invoice = Factura::factory()->create();
     $headers = [
@@ -44,7 +46,7 @@ test('all documented pages expose their Inertia contracts', function () {
         'X-Requested-With' => 'XMLHttpRequest',
     ];
 
-    $this->withHeaders($headers)->get(route('reservas.create'))
+    $this->actingAs($user)->withHeaders($headers)->get(route('reservas.create'))
         ->assertOk()
         ->assertJsonPath('component', 'Reservas/Create')
         ->assertJsonStructure(['props' => ['vehicles', 'quote']]);
@@ -80,7 +82,7 @@ test('all documented write routes validate and redirect', function () {
         'vehiculo_id' => $vehicle->id,
     ]);
 
-    $this->post(route('reservas.store'), [
+    $this->actingAs($user)->post(route('reservas.store'), [
         'user_id' => $user->id,
         'vehiculo_id' => $availableVehicle->id,
         'inicio' => now()->addDay()->toDateTimeString(),
@@ -121,6 +123,12 @@ test('all documented write routes validate and redirect', function () {
 });
 
 test('requests expose authorization and validation contracts', function () {
+    $client = User::factory()->cliente()->create();
+    $prepararReservaRequest = new PrepararReservaRequest;
+    $prepararReservaRequest->setUserResolver(fn (): User => $client);
+    $storeReservaRequest = new StoreReservaRequest;
+    $storeReservaRequest->setUserResolver(fn (): User => $client);
+
     $requests = [
         [new ConfirmarReservaRequest, []],
         [new StoreActaDevolucionRequest, [
@@ -144,7 +152,8 @@ test('requests expose authorization and validation contracts', function () {
             'foto',
         ]],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
-        [new StoreReservaRequest, ['user_id', 'vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
+        [$prepararReservaRequest, ['vehiculo_id', 'inicio', 'fin']],
+        [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
     ];
 
