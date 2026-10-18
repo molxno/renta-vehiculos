@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { register } from '@/routes';
+import { catalogo, register } from '@/routes';
 
+const catalogoUrl = catalogo.url();
 const registerUrl = register.url();
 </script>
 
@@ -18,12 +19,12 @@ const registerUrl = register.url();
                 sorpresas al recoger el vehículo.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-3">
-                <a
-                    href="#vehiculos"
+                <Link
+                    :href="catalogoUrl"
                     class="rounded-lg bg-brand-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-teal-dark"
                 >
                     Explorar catálogo
-                </a>
+                </Link>
                 <Link
                     :href="registerUrl"
                     class="rounded-lg border border-white/30 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"

@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import { mockCategories } from '@/components/storefront/mocks';
 import StorefrontSoftIcon from '@/components/storefront/StorefrontSoftIcon.vue';
+import { catalogo } from '@/routes';
+
+const catalogoUrl = catalogo.url();
 </script>
 
 <template>
@@ -16,10 +20,10 @@ import StorefrontSoftIcon from '@/components/storefront/StorefrontSoftIcon.vue';
                 Categorías de vehículos
             </h2>
             <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <a
+                <Link
                     v-for="category in mockCategories"
                     :key="category.name"
-                    href="#vehiculos"
+                    :href="catalogoUrl"
                     class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-teal hover:shadow-md"
                 >
                     <span
@@ -35,7 +39,7 @@ import StorefrontSoftIcon from '@/components/storefront/StorefrontSoftIcon.vue';
                             {{ category.description }}
                         </span>
                     </span>
-                </a>
+                </Link>
             </div>
         </div>
     </section>

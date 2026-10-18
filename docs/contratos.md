@@ -62,6 +62,7 @@ documenta; serán registradas con controladores placeholder en PR3a.
 | Nombre                | Método | URI                              | Página                        |
 | --------------------- | ------ | -------------------------------- | ----------------------------- |
 | `home`                | GET    | `/`                              | `Welcome`                     |
+| `catalogo`            | GET    | `/catalogo`                      | `Catalogo/Index`              |
 | `reservas.index`      | GET    | `/reservas`                      | `Reservas/Index`              |
 | `reservas.create`     | GET    | `/reservas/crear`                | `Reservas/Create`             |
 | `reservas.store`      | POST   | `/reservas`                      | redirección a `reservas.show` |
@@ -102,6 +103,28 @@ export interface SharedPageProps {
 ### Props por página
 
 ```ts
+export interface CatalogVehicle {
+    id: number;
+    label: string;
+    brand: string;
+    model: string;
+    year: number;
+    category: string;
+    status: 'disponible' | 'alquilado' | 'contingencia' | 'mantenimiento';
+    dailyRateCents: number;
+}
+
+export interface CatalogIndexProps extends SharedPageProps {
+    vehicles: CatalogVehicle[];
+    categories: string[];
+    filters: {
+        category: string;
+        startDate: string;
+        endDate: string;
+        location: string;
+    };
+}
+
 export interface ReservationSummary {
     id: number;
     status:
@@ -210,6 +233,7 @@ PHP, la base de datos y TypeScript.
 
 PR3a publicará estos requests, sin duplicar reglas en controladores:
 
+- `FiltrarCatalogoRequest`
 - `StoreReservaRequest`
 - `ConfirmarReservaRequest`
 - `StoreActaEntregaRequest`
@@ -241,6 +265,7 @@ deben sustituirlo por props provenientes de los controladores contractuales.
 
 | Historia                         | Ruta(s)                                                                | Página Inertia                                       | Props principales                                             |
 | -------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| Consultar catálogo               | `catalogo`                                                             | `Catalogo/Index`                                     | `vehicles`, `categories`, `filters`                           |
 | Crear y consultar reservas       | `reservas.index`, `reservas.create`, `reservas.store`, `reservas.show` | `Reservas/Index`, `Reservas/Create`, `Reservas/Show` | `reservations`, `filters`, `vehicles`, `quote`, `reservation` |
 | Confirmar o cancelar una reserva | `reservas.confirmar`, `reservas.cancelar`                              | redirección a `Reservas/Show`                        | `reservation`                                                 |
 | Registrar entrega                | `entregas.create`, `entregas.store`                                    | `Entregas/Create`                                    | `reservation`, `checklist`                                    |
