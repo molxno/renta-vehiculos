@@ -4,6 +4,9 @@ export const heroImage =
 export const loginHeroImage =
     'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&h=1200&fit=crop&auto=format';
 
+export const registerHeroImage =
+    'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1600&h=1200&fit=crop&auto=format';
+
 export const policyImage =
     'https://images.unsplash.com/photo-1606590526453-9b8ee4569a70?w=800&h=600&fit=crop&auto=format';
 
