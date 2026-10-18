@@ -156,7 +156,7 @@ test('requests expose authorization and validation contracts', function () {
         ]],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
         [$prepararReservaRequest, ['vehiculo_id', 'inicio', 'fin']],
-        [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin']],
+        [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
     ];
 
