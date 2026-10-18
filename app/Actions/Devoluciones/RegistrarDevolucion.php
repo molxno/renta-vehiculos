@@ -62,6 +62,7 @@ final class RegistrarDevolucion
             ]);
 
             $reserva->update(['estado' => ReservaEstado::Devuelta]);
+            $reserva->update(['estado' => ReservaEstado::Facturada]);
 
             return $acta;
         });

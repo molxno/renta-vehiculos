@@ -74,6 +74,7 @@ test('all documented write routes validate and redirect', function () {
     $user = User::factory()->create();
     LicenciaConduccion::factory()->create(['user_id' => $user->id]);
     $vehicle = Vehiculo::factory()->create();
+    $availableVehicle = Vehiculo::factory()->create();
     $reservation = Reserva::factory()->create([
         'user_id' => $user->id,
         'vehiculo_id' => $vehicle->id,
@@ -81,10 +82,13 @@ test('all documented write routes validate and redirect', function () {
 
     $this->post(route('reservas.store'), [
         'user_id' => $user->id,
-        'vehiculo_id' => $vehicle->id,
+        'vehiculo_id' => $availableVehicle->id,
         'inicio' => now()->addDay()->toDateTimeString(),
         'fin' => now()->addDays(2)->toDateTimeString(),
-    ])->assertRedirectToRoute('reservas.index');
+    ])->assertRedirectToRoute(
+        'reservas.show',
+        Reserva::query()->where('vehiculo_id', $availableVehicle->id)->sole(),
+    );
 
     $this->post(route('reservas.confirmar', $reservation))
         ->assertRedirectToRoute('reservas.show', $reservation);
