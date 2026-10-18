@@ -12,7 +12,17 @@ final class FacturaController extends Controller
     public function show(Factura $factura): Response
     {
         return inertia('Facturas/Show', [
-            'invoice' => $factura,
+            'invoice' => [
+                'id' => $factura->id,
+                'reservationId' => $factura->reserva_id,
+                'status' => $factura->estado->value,
+                'totalCents' => $factura->total_centavos,
+                'currency' => $factura->moneda,
+                'desglose' => $factura->desglose,
+                'numero' => $factura->numero,
+                'subtotalCents' => $factura->subtotal_centavos,
+                'taxCents' => $factura->impuestos_centavos,
+            ],
         ]);
     }
 }

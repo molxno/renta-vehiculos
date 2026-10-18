@@ -8,7 +8,13 @@ use Database\Factories\LicenciaConduccionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property string $numero
+ * @property Carbon $fecha_vencimiento
+ * @property string $categoria
+ */
 final class LicenciaConduccion extends Model
 {
     /** @use HasFactory<LicenciaConduccionFactory> */
@@ -21,6 +27,11 @@ final class LicenciaConduccion extends Model
     protected function casts(): array
     {
         return ['fecha_vencimiento' => 'date'];
+    }
+
+    public function estaVigente(): bool
+    {
+        return $this->fecha_vencimiento->gte(now()->toDateString());
     }
 
     /** @return BelongsTo<User, $this> */

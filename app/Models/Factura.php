@@ -10,6 +10,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $reserva_id
+ * @property string $numero
+ * @property FacturaEstado $estado
+ * @property int $subtotal_centavos
+ * @property int $impuestos_centavos
+ * @property int $total_centavos
+ * @property string $moneda
+ * @property array<int, array{concepto: string, monto_centavos: int}> $desglose
+ */
 final class Factura extends Model
 {
     /** @use HasFactory<FacturaFactory> */
