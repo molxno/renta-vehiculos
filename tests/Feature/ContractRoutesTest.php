@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 test('contract routes expose the documented pages and redirects', function () {
     $routes = Route::getRoutes();
 
-    expect($routes->getByName('reservas.index')->methods())->toContain('GET')
+    expect($routes->getByName('catalogo')->methods())->toContain('GET')
+        ->and($routes->getByName('reservas.index')->methods())->toContain('GET')
         ->and($routes->getByName('reservas.create')->methods())->toContain('GET')
         ->and($routes->getByName('reservas.store')->methods())->toContain('POST')
         ->and($routes->getByName('reservas.confirmar')->methods())->toContain('POST')
