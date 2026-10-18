@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import {
+    confirmar as confirmarReserva,
     create as crearReserva,
     store as guardarReserva,
 } from '@/actions/App/Http/Controllers/ReservaController';
@@ -46,7 +47,24 @@ function trmLabel(value: string | null): string {
 }
 
 function reservar(): void {
-    form.post(guardarReserva.url());
+    form.post(guardarReserva.url(), {
+        onSuccess: (page) => {
+            const reservation = page.props.reservation;
+
+            if (
+                typeof reservation !== 'object' ||
+                reservation === null ||
+                !('id' in reservation) ||
+                typeof reservation.id !== 'number'
+            ) {
+                throw new Error(
+                    'La respuesta de reserva no incluyó un identificador válido.',
+                );
+            }
+
+            router.post(confirmarReserva.url({ reserva: reservation.id }));
+        },
+    });
 }
 </script>
 

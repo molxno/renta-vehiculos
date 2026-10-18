@@ -137,16 +137,23 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         'vehiculo_id' => $vehiculo->id,
         'inicio' => '2026-12-01 09:00:00',
         'fin' => '2026-12-04 09:00:00',
-        'moneda' => 'COP',
     ])->assertRedirectToRoute(
         'reservas.show',
         $reserva = Reserva::query()->where('user_id', $cliente->id)->sole(),
     );
 
-    expect($reserva->estado)->toBe(ReservaEstado::Confirmada)
-        ->and($reserva->qr_codigo)->toBe('FAKE-QR-'.$reserva->id)
+    expect($reserva->estado)->toBe(ReservaEstado::Pendiente)
+        ->and($reserva->qr_codigo)->toBeNull()
         ->and($reserva->total_centavos)->toBe(53550000)
         ->and($reserva->moneda)->toBe('COP');
+
+    $this->post(route('reservas.confirmar', $reserva))
+        ->assertRedirectToRoute('reservas.show', $reserva);
+
+    $reserva->refresh();
+
+    expect($reserva->estado)->toBe(ReservaEstado::Confirmada)
+        ->and($reserva->qr_codigo)->toBe('FAKE-QR-'.$reserva->id);
 
     $this->withHeaders($headers)
         ->get(route('reservas.show', $reserva))

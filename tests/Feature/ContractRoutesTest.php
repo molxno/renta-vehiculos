@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Contracts\CalculadoraDevolucion;
 use App\Contracts\DisponibilidadService;
 use App\Contracts\GeneradorQr;
@@ -21,6 +23,7 @@ test('contract routes expose the documented pages and redirects', function () {
         ->and($routes->getByName('reservas.index')->methods())->toContain('GET')
         ->and($routes->getByName('reservas.create')->methods())->toContain('GET')
         ->and($routes->getByName('reservas.store')->methods())->toContain('POST')
+        ->and($routes->getByName('reservas.qr')->methods())->toContain('GET')
         ->and($routes->getByName('reservas.confirmar')->methods())->toContain('POST')
         ->and($routes->getByName('reservas.cancelar')->methods())->toContain('POST')
         ->and($routes->getByName('entregas.create')->methods())->toContain('GET')
@@ -33,7 +36,11 @@ test('contract routes expose the documented pages and redirects', function () {
 
     $this->actingAs(User::factory()->cliente()->create())
         ->post(route('reservas.store'), [])
-        ->assertSessionHasErrors(['vehiculo_id', 'inicio', 'fin']);
+        ->assertSessionHasErrors([
+            'vehiculo_id',
+            'inicio',
+            'fin',
+        ]);
 });
 
 test('application contracts resolve to the phase fakes', function () {

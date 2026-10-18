@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\FacturaEstado;
 use App\Enums\MetodoPago;
 use App\Enums\NivelCombustible;
@@ -7,7 +9,6 @@ use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
-use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\FiltrarCatalogoRequest;
 use App\Http\Requests\PrepararReservaRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
@@ -73,17 +74,14 @@ test('all documented pages expose their Inertia contracts', function () {
 });
 
 test('all documented write routes validate and redirect', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->cliente()->create();
     LicenciaConduccion::factory()->create(['user_id' => $user->id]);
-    $vehicle = Vehiculo::factory()->create();
     $availableVehicle = Vehiculo::factory()->create();
     $reservation = Reserva::factory()->create([
         'user_id' => $user->id,
-        'vehiculo_id' => $vehicle->id,
     ]);
 
     $this->actingAs($user)->post(route('reservas.store'), [
-        'user_id' => $user->id,
         'vehiculo_id' => $availableVehicle->id,
         'inicio' => now()->addDay()->toDateTimeString(),
         'fin' => now()->addDays(2)->toDateTimeString(),
@@ -92,8 +90,9 @@ test('all documented write routes validate and redirect', function () {
         Reserva::query()->where('vehiculo_id', $availableVehicle->id)->sole(),
     );
 
-    $this->post(route('reservas.confirmar', $reservation))
-        ->assertRedirectToRoute('reservas.show', $reservation);
+    $reservaPendiente = Reserva::query()->where('vehiculo_id', $availableVehicle->id)->sole();
+    $this->post(route('reservas.confirmar', $reservaPendiente))
+        ->assertRedirectToRoute('reservas.show', $reservaPendiente);
 
     $this->post(route('reservas.cancelar', $reservation))
         ->assertRedirectToRoute('reservas.show', $reservation);
@@ -130,7 +129,6 @@ test('requests expose authorization and validation contracts', function () {
     $storeReservaRequest->setUserResolver(fn (): User => $client);
 
     $requests = [
-        [new ConfirmarReservaRequest, []],
         [new StoreActaDevolucionRequest, [
             'devuelto_at',
             'checklist',
@@ -153,7 +151,7 @@ test('requests expose authorization and validation contracts', function () {
         ]],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
         [$prepararReservaRequest, ['vehiculo_id', 'inicio', 'fin']],
-        [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
+        [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin']],
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
     ];
 
@@ -209,7 +207,7 @@ test('models expose their casts and relationships', function () {
 });
 
 test('enums preserve the domain vocabulary', function () {
-    expect(ReservaEstado::cases())->toHaveCount(6)
+    expect(ReservaEstado::cases())->toHaveCount(7)
         ->and(FacturaEstado::cases())->toHaveCount(3)
         ->and(PagoEstado::cases())->toHaveCount(3)
         ->and(UsuarioRol::cases())->toHaveCount(5)

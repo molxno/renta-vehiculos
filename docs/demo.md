@@ -56,10 +56,13 @@ php artisan tinker --execute "App\Models\Reserva::query()->get(['id','qr_codigo'
 
 - **Crear reserva.** `GET /reservas/crear` y `POST /reservas` requieren un
   cliente autenticado. El formulario cotiza mediante el servicio configurado;
-  el alta crea una reserva confirmada y la pantalla de detalle muestra el
-  total y el código QR de demostración. El generador QR y la tarifa usan fakes.
+  el alta crea una reserva pendiente. Al confirmarla desde el formulario se
+  genera un QR de demostración; tarifa y generador QR usan fakes.
 - **Listado de reservas.** `/reservas` responde con el contrato de Inertia,
   pero la página Vue `Reservas/Index` sigue pendiente.
+- **Confirmación y búsqueda QR.** Solo el cliente titular puede confirmar una
+  reserva pendiente. La ruta `/reservas/qr/{qrCodigo}` permite localizarla por
+  el código de demostración.
 - **Disponibilidad.** El catálogo y el formulario consultan
   `DisponibilidadService`; el fake excluye vehículos fuera de servicio y
   reservas no canceladas que se solapan, pero permite reservas consecutivas.
