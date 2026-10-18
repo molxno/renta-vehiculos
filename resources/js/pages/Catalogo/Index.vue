@@ -12,7 +12,6 @@ const props = defineProps<{
 }>();
 
 const homeUrl = home.url();
-const crearReservaUrl = crearReserva.url();
 const catalogCount = props.vehicles.length;
 
 const categoryImages: Record<string, string> = {
@@ -82,6 +81,22 @@ function vehicleImage(vehicle: CatalogVehicle): string {
         categoryImages[vehicle.category] ??
         'https://images.unsplash.com/photo-1617814086906-d847a8bc6fca?w=600&h=400&fit=crop&auto=format'
     );
+}
+
+function reservationUrl(vehicle: CatalogVehicle): string {
+    const query: Record<string, string | number> = {
+        vehiculo_id: vehicle.id,
+    };
+
+    if (props.filters.startDate !== '') {
+        query.inicio = props.filters.startDate;
+    }
+
+    if (props.filters.endDate !== '') {
+        query.fin = props.filters.endDate;
+    }
+
+    return crearReserva.url({ query });
 }
 </script>
 
@@ -272,13 +287,13 @@ function vehicleImage(vehicle: CatalogVehicle): string {
                             </p>
                             <div class="mt-5 flex gap-3">
                                 <Link
-                                    :href="crearReservaUrl"
+                                    :href="reservationUrl(vehicle)"
                                     class="inline-flex flex-1 justify-center rounded-lg border border-brand-navy px-3 py-2 text-sm font-semibold text-brand-navy hover:bg-slate-50"
                                 >
                                     Ver detalles
                                 </Link>
                                 <Link
-                                    :href="crearReservaUrl"
+                                    :href="reservationUrl(vehicle)"
                                     class="inline-flex flex-1 justify-center rounded-lg bg-brand-teal px-3 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
                                 >
                                     Reservar

@@ -158,12 +158,15 @@ export interface ReservationsIndexProps extends SharedPageProps {
 }
 
 export interface ReservationsCreateProps extends SharedPageProps {
-    vehicles: Array<{
-        id: number;
-        label: string;
-        category: string;
-    }>;
+    vehicles: CatalogVehicle[];
+    filters: {
+        vehiculoId: number | null;
+        inicio: string;
+        fin: string;
+    };
+    trm: string | null;
     quote: {
+        dailyRateCents: number;
         subtotalCents: number;
         discountCents: number;
         taxesCents: number;
@@ -174,11 +177,9 @@ export interface ReservationsCreateProps extends SharedPageProps {
 
 export interface ReservationShowProps extends SharedPageProps {
     reservation: ReservationSummary & {
+        vehicleLabel: string;
+        vehiclePlate: string;
         qrCode: string | null;
-        deliveryRecordId: number | null;
-        returnRecordId: number | null;
-        invoiceId: number | null;
-        paymentStatus: 'pendiente' | 'aprobado' | 'rechazado' | null;
     };
 }
 
@@ -225,6 +226,12 @@ export interface PaymentCreateProps extends SharedPageProps {
 }
 ```
 
+`reservas.create` y `reservas.store` requieren un cliente autenticado. El
+formulario recibe solo vehículos disponibles para las fechas solicitadas; la
+cotización y la TRM provienen de los servicios y registros configurados en el
+servidor. La respuesta de `reservas.show` incluye los datos del vehículo y el
+código QR de demostración.
+
 ## Interfaces de aplicación
 
 Las interfaces PHP de `app/Contracts` son los límites de aplicación. Las
@@ -248,11 +255,10 @@ los vehículos consultados está disponible, el motivo recomienda modificar las
 fechas o seleccionar otro vehículo. El fixture independiente puede cargarse
 con `php artisan db:seed --class=DisponibilidadSeeder`.
 
-### FormRequests previstos
-
-PR3a publicará estos requests, sin duplicar reglas en controladores:
+### FormRequests
 
 - `FiltrarCatalogoRequest`
+- `PrepararReservaRequest`
 - `StoreReservaRequest`
 - `ConfirmarReservaRequest`
 - `StoreActaEntregaRequest`
@@ -292,8 +298,6 @@ deben sustituirlo por props provenientes de los controladores contractuales.
 | Consultar factura                | `facturas.show`                                                        | `Facturas/Show`                                      | `invoice`                                                     |
 | Registrar pago                   | `pagos.create`, `pagos.store`                                          | `Pagos/Create` y redirección                         | `reservation`, `amountCents`, `currency`, `methods`           |
 
-Los controladores de esta fase son esqueletos HTTP: publican los nombres de
-ruta, la página y la forma de props para que las historias puedan avanzar sin
-duplicar contratos. Las implementaciones de negocio quedan detrás de los
-contratos de `app/Contracts` y, durante esta fase, usan fakes enlazados por el
-contenedor.
+Las páginas de catálogo y creación/detalle de reservas están implementadas con
+props tipadas. El listado de reservas continúa pendiente; otros flujos usan los
+contratos y fakes enlazados por el contenedor según su estado de desarrollo.

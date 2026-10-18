@@ -132,12 +132,15 @@ describe('cierre de sesión', function () {
 });
 
 describe('registro mínimo', function () {
-    it('renders the registration page', function () {
+    it('renders the registration page', function (string $path) {
         $this->withHeaders(authInertiaHeaders())
-            ->get(route('register'))
+            ->get($path)
             ->assertOk()
             ->assertJsonPath('component', 'Auth/Register');
-    });
+    })->with([
+        'ruta en español' => '/registro',
+        'alias en inglés' => '/register',
+    ]);
 
     it('creates a client and starts the session', function () {
         $this->from(route('register'))
@@ -212,6 +215,10 @@ describe('registro mínimo', function () {
 
         $this->actingAs($user)
             ->get(route('register'))
+            ->assertRedirect(route('home'));
+
+        $this->actingAs($user)
+            ->get('/register')
             ->assertRedirect(route('home'));
     });
 });
