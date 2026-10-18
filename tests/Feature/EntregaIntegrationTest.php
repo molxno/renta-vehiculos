@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 describe('registro de entrega', function () {
+    beforeEach(function (): void {
+        autenticarEmpleado();
+    });
+
     it('stores the delivery record, contract and deposit and advances the reservation', function () {
         $this->seed(ReservaConfirmadaSeeder::class);
         $reservation = Reserva::query()->where('qr_codigo', 'QR-RESERVA-CONFIRMADA')->sole();

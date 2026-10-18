@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 Route::get('/catalogo', CatalogoController::class)->name('catalogo');
 
-Route::get('/reservas', [ReservaController::class, 'index'])->name('reservas.index');
+Route::get('/reservas', [ReservaController::class, 'index'])
+    ->middleware('auth')
+    ->name('reservas.index');
 Route::get('/reservas/crear', [ReservaController::class, 'create'])
     ->middleware('auth')
     ->name('reservas.create');
@@ -37,13 +39,14 @@ Route::middleware(['auth', 'rol:administrador'])
         Route::put('/trm', [TrmController::class, 'update'])->name('trm.update');
     });
 
-Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');
-Route::post('/reservas/{reserva}/entrega', [EntregaController::class, 'store'])->name('entregas.store');
-Route::get('/reservas/{reserva}/devolucion', [DevolucionController::class, 'create'])->name('devoluciones.create');
-Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'store'])->name('devoluciones.store');
-
-Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
-Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
-Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');
+Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(function (): void {
+    Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');
+    Route::post('/reservas/{reserva}/entrega', [EntregaController::class, 'store'])->name('entregas.store');
+    Route::get('/reservas/{reserva}/devolucion', [DevolucionController::class, 'create'])->name('devoluciones.create');
+    Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'store'])->name('devoluciones.store');
+    Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
+    Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
+    Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');
+});
 
 require __DIR__.'/auth.php';

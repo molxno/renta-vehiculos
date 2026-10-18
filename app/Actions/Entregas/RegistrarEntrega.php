@@ -6,12 +6,13 @@ namespace App\Actions\Entregas;
 
 use App\Enums\MetodoPago;
 use App\Enums\PagoEstado;
-use App\Enums\ReservaEstado;
 use App\Enums\VehiculoEstado;
+use App\Exceptions\TransicionEstadoInvalida;
 use App\Models\ActaEntrega;
 use App\Models\Reserva;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final class RegistrarEntrega
 {
@@ -54,7 +55,14 @@ final class RegistrarEntrega
                 'mensaje' => 'Anticipo de entrega',
             ]);
 
-            $reserva->update(['estado' => ReservaEstado::Entregada]);
+            try {
+                $reserva->entregar();
+            } catch (TransicionEstadoInvalida $excepcion) {
+                throw ValidationException::withMessages([
+                    'reserva' => $excepcion->getMessage(),
+                ]);
+            }
+
             $reserva->vehiculo()->update(['estado' => VehiculoEstado::Alquilado]);
 
             return $acta;

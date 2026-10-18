@@ -2,6 +2,7 @@
 
 use App\Enums\FacturaEstado;
 use App\Enums\ReservaEstado;
+use App\Enums\VehiculoEstado;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Models\ActaDevolucion;
 use App\Models\ActaEntrega;
@@ -16,6 +17,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 describe('registro de devolución', function () {
+    beforeEach(function (): void {
+        autenticarEmpleado();
+    });
+
     it('stores the return record and advances the reservation state', function () {
         $reservation = Reserva::factory()->create([
             'estado' => ReservaEstado::Entregada,
@@ -64,7 +69,8 @@ describe('registro de devolución', function () {
             ->and($invoice->total_centavos)->toBe(202300000)
             ->and(Dano::query()->where('reserva_id', $reservation->id)->pluck('descripcion')->all())->toBe(['Rayón en puerta'])
             ->and($reservation->fresh()->actaDevolucion->checklist)->toBe(['kilometraje' => 10450, 'combustible' => 'cuarto'])
-            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Facturada);
+            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Facturada)
+            ->and($reservation->fresh()->vehiculo->estado)->toBe(VehiculoEstado::Disponible);
     });
 
     it('rejects a second return for the same reservation without failing', function () {
@@ -174,6 +180,72 @@ describe('registro de devolución', function () {
             ->assertJsonPath('props.nivelesCombustible.0.value', 'vacio')
             ->assertJsonPath('props.nivelesCombustible.0.label', 'Vacío')
             ->assertJsonPath('props.nivelesCombustible.4.label', 'Lleno');
+    });
+
+    it('recalculates the return cost from the submitted date and vehicle condition', function () {
+        $this->seed(AlquilerEntregadoSeeder::class);
+        $reservation = Reserva::query()->where('qr_codigo', 'QR-ALQUILER-ENTREGADO')->sole();
+
+        $this->withHeaders([
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->get(route('devoluciones.create', [
+            'reserva' => $reservation,
+            'devuelto_at' => '2026-02-09 10:00:00',
+            'kilometraje' => '10450',
+            'combustible' => 'cuarto',
+        ]))
+            ->assertOk()
+            ->assertJsonPath('props.filters.devuelto_at', '2026-02-09 10:00:00')
+            ->assertJsonPath('props.filters.kilometraje', '10450')
+            ->assertJsonPath('props.filters.combustible', 'cuarto')
+            ->assertJsonPath('props.cobro.desglose.1.concepto', 'Retraso de 2 día(s)')
+            ->assertJsonPath('props.cobro.desglose.2.concepto', 'Exceso de kilometraje (150 km)')
+            ->assertJsonPath('props.cobro.desglose.3.concepto', 'Combustible faltante (3 cuarto(s) de tanque)')
+            ->assertJsonPath('props.cobro.cargos_centavos', 99000000);
+    });
+
+    it('falls back to nested checklist query values for the cost preview', function () {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Entregada]);
+        ActaEntrega::factory()->create([
+            'reserva_id' => $reservation->id,
+            'checklist' => ['kilometraje' => 10000, 'combustible' => 'lleno'],
+        ]);
+
+        $this->withHeaders([
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->get(route('devoluciones.create', $reservation).'?'.http_build_query([
+            'checklist' => ['kilometraje' => '10300', 'combustible' => 'lleno'],
+        ]))
+            ->assertOk()
+            ->assertJsonPath('props.filters.kilometraje', '10300')
+            ->assertJsonPath('props.filters.combustible', 'lleno')
+            ->assertJsonPath('props.estimatedChargesCents', 0);
+    });
+
+    it('reads nested checklist query parameters when calculating the preview', function () {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Entregada]);
+        ActaEntrega::factory()->create([
+            'reserva_id' => $reservation->id,
+            'checklist' => ['kilometraje' => 10000, 'combustible' => 'lleno'],
+        ]);
+
+        $this->withHeaders([
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->get(route('devoluciones.create', $reservation).'?'.http_build_query([
+            'checklist' => ['kilometraje' => '10300', 'combustible' => 'lleno'],
+            'kilometraje' => ['x'],
+            'combustible' => ['lleno'],
+        ]))
+            ->assertOk()
+            ->assertJsonPath('props.filters.kilometraje', '')
+            ->assertJsonPath('props.filters.combustible', '')
+            ->assertJsonPath('props.estimatedChargesCents', 0);
     });
 
     it('stores an optional evidence photo in the return checklist', function () {

@@ -7,22 +7,33 @@ namespace App\Http\Controllers;
 use App\Actions\Catalogo\ListarCatalogoVehiculos;
 use App\Actions\Reservas\ConfirmarReserva as ConfirmarReservaAction;
 use App\Actions\Reservas\CrearReserva;
+use App\Actions\Reservas\ListarReservas;
 use App\Contracts\TarifaService;
+use App\Exceptions\TransicionEstadoInvalida;
 use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\PrepararReservaRequest;
 use App\Http\Requests\StoreReservaRequest;
 use App\Models\Reserva;
 use App\Models\Trm;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Validation\ValidationException;
 use Inertia\Response;
 
 final class ReservaController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request, ListarReservas $listarReservas): Response
     {
+        $usuario = $request->user();
+
+        if (! $usuario instanceof User) {
+            abort(403);
+        }
+
         return inertia('Reservas/Index', [
-            'reservations' => [],
+            'reservations' => $listarReservas->handle($usuario),
             'filters' => ['page' => 1],
         ]);
     }
@@ -138,6 +149,14 @@ final class ReservaController extends Controller
 
     public function cancelar(ConfirmarReservaRequest $request, Reserva $reserva): RedirectResponse
     {
+        try {
+            $reserva->cancelar();
+        } catch (TransicionEstadoInvalida $excepcion) {
+            throw ValidationException::withMessages([
+                'reserva' => $excepcion->getMessage(),
+            ]);
+        }
+
         return to_route('reservas.show', $reserva);
     }
 }
