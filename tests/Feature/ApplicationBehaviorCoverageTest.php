@@ -52,22 +52,28 @@ test('all documented pages expose their Inertia contracts', function () {
         ->assertJsonPath('component', 'Reservas/Create')
         ->assertJsonStructure(['props' => ['vehicles', 'quote']]);
 
-    $this->withHeaders($headers)->get(route('entregas.create', $reservation))
+    $this->actingAs($user)->withHeaders($headers)->get(route('reservas.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Reservas/Index');
+
+    $empleado = User::factory()->coordinador()->create();
+
+    $this->actingAs($empleado)->withHeaders($headers)->get(route('entregas.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Entregas/Create')
         ->assertJsonPath('props.reservation.id', $reservation->id);
 
-    $this->withHeaders($headers)->get(route('devoluciones.create', $reservation))
+    $this->actingAs($empleado)->withHeaders($headers)->get(route('devoluciones.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Devoluciones/Create')
         ->assertJsonPath('props.estimatedChargesCents', 0);
 
-    $this->withHeaders($headers)->get(route('pagos.create', $reservation))
+    $this->actingAs($empleado)->withHeaders($headers)->get(route('pagos.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Pagos/Create')
         ->assertJsonPath('props.currency', 'COP');
 
-    $this->withHeaders($headers)->get(route('facturas.show', $invoice))
+    $this->actingAs($empleado)->withHeaders($headers)->get(route('facturas.show', $invoice))
         ->assertOk()
         ->assertJsonPath('component', 'Facturas/Show')
         ->assertJsonPath('props.invoice.id', $invoice->id);
@@ -99,17 +105,20 @@ test('all documented write routes validate and redirect', function () {
     $this->post(route('reservas.confirmar', $reservaPendiente))
         ->assertRedirectToRoute('reservas.show', $reservaPendiente);
 
-    $this->post(route('reservas.cancelar', $reservation))
-        ->assertRedirectToRoute('reservas.show', $reservation);
+    $paraCancelar = Reserva::factory()->pendiente()->create(['user_id' => $user->id]);
+    $this->post(route('reservas.cancelar', $paraCancelar))
+        ->assertRedirectToRoute('reservas.show', $paraCancelar);
 
-    $this->post(route('entregas.store', $reservation), [
+    $empleado = User::factory()->coordinador()->create();
+
+    $this->actingAs($empleado)->post(route('entregas.store', $reservation), [
         'entregado_at' => now()->toDateTimeString(),
         'aceptacion' => '1',
     ])->assertRedirectToRoute('reservas.show', $reservation);
 
     $reservation->update(['estado' => ReservaEstado::Entregada]);
 
-    $this->post(route('devoluciones.store', $reservation), [
+    $this->actingAs($empleado)->post(route('devoluciones.store', $reservation), [
         'devuelto_at' => now()->toDateTimeString(),
     ])->assertRedirectToRoute('reservas.show', $reservation);
 
@@ -120,7 +129,7 @@ test('all documented write routes validate and redirect', function () {
         'total_centavos' => 100,
     ]);
 
-    $this->post(route('pagos.store', $reservation), [
+    $this->actingAs($empleado)->post(route('pagos.store', $reservation), [
         'metodo' => MetodoPago::Efectivo->value,
         'monto_centavos' => $invoice->total_centavos,
     ])->assertRedirectToRoute('reservas.show', $reservation);

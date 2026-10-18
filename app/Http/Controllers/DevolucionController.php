@@ -10,16 +10,33 @@ use App\Enums\NivelCombustible;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Models\Reserva;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Inertia\Response;
 
 final class DevolucionController extends Controller
 {
-    public function create(Reserva $reserva, CalculadoraDevolucion $calculadora): Response
+    public function create(Request $request, Reserva $reserva, CalculadoraDevolucion $calculadora): Response
     {
         $reserva->load(['actaEntrega', 'contrato', 'multas', 'danos']);
 
-        $cobro = $calculadora->calcular($reserva->id, Date::now(), []);
+        $devueltoEn = $request->filled('devuelto_at')
+            ? Date::parse($request->string('devuelto_at')->toString())
+            : Date::now();
+
+        $kilometraje = $request->input('kilometraje', $request->input('checklist.kilometraje'));
+        $combustible = $request->input('combustible', $request->input('checklist.combustible'));
+        $condiciones = [];
+
+        if ($kilometraje !== null && $kilometraje !== '') {
+            $condiciones['kilometraje'] = $kilometraje;
+        }
+
+        if (is_string($combustible) && $combustible !== '') {
+            $condiciones['combustible'] = $combustible;
+        }
+
+        $cobro = $calculadora->calcular($reserva->id, $devueltoEn, $condiciones);
 
         return inertia('Devoluciones/Create', [
             'reservation' => $reserva,
@@ -28,6 +45,12 @@ final class DevolucionController extends Controller
             'cobro' => $cobro,
             'actaEntrega' => $reserva->actaEntrega,
             'storeUrl' => route('devoluciones.store', $reserva),
+            'createUrl' => route('devoluciones.create', $reserva),
+            'filters' => [
+                'devuelto_at' => $request->string('devuelto_at')->toString(),
+                'kilometraje' => is_scalar($kilometraje) ? (string) $kilometraje : '',
+                'combustible' => is_string($combustible) ? $combustible : '',
+            ],
             'nivelesCombustible' => array_map(
                 fn (NivelCombustible $nivel): array => [
                     'value' => $nivel->value,

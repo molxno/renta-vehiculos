@@ -34,6 +34,10 @@ function inertiaPagoHeaders(): array
 }
 
 describe('registro de pago', function () {
+    beforeEach(function (): void {
+        autenticarEmpleado();
+    });
+
     it('renders the payment page with the pending invoice total', function () {
         [$reservation, $invoice] = facturaPendiente();
 

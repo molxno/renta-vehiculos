@@ -6,12 +6,14 @@ namespace App\Actions\Devoluciones;
 
 use App\Contracts\CalculadoraDevolucion;
 use App\Enums\FacturaEstado;
-use App\Enums\ReservaEstado;
+use App\Enums\VehiculoEstado;
+use App\Exceptions\TransicionEstadoInvalida;
 use App\Models\ActaDevolucion;
 use App\Models\Factura;
 use App\Models\Reserva;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final class RegistrarDevolucion
 {
@@ -61,8 +63,15 @@ final class RegistrarDevolucion
                 'desglose' => $cobro['desglose'],
             ]);
 
-            $reserva->update(['estado' => ReservaEstado::Devuelta]);
-            $reserva->update(['estado' => ReservaEstado::Facturada]);
+            try {
+                $reserva->devolver();
+            } catch (TransicionEstadoInvalida $excepcion) {
+                throw ValidationException::withMessages([
+                    'reserva' => $excepcion->getMessage(),
+                ]);
+            }
+
+            $reserva->vehiculo()->update(['estado' => VehiculoEstado::Disponible]);
 
             return $acta;
         });
