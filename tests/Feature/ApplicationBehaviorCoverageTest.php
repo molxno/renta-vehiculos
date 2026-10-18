@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\FacturaEstado;
 use App\Enums\MetodoPago;
 use App\Enums\NivelCombustible;
@@ -7,12 +9,10 @@ use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
-use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\FiltrarCatalogoRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Http\Requests\StoreActaEntregaRequest;
 use App\Http\Requests\StorePagoRequest;
-use App\Http\Requests\StoreReservaRequest;
 use App\Models\ActaDevolucion;
 use App\Models\ActaEntrega;
 use App\Models\Contrato;
@@ -79,15 +79,18 @@ test('all documented write routes validate and redirect', function () {
         'vehiculo_id' => $vehicle->id,
     ]);
 
-    $this->post(route('reservas.store'), [
-        'user_id' => $user->id,
+    $this->actingAs($user)->post(route('reservas.store'), [
         'vehiculo_id' => $vehicle->id,
         'inicio' => now()->addDay()->toDateTimeString(),
         'fin' => now()->addDays(2)->toDateTimeString(),
-    ])->assertRedirectToRoute('reservas.index');
+    ])->assertRedirectToRoute(
+        'reservas.show',
+        Reserva::query()->latest('id')->firstOrFail(),
+    );
 
-    $this->post(route('reservas.confirmar', $reservation))
-        ->assertRedirectToRoute('reservas.show', $reservation);
+    $reservaPendiente = Reserva::query()->latest('id')->firstOrFail();
+    $this->post(route('reservas.confirmar', $reservaPendiente))
+        ->assertRedirectToRoute('reservas.show', $reservaPendiente);
 
     $this->post(route('reservas.cancelar', $reservation))
         ->assertRedirectToRoute('reservas.show', $reservation);
@@ -118,7 +121,6 @@ test('all documented write routes validate and redirect', function () {
 
 test('requests expose authorization and validation contracts', function () {
     $requests = [
-        [new ConfirmarReservaRequest, []],
         [new StoreActaDevolucionRequest, [
             'devuelto_at',
             'checklist',
@@ -140,7 +142,6 @@ test('requests expose authorization and validation contracts', function () {
             'foto',
         ]],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
-        [new StoreReservaRequest, ['user_id', 'vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
     ];
 
@@ -196,7 +197,7 @@ test('models expose their casts and relationships', function () {
 });
 
 test('enums preserve the domain vocabulary', function () {
-    expect(ReservaEstado::cases())->toHaveCount(6)
+    expect(ReservaEstado::cases())->toHaveCount(7)
         ->and(FacturaEstado::cases())->toHaveCount(3)
         ->and(PagoEstado::cases())->toHaveCount(3)
         ->and(UsuarioRol::cases())->toHaveCount(5)

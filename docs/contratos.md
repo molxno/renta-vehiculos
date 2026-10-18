@@ -16,7 +16,8 @@ negocio.
   de Laravel si una historia lo necesita.
 - No se crea `lineas_factura`: `facturas.desglose` será una columna JSON.
 - No existe una entidad `Alquiler`. `Reserva` conserva la máquina de estados:
-  `confirmada`, `entregada`, `devuelta`, `facturada`, `pagada` y `cancelada`.
+  `pendiente`, `confirmada`, `entregada`, `devuelta`, `facturada`, `pagada` y
+  `cancelada`.
 - `ActaEntrega` y `ActaDevolucion` son entidades separadas relacionadas con una
   reserva.
 - El archivo Figma Make no expuso un archivo CSS de tokens legible mediante el
@@ -28,6 +29,7 @@ negocio.
 ### Reserva
 
 ```text
+pendiente  -> confirmada
 confirmada -> entregada
 entregada  -> devuelta
 devuelta   -> facturada
@@ -35,8 +37,12 @@ facturada  -> pagada
 confirmada -> cancelada
 ```
 
-No se permiten saltos de estado ni transiciones inversas en la capa de
-aplicación. Una reserva cancelada es terminal.
+La creación deja la reserva pendiente. Solo el cliente propietario puede
+confirmarla; al confirmarse se genera y persiste el QR. Una reserva cancelada
+es terminal. No se permiten saltos de estado ni transiciones inversas en la
+capa de aplicación. Las rutas de creación y confirmación requieren un cliente
+autenticado. La ruta `reservas.qr` localiza la reserva por su código y redirige
+a su página de consulta.
 
 ### Vehículo
 
@@ -66,6 +72,7 @@ documenta; serán registradas con controladores placeholder en PR3a.
 | `reservas.index`      | GET    | `/reservas`                      | `Reservas/Index`              |
 | `reservas.create`     | GET    | `/reservas/crear`                | `Reservas/Create`             |
 | `reservas.store`      | POST   | `/reservas`                      | redirección a `reservas.show` |
+| `reservas.qr`         | GET    | `/reservas/qr/{qrCodigo}`        | redirección a `reservas.show` |
 | `reservas.show`       | GET    | `/reservas/{reserva}`            | `Reservas/Show`               |
 | `reservas.confirmar`  | POST   | `/reservas/{reserva}/confirmar`  | redirección                   |
 | `reservas.cancelar`   | POST   | `/reservas/{reserva}/cancelar`   | redirección                   |
@@ -128,6 +135,7 @@ export interface CatalogIndexProps extends SharedPageProps {
 export interface ReservationSummary {
     id: number;
     status:
+        | 'pendiente'
         | 'confirmada'
         | 'entregada'
         | 'devuelta'
