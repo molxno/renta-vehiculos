@@ -15,19 +15,27 @@ use App\Models\Contrato;
 use App\Models\Factura;
 use App\Models\Pago;
 use App\Models\Reserva;
+use App\Models\Vehiculo;
 use Illuminate\Support\Carbon;
 
 test('completes the reservation delivery return and payment contract flow', function () {
+    $vehicle = Vehiculo::factory()->create();
+    $reservationStart = Carbon::parse('2026-10-13 09:00:00');
+    $reservationEnd = Carbon::parse('2026-10-15 09:00:00');
+    $availability = app(DisponibilidadService::class)->consultar(
+        $reservationStart,
+        $reservationEnd,
+        $vehicle->id,
+    );
+
     $reservation = Reserva::factory()->create([
         'estado' => ReservaEstado::Confirmada,
         'total_centavos' => 53550000,
+        'vehiculo_id' => $vehicle->id,
+        'inicio' => $reservationStart,
+        'fin' => $reservationEnd,
     ]);
 
-    $availability = app(DisponibilidadService::class)->consultar(
-        $reservation->inicio,
-        $reservation->fin,
-        $reservation->vehiculo_id,
-    );
     $quote = app(TarifaService::class)->cotizar(
         $reservation->vehiculo_id,
         $reservation->inicio,
