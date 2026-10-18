@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\FacturaController;
@@ -24,3 +26,19 @@ Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'sto
 Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
 Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
 Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');
+
+Route::get('/login', [LoginController::class, 'create'])
+    ->name('login');
+
+Route::post('/login', [LoginController::class, 'store'])
+    ->name('login.store');
+
+Route::get('/registro', [RegisterController::class, 'create'])
+    ->name('register');
+
+Route::post('/registro', [RegisterController::class, 'store'])
+    ->name('register.store');
+
+Route::get('/admin-test', function () {
+    return 'ok';
+})->middleware('rol:administrador');
