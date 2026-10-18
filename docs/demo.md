@@ -54,21 +54,18 @@ php artisan tinker --execute "App\Models\Reserva::query()->get(['id','qr_codigo'
 
 ## Qué está simulado
 
-- **Crear reserva.** El backend persiste reservas pendientes mediante
-  `POST /reservas` para clientes autenticados y valida la disponibilidad.
-  Al confirmar una reserva pendiente se genera su QR. La pantalla
-  `Reservas/Create` aún no existe en Vue, por lo que la demo usa las reservas
-  sembradas en lugar de crear una desde la interfaz.
-- **Listado y detalle de reservas.** El backend responde las rutas
-  `/reservas` y `/reservas/{reserva}`, pero aún no hay páginas Vue
-  `Reservas/Index` ni `Reservas/Show`. Tras guardar una entrega, una
-  devolución o un pago, Inertia redirige a ese detalle: si el navegador
-  muestra un componente faltante, copien el `#id` del título de la
-  pantalla anterior y sigan a la URL del paso siguiente.
-- **Disponibilidad.** El catálogo filtra por categoría y fechas y consulta
-  `DisponibilidadService`. El fake excluye vehículos fuera de servicio y
-  reservas no canceladas que se solapan; permite reservas consecutivas. Si no
-  hay vehículos disponibles, sugiere cambiar las fechas o seleccionar otro.
+- **Crear reserva.** `GET /reservas/crear` y `POST /reservas` requieren un
+  cliente autenticado. El formulario cotiza mediante el servicio configurado;
+  el alta crea una reserva pendiente. Al confirmarla desde el formulario se
+  genera un QR de demostración; tarifa y generador QR usan fakes.
+- **Listado de reservas.** `/reservas` responde con el contrato de Inertia,
+  pero la página Vue `Reservas/Index` sigue pendiente.
+- **Confirmación y búsqueda QR.** Solo el cliente titular puede confirmar una
+  reserva pendiente. La ruta `/reservas/qr/{qrCodigo}` permite localizarla por
+  el código de demostración.
+- **Disponibilidad.** El catálogo y el formulario consultan
+  `DisponibilidadService`; el fake excluye vehículos fuera de servicio y
+  reservas no canceladas que se solapan, pero permite reservas consecutivas.
 - **Ubicación.** El buscador de la landing y del catálogo envía `location`,
   pero ese valor no filtra la flota todavía.
 - **Pasarela.** Cualquier tarjeta que no termine en `0000` se aprueba.
@@ -105,25 +102,41 @@ Resultado: la landing pública RENT-GO, no un panel operativo.
 
 3. Filtren por categoría (por ejemplo **Camioneta**): debe quedar solo
    `DEF-456`.
-4. Con fechas de recogida y devolución, el listado se recarga; con el fake
-   actual siguen apareciendo los vehículos disponibles.
-5. **Reservar** lleva a `/reservas/crear`. Expliquen que el alta real de
-   reserva queda pendiente y que el resto del flujo usa fixtures.
+4. Con fechas de recogida y devolución, el listado se recarga y excluye los
+   vehículos ocupados para ese período.
+5. **Reservar** lleva a `/reservas/crear` con el vehículo y las fechas
+   seleccionadas. La creación requiere una sesión de cliente; si se solicita
+   iniciar sesión, completen el paso 3 y vuelvan al catálogo.
 
 ### 3. Login
 
 1. En el encabezado, **Iniciar sesión** (`/iniciar-sesion`).
 2. Entren como cliente: `cliente@renta.test` / `password`.
-3. Deben volver a `/`. Cierren sesión.
-4. Vuelvan a entrar como coordinador: `coordinador@renta.test` / `password`.
+3. Deben volver a `/`. Mantengan la sesión de cliente para crear la reserva.
+4. Más adelante, cierren sesión e inicien como coordinador:
+   `coordinador@renta.test` / `password`.
 
 Para mostrar administración, en otro momento usen
 `administrador@renta.test` / `password`. El cromado del layout operativo
 cambia según el rol de la sesión.
 
-### 4. Reserva (fixture confirmada)
+### 4. Reserva y QR
 
-No hay alta por UI. Abran directo la entrega de la reserva confirmada:
+Desde el catálogo, pulsen **Reservar** en un vehículo disponible. En el
+formulario, confirmen las fechas y actualicen el resumen de costos. Inicien
+sesión como cliente si aún no lo hicieron y regresen al formulario para
+confirmar la reserva.
+
+Resultado: se guarda la reserva con el total calculado por el servicio fake y
+se muestra una pantalla de confirmación con un código QR de demostración. El
+gráfico es ilustrativo; el fake no genera una imagen QR escaneable.
+
+Para continuar el recorrido operativo con los datos precargados, usen la
+reserva fixture confirmada que se describe a continuación.
+
+### 5. Reserva fixture confirmada
+
+Abran directo la entrega de la reserva fixture confirmada:
 
 ```text
 /reservas/1/entrega
@@ -134,7 +147,7 @@ para `QR-RESERVA-CONFIRMADA`. La pantalla debe mostrar la licencia
 `LIC-DEMO-001`, categoría B1, vigente hasta 2028-12-31, y un anticipo en
 efectivo (30 % de la renta).
 
-### 5. Entrega
+### 6. Entrega
 
 Con sesión de coordinador, en el acta:
 
@@ -147,10 +160,10 @@ Con sesión de coordinador, en el acta:
 7. Confirmen.
 
 Resultado esperado: acta, contrato `CTR-00000{id}` y anticipo en efectivo.
-La reserva pasa a **entregada** y el vehículo a **alquilado**. Si aparece
-el componente faltante `Reservas/Show`, anoten el id y sigan al paso 6.
+La reserva pasa a **entregada** y el vehículo a **alquilado**. La pantalla de
+detalle muestra el resumen de la reserva; continúen al paso 7.
 
-### 6. Devolución y costos
+### 7. Devolución y costos
 
 Abran:
 
@@ -175,7 +188,7 @@ genera una factura pendiente `FAC-00000{id}`.
 Para una devolución limpia, usen regreso `2026-02-04 09:00`, kilometraje
 `10000` y combustible **Lleno**, sin daños: solo renta base e impuestos.
 
-### 7. Pago y factura
+### 8. Pago y factura
 
 Cierren sesión e inicien como cajero: `cajero@renta.test` / `password`.
 

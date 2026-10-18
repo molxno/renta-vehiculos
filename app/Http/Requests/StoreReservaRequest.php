@@ -14,9 +14,17 @@ final class StoreReservaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $usuario = $this->user();
+        $user = $this->user();
 
-        return $usuario instanceof User && $usuario->rol === UsuarioRol::Cliente;
+        return $user instanceof User && $user->rol === UsuarioRol::Cliente;
+    }
+
+    public function cliente(): User
+    {
+        /** @var User $cliente */
+        $cliente = $this->user();
+
+        return $cliente;
     }
 
     /** @return array<string, array<int, string>> */
@@ -46,13 +54,6 @@ final class StoreReservaRequest extends FormRequest
             'fin.date' => 'La fecha de fin no es válida.',
             'fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
         ];
-    }
-
-    public function cliente(): User
-    {
-        $usuario = $this->user();
-
-        return $usuario instanceof User ? $usuario : abort(403);
     }
 
     public function inicio(): CarbonInterface
