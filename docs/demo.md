@@ -45,12 +45,12 @@ numéricos suelen ser 1 a 4 en un clon limpio; si dudan, confírmenlos:
 php artisan tinker --execute "App\Models\Reserva::query()->get(['id','qr_codigo','estado'])->each(fn ($r) => print($r->id.' '.$r->qr_codigo.' '.$r->estado->value.PHP_EOL));"
 ```
 
-| QR                      | Estado inicial | Vehículo     | Uso en la demo                                         | Ruta típica (id fresco)        |
-| ----------------------- | -------------- | ------------ | ------------------------------------------------------ | ------------------------------ |
-| `QR-RESERVA-CONFIRMADA` | confirmada     | `ABC-123`    | Recorrido principal: entrega → devolución → pago       | `/reservas/1/entrega`          |
-| `QR-ALQUILER-ENTREGADO` | entregada      | `DEF-456`    | Atajo: entrar directo a devolución con cargos extra    | `/reservas/2/devolucion`       |
-| `QR-DEVOLUCION-FACTURA` | devuelta       | `GHI-789`    | Atajo: factura pendiente `FAC-DEVOLUCION-PENDIENTE`    | `/facturas/1`                  |
-| `QR-PAGO-RECHAZADO`     | facturada      | `ABC-123`    | Atajo: reintento de pago tras un rechazo               | `/reservas/4/pago`             |
+| QR                      | Estado inicial | Vehículo  | Uso en la demo                                      | Ruta típica (id fresco)  |
+| ----------------------- | -------------- | --------- | --------------------------------------------------- | ------------------------ |
+| `QR-RESERVA-CONFIRMADA` | confirmada     | `ABC-123` | Recorrido principal: entrega → devolución → pago    | `/reservas/1/entrega`    |
+| `QR-ALQUILER-ENTREGADO` | entregada      | `DEF-456` | Atajo: entrar directo a devolución con cargos extra | `/reservas/2/devolucion` |
+| `QR-DEVOLUCION-FACTURA` | devuelta       | `GHI-789` | Atajo: factura pendiente `FAC-DEVOLUCION-PENDIENTE` | `/facturas/1`            |
+| `QR-PAGO-RECHAZADO`     | facturada      | `ABC-123` | Atajo: reintento de pago tras un rechazo            | `/reservas/4/pago`       |
 
 ## Qué está simulado
 
@@ -94,11 +94,11 @@ Resultado: la landing pública RENT-GO, no un panel operativo.
 1. Envíen el buscador del hero o pulsen **Catálogo** / **Buscar vehículos**.
 2. Deben llegar a `/catalogo` con los tres vehículos del seeder:
 
-   | Placa     | Vehículo           | Categoría | Tarifa diaria |
-   | --------- | ------------------ | --------- | ------------- |
-   | `ABC-123` | Toyota Corolla 2024 | sedan     | $150.000 COP  |
-   | `DEF-456` | Renault Duster 2023 | camioneta | $220.000 COP  |
-   | `GHI-789` | Kia Picanto 2022    | compacto  | $150.000 COP  |
+    | Placa     | Vehículo            | Categoría | Tarifa diaria |
+    | --------- | ------------------- | --------- | ------------- |
+    | `ABC-123` | Toyota Corolla 2024 | sedan     | $150.000 COP  |
+    | `DEF-456` | Renault Duster 2023 | camioneta | $220.000 COP  |
+    | `GHI-789` | Kia Picanto 2022    | compacto  | $150.000 COP  |
 
 3. Filtren por categoría (por ejemplo **Camioneta**): debe quedar solo
    `DEF-456`.
@@ -195,11 +195,11 @@ total en COP y estado **pagada**.
 Si la reserva confirmada ya no está en el estado inicial, no hace falta
 volver a sembrar para mostrar una pantalla suelta:
 
-| Quieren mostrar        | Fixture                   | Rol             | Ruta                          |
-| ---------------------- | ------------------------- | --------------- | ----------------------------- |
-| Devolución con cargos  | `QR-ALQUILER-ENTREGADO`   | Coordinador     | `/reservas/{id}/devolucion`   |
-| Factura pendiente      | `QR-DEVOLUCION-FACTURA`   | Cajero          | `/facturas/{id}`              |
-| Reintento de pago      | `QR-PAGO-RECHAZADO`       | Cajero          | `/reservas/{id}/pago`         |
+| Quieren mostrar       | Fixture                 | Rol         | Ruta                        |
+| --------------------- | ----------------------- | ----------- | --------------------------- |
+| Devolución con cargos | `QR-ALQUILER-ENTREGADO` | Coordinador | `/reservas/{id}/devolucion` |
+| Factura pendiente     | `QR-DEVOLUCION-FACTURA` | Cajero      | `/facturas/{id}`            |
+| Reintento de pago     | `QR-PAGO-RECHAZADO`     | Cajero      | `/reservas/{id}/pago`       |
 
 Valores de devolución sobre `QR-ALQUILER-ENTREGADO` (contrato con 300 km
 incluidos, salida 10 000 km, tanque lleno, fin `2026-02-08 09:00`):
