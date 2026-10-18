@@ -22,5 +22,6 @@ interface TarifaService
         DateTimeInterface $inicio,
         DateTimeInterface $fin,
         ?int $convenioId = null,
+        ?string $moneda = null,
     ): array;
 }

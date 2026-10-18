@@ -9,6 +9,7 @@ use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\TrmController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -27,6 +28,14 @@ Route::post('/reservas/{reserva}/confirmar', [ReservaController::class, 'confirm
     ->middleware('auth')
     ->name('reservas.confirmar');
 Route::post('/reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar'])->name('reservas.cancelar');
+
+Route::middleware(['auth', 'rol:administrador'])
+    ->prefix('administracion')
+    ->name('admin.')
+    ->group(function (): void {
+        Route::get('/trm', [TrmController::class, 'edit'])->name('trm.edit');
+        Route::put('/trm', [TrmController::class, 'update'])->name('trm.update');
+    });
 
 Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');
 Route::post('/reservas/{reserva}/entrega', [EntregaController::class, 'store'])->name('entregas.store');

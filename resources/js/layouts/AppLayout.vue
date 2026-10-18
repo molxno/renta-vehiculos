@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { login, logout } from '@/routes';
 import { index as reservasIndex } from '@/actions/App/Http/Controllers/ReservaController';
+import { edit as editarTrm } from '@/actions/App/Http/Controllers/TrmController';
 import Button from '@/components/ui/Button.vue';
 import type { UserRole } from '@/types';
 
@@ -21,13 +22,14 @@ const navigation = {
     cliente: ['Mis reservas', 'Facturas', 'Pagos'],
     coordinador: ['Reservas', 'Entregas', 'Devoluciones'],
     cajero: ['Facturas', 'Pagos', 'Cierres de caja'],
-    administrador: ['Dashboard', 'Usuarios', 'Reportes'],
+    administrador: ['Dashboard', 'Tasa de cambio', 'Usuarios', 'Reportes'],
     gerente: ['Dashboard', 'Reportes', 'Indicadores'],
 } as const;
 
 const navigationHrefs: Record<string, string> = {
     'Mis reservas': reservasIndex.url(),
     Reservas: reservasIndex.url(),
+    'Tasa de cambio': editarTrm.url(),
 };
 const loginUrl = login.url();
 const logoutUrl = logout.url();

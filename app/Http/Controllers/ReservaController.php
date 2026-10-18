@@ -54,7 +54,7 @@ final class ReservaController extends Controller
             }
         }
 
-        $trm = Trm::query()->orderByDesc('fecha')->orderByDesc('id')->first();
+        $trm = Trm::query()->vigente()->first();
         $quote = null;
 
         if ($selectedVehicle !== null && $inicio !== '' && $fin !== '') {
@@ -93,6 +93,7 @@ final class ReservaController extends Controller
             $request->convenioId(),
             $request->inicio(),
             $request->fin(),
+            $request->moneda(),
         );
 
         return to_route('reservas.show', $reserva);

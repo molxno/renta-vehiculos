@@ -32,7 +32,9 @@ test('contract routes expose the documented pages and redirects', function () {
         ->and($routes->getByName('devoluciones.store')->methods())->toContain('POST')
         ->and($routes->getByName('facturas.show')->methods())->toContain('GET')
         ->and($routes->getByName('pagos.create')->methods())->toContain('GET')
-        ->and($routes->getByName('pagos.store')->methods())->toContain('POST');
+        ->and($routes->getByName('pagos.store')->methods())->toContain('POST')
+        ->and($routes->getByName('admin.trm.edit')->methods())->toContain('GET')
+        ->and($routes->getByName('admin.trm.update')->methods())->toContain('PUT');
 
     $this->actingAs(User::factory()->cliente()->create())
         ->post(route('reservas.store'), [])

@@ -5,6 +5,9 @@ defineProps<{
     type?: string;
     placeholder?: string;
     error?: string;
+    min?: string | number;
+    max?: string | number;
+    step?: string | number;
 }>();
 
 defineEmits<{
@@ -19,6 +22,9 @@ defineEmits<{
             :type="type ?? 'text'"
             :value="modelValue"
             :placeholder="placeholder"
+            :min="min"
+            :max="max"
+            :step="step"
             class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30"
             @input="
                 $emit(
