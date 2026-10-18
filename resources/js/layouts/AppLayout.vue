@@ -34,7 +34,9 @@ const logoutUrl = logout.url();
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-50 text-slate-900">
+    <div
+        class="flex min-h-screen flex-col bg-brand-navy text-slate-800 antialiased"
+    >
         <header class="border-b border-slate-200 bg-white">
             <div
                 class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4"
@@ -63,8 +65,10 @@ const logoutUrl = logout.url();
                 </Link>
             </div>
         </header>
-        <main class="mx-auto max-w-7xl px-6 py-8">
-            <slot />
+        <main class="w-full flex-1 bg-slate-50">
+            <div class="mx-auto max-w-7xl px-6 py-8">
+                <slot />
+            </div>
         </main>
     </div>
 </template>

@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { login, logout, register } from '@/routes';
+import { catalogo, home, login, logout, register } from '@/routes';
 import RentGoLogo from '@/components/storefront/RentGoLogo.vue';
 
 const page = usePage();
 const authUser = computed(() => page.props.auth?.user ?? null);
+const homeUrl = home.url();
+const catalogoUrl = catalogo.url();
 const loginUrl = login.url();
 const registerUrl = register.url();
 const logoutUrl = logout.url();
+const isCatalogo = computed(() => page.url.startsWith('/catalogo'));
 </script>
 
 <template>
@@ -16,16 +19,28 @@ const logoutUrl = logout.url();
         <div
             class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6"
         >
-            <Link href="/">
+            <Link :href="homeUrl">
                 <RentGoLogo />
             </Link>
             <nav class="hidden items-center gap-6 text-sm font-medium md:flex">
-                <a href="#inicio" class="hover:text-brand-teal">Inicio</a>
-                <a href="#vehiculos" class="hover:text-brand-teal">Catálogo</a>
-                <a href="#como-funciona" class="hover:text-brand-teal"
+                <Link :href="homeUrl" class="hover:text-brand-teal"
+                    >Inicio</Link
+                >
+                <Link
+                    :href="catalogoUrl"
+                    class="hover:text-brand-teal"
+                    :class="{ 'text-brand-teal': isCatalogo }"
+                >
+                    Catálogo
+                </Link>
+                <a
+                    :href="`${homeUrl}#como-funciona`"
+                    class="hover:text-brand-teal"
                     >Cómo funciona</a
                 >
-                <a href="#contacto" class="hover:text-brand-teal">Contacto</a>
+                <a :href="`${homeUrl}#contacto`" class="hover:text-brand-teal"
+                    >Contacto</a
+                >
             </nav>
             <div class="flex items-center gap-3">
                 <Link

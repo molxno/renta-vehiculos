@@ -11,6 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property int $id
+ * @property string $placa
+ * @property string $marca
+ * @property string $modelo
+ * @property int $anio
+ * @property string $tipo
  * @property VehiculoEstado $estado
  */
 final class Vehiculo extends Model

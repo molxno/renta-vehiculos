@@ -2,8 +2,10 @@
 import { Link } from '@inertiajs/vue3';
 import { create as crearReserva } from '@/actions/App/Http/Controllers/ReservaController';
 import { mockFleet } from '@/components/storefront/mocks';
+import { catalogo } from '@/routes';
 
 const crearReservaUrl = crearReserva.url();
+const catalogoUrl = catalogo.url();
 </script>
 
 <template>
@@ -20,12 +22,12 @@ const crearReservaUrl = crearReserva.url();
                     Vehículos más solicitados
                 </h2>
             </div>
-            <a
-                href="#categorias"
+            <Link
+                :href="catalogoUrl"
                 class="text-sm font-semibold text-brand-blue hover:text-brand-teal"
             >
                 Ver todo el catálogo →
-            </a>
+            </Link>
         </div>
         <div class="mt-8 grid gap-6 md:grid-cols-3">
             <article

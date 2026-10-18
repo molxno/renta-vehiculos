@@ -8,6 +8,7 @@ use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
 use App\Http\Requests\ConfirmarReservaRequest;
+use App\Http\Requests\FiltrarCatalogoRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Http\Requests\StoreActaEntregaRequest;
 use App\Http\Requests\StorePagoRequest;
@@ -140,6 +141,7 @@ test('requests expose authorization and validation contracts', function () {
         ]],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
         [new StoreReservaRequest, ['user_id', 'vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
+        [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
     ];
 
     foreach ($requests as [$request, $fields]) {
