@@ -118,20 +118,26 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
     $vehiculo = Vehiculo::query()->where('placa', 'ABC-123')->sole();
 
     $this->post(route('reservas.store'), [
-        'user_id' => $cliente->id,
         'vehiculo_id' => $vehiculo->id,
         'inicio' => '2026-12-01 09:00:00',
         'fin' => '2026-12-04 09:00:00',
-        'moneda' => 'COP',
     ])->assertRedirectToRoute(
         'reservas.show',
         $reserva = Reserva::query()->where('user_id', $cliente->id)->sole(),
     );
 
-    expect($reserva->estado)->toBe(ReservaEstado::Confirmada)
-        ->and($reserva->qr_codigo)->toBe('FAKE-QR-'.$reserva->id)
+    expect($reserva->estado)->toBe(ReservaEstado::Pendiente)
+        ->and($reserva->qr_codigo)->toBeNull()
         ->and($reserva->total_centavos)->toBe(53550000)
         ->and($reserva->moneda)->toBe('COP');
+
+    $this->post(route('reservas.confirmar', $reserva))
+        ->assertRedirectToRoute('reservas.show', $reserva);
+
+    $reserva->refresh();
+
+    expect($reserva->estado)->toBe(ReservaEstado::Confirmada)
+        ->and($reserva->qr_codigo)->toBe('FAKE-QR-'.$reserva->id);
 
     $this->withHeaders($headers)
         ->get(route('reservas.show', $reserva))
@@ -209,9 +215,9 @@ test('rejects creating a mock reservation when the vehicle is occupied', functio
         'fin' => '2026-12-04 09:00:00',
     ]);
 
-    $this->from(route('reservas.create'))
+    $this->actingAs($cliente)
+        ->from(route('reservas.create'))
         ->post(route('reservas.store'), [
-            'user_id' => $cliente->id,
             'vehiculo_id' => $vehiculo->id,
             'inicio' => '2026-12-02 09:00:00',
             'fin' => '2026-12-05 09:00:00',

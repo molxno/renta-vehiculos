@@ -6,6 +6,7 @@ namespace App\Enums;
 
 enum ReservaEstado: string
 {
+    case Pendiente = 'pendiente';
     case Confirmada = 'confirmada';
     case Entregada = 'entregada';
     case Devuelta = 'devuelta';

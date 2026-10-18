@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $fin
  * @property int $total_centavos
  * @property string $moneda
+ * @property string|null $qr_codigo
  * @property User $user
  * @property Vehiculo $vehiculo
  */
