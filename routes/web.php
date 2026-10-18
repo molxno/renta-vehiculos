@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\EntregaController;
@@ -14,9 +16,14 @@ Route::get('/catalogo', CatalogoController::class)->name('catalogo');
 
 Route::get('/reservas', [ReservaController::class, 'index'])->name('reservas.index');
 Route::get('/reservas/crear', [ReservaController::class, 'create'])->name('reservas.create');
-Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
+Route::post('/reservas', [ReservaController::class, 'store'])
+    ->middleware('auth')
+    ->name('reservas.store');
+Route::get('/reservas/qr/{qrCodigo}', [ReservaController::class, 'showByQrCode'])->name('reservas.qr');
 Route::get('/reservas/{reserva}', [ReservaController::class, 'show'])->name('reservas.show');
-Route::post('/reservas/{reserva}/confirmar', [ReservaController::class, 'confirmar'])->name('reservas.confirmar');
+Route::post('/reservas/{reserva}/confirmar', [ReservaController::class, 'confirmar'])
+    ->middleware('auth')
+    ->name('reservas.confirmar');
 Route::post('/reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar'])->name('reservas.cancelar');
 
 Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');

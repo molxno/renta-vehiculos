@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Actions\Reservas;
 
 use App\Contracts\DisponibilidadService;
-use App\Contracts\GeneradorQr;
 use App\Contracts\TarifaService;
 use App\Enums\ReservaEstado;
 use App\Models\Reserva;
+use App\Models\User;
+use App\Models\Vehiculo;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -18,45 +19,50 @@ final class CrearReserva
     public function __construct(
         private DisponibilidadService $disponibilidad,
         private TarifaService $tarifa,
-        private GeneradorQr $generadorQr,
     ) {}
 
     public function handle(
-        int $userId,
+        User $cliente,
         int $vehiculoId,
+        ?int $convenioId,
         DateTimeInterface $inicio,
         DateTimeInterface $fin,
-        ?int $convenioId = null,
-        ?string $moneda = null,
     ): Reserva {
-        $disponibilidad = $this->disponibilidad->consultar($inicio, $fin, $vehiculoId)[0] ?? null;
+        return DB::transaction(function () use ($cliente, $vehiculoId, $convenioId, $inicio, $fin): Reserva {
+            Vehiculo::query()->whereKey($vehiculoId)->lockForUpdate()->firstOrFail();
 
-        if ($disponibilidad === null || $disponibilidad['disponible'] !== true) {
-            throw ValidationException::withMessages([
-                'vehiculo_id' => $disponibilidad['motivo']
-                    ?? 'El vehículo no está disponible. Modifica las fechas o selecciona otro vehículo.',
-            ]);
-        }
+            $vehiculoDisponible = false;
+            $motivoNoDisponible = null;
 
-        $cotizacion = $this->tarifa->cotizar($vehiculoId, $inicio, $fin, $convenioId);
+            foreach ($this->disponibilidad->consultar($inicio, $fin, $vehiculoId) as $resultado) {
+                if ($resultado['vehiculo_id'] === $vehiculoId) {
+                    $vehiculoDisponible = $resultado['disponible'];
+                    $motivoNoDisponible = $resultado['motivo'];
 
-        return DB::transaction(function () use ($userId, $vehiculoId, $inicio, $fin, $convenioId, $moneda, $cotizacion): Reserva {
-            $reserva = Reserva::query()->create([
-                'user_id' => $userId,
+                    break;
+                }
+            }
+
+            if (! $vehiculoDisponible) {
+                throw ValidationException::withMessages([
+                    'vehiculo_id' => $motivoNoDisponible !== null && $motivoNoDisponible !== ''
+                        ? $motivoNoDisponible
+                        : 'El vehículo no está disponible para las fechas seleccionadas.',
+                ]);
+            }
+
+            $cotizacion = $this->tarifa->cotizar($vehiculoId, $inicio, $fin, $convenioId);
+
+            return Reserva::query()->create([
+                'user_id' => $cliente->id,
                 'vehiculo_id' => $vehiculoId,
                 'convenio_id' => $convenioId,
-                'estado' => ReservaEstado::Confirmada,
+                'estado' => ReservaEstado::Pendiente,
                 'inicio' => $inicio,
                 'fin' => $fin,
                 'total_centavos' => $cotizacion['total_centavos'],
-                'moneda' => $moneda ?? $cotizacion['moneda'],
+                'moneda' => $cotizacion['moneda'],
             ]);
-
-            $reserva->update([
-                'qr_codigo' => $this->generadorQr->generar($reserva->id),
-            ]);
-
-            return $reserva->refresh();
         });
     }
 }

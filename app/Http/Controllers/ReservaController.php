@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Reservas\ConfirmarReserva as ConfirmarReservaAction;
 use App\Actions\Reservas\CrearReserva;
 use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\StoreReservaRequest;
@@ -32,12 +33,11 @@ final class ReservaController extends Controller
     public function store(StoreReservaRequest $request, CrearReserva $crearReserva): RedirectResponse
     {
         $reserva = $crearReserva->handle(
-            $request->integer('user_id'),
+            $request->cliente(),
             $request->integer('vehiculo_id'),
+            $request->convenioId(),
             $request->inicio(),
             $request->fin(),
-            $request->convenioId(),
-            $request->moneda(),
         );
 
         return to_route('reservas.show', $reserva);
@@ -50,8 +50,20 @@ final class ReservaController extends Controller
         ]);
     }
 
-    public function confirmar(ConfirmarReservaRequest $request, Reserva $reserva): RedirectResponse
+    public function showByQrCode(string $qrCodigo): RedirectResponse
     {
+        $reserva = Reserva::query()->where('qr_codigo', $qrCodigo)->firstOrFail();
+
+        return to_route('reservas.show', $reserva);
+    }
+
+    public function confirmar(
+        ConfirmarReservaRequest $request,
+        Reserva $reserva,
+        ConfirmarReservaAction $confirmarReserva,
+    ): RedirectResponse {
+        $confirmarReserva->handle($reserva);
+
         return to_route('reservas.show', $reserva);
     }
 
