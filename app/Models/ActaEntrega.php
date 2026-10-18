@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property array<string, mixed>|null $checklist
+ */
 final class ActaEntrega extends Model
 {
     /** @use HasFactory<ActaEntregaFactory> */

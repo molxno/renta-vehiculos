@@ -31,12 +31,12 @@ class AlquilerEntregadoSeeder extends Seeder
 
         Contrato::updateOrCreate(
             ['reserva_id' => $reserva->id],
-            ['numero' => 'CTR-ALQUILER-ENTREGADO', 'condiciones' => ['combustible' => 'lleno'], 'firmado_at' => '2026-02-05 08:30:00'],
+            ['numero' => 'CTR-ALQUILER-ENTREGADO', 'condiciones' => ['combustible' => 'lleno', 'kilometraje_incluido' => 300], 'firmado_at' => '2026-02-05 08:30:00'],
         );
 
         ActaEntrega::updateOrCreate(
             ['reserva_id' => $reserva->id],
-            ['entregado_at' => '2026-02-05 09:00:00', 'checklist' => ['documentos' => true, 'llantas' => true], 'observaciones' => null],
+            ['entregado_at' => '2026-02-05 09:00:00', 'checklist' => ['documentos' => true, 'llantas' => true, 'kilometraje' => 10000, 'combustible' => 'lleno'], 'observaciones' => null],
         );
     }
 }

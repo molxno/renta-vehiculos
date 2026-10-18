@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $reserva_id
+ * @property PagoEstado $estado
+ * @property MetodoPago $metodo
+ * @property int $monto_centavos
+ * @property string|null $referencia
+ * @property string|null $mensaje
+ */
 final class Pago extends Model
 {
     /** @use HasFactory<PagoFactory> */

@@ -3,11 +3,12 @@
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\FacturaController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ReservaController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::get('/', HomeController::class)->name('home');
 
 Route::get('/reservas', [ReservaController::class, 'index'])->name('reservas.index');
 Route::get('/reservas/crear', [ReservaController::class, 'create'])->name('reservas.create');
@@ -24,3 +25,5 @@ Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'sto
 Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
 Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
 Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');
+
+require __DIR__.'/auth.php';

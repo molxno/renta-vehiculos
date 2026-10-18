@@ -11,7 +11,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property ReservaEstado $estado
+ * @property Carbon $inicio
+ * @property Carbon $fin
+ * @property int $total_centavos
+ * @property string $moneda
+ * @property User $user
+ * @property Vehiculo $vehiculo
+ */
 final class Reserva extends Model
 {
     /** @use HasFactory<ReservaFactory> */
@@ -92,5 +102,65 @@ final class Reserva extends Model
     public function danos(): HasMany
     {
         return $this->hasMany(Dano::class);
+    }
+
+    public function estaEntregada(): bool
+    {
+        return $this->estado === ReservaEstado::Entregada;
+    }
+
+    public function estaConfirmada(): bool
+    {
+        return $this->estado === ReservaEstado::Confirmada;
+    }
+
+    public function anticipoCentavos(): int
+    {
+        return intdiv($this->total_centavos * (int) config('entrega.anticipo_porcentaje'), 100);
+    }
+
+    public function mensajeBloqueoEntrega(): ?string
+    {
+        $this->loadMissing('user.licenciaConduccion');
+
+        $licencia = $this->user->licenciaConduccion;
+
+        if (! $licencia instanceof LicenciaConduccion) {
+            return 'La licencia de conducción no está registrada.';
+        }
+
+        if (! $licencia->estaVigente()) {
+            return 'La licencia de conducción está vencida.';
+        }
+
+        if ($this->actaEntrega()->exists()) {
+            return 'La reserva ya tiene una entrega registrada.';
+        }
+
+        if (! $this->estaConfirmada()) {
+            return 'Solo se puede registrar la entrega de una reserva confirmada.';
+        }
+
+        return null;
+    }
+
+    /** @return array<string, mixed> */
+    public function checklistEntrega(): array
+    {
+        if (! $this->actaEntrega()->exists()) {
+            return [];
+        }
+
+        return $this->actaEntrega()->first()->checklist ?? [];
+    }
+
+    /** @return array<string, mixed> */
+    public function condicionesContrato(): array
+    {
+        if (! $this->contrato()->exists()) {
+            return [];
+        }
+
+        return $this->contrato()->first()->condiciones ?? [];
     }
 }
