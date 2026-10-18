@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\CalculadoraDevolucionEstandar;
+use App\Services\Devolucion\Strategies\CombustibleCargoStrategy;
+use App\Services\Devolucion\Strategies\DanoCargoStrategy;
+use App\Services\Devolucion\Strategies\KilometrajeCargoStrategy;
+use App\Services\Devolucion\Strategies\RetrasoCargoStrategy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +25,15 @@ final class AppServiceProvider extends ServiceProvider
         foreach (config('servicios.bindings', []) as $contract => $implementation) {
             $this->app->bind($contract, $implementation);
         }
+
+        $this->app->when(CalculadoraDevolucionEstandar::class)
+            ->needs('$estrategias')
+            ->give(fn (): array => [
+                $this->app->make(RetrasoCargoStrategy::class),
+                $this->app->make(KilometrajeCargoStrategy::class),
+                $this->app->make(CombustibleCargoStrategy::class),
+                $this->app->make(DanoCargoStrategy::class),
+            ]);
     }
 
     /**

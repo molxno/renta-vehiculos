@@ -4,7 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\ReservaState;
 use App\Enums\ReservaEstado;
+use App\States\Reserva\CanceladaState;
+use App\States\Reserva\ConfirmadaState;
+use App\States\Reserva\EntregadaState;
+use App\States\Reserva\FacturadaState;
+use App\States\Reserva\PagadaState;
+use App\States\Reserva\PendienteState;
 use Database\Factories\ReservaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -103,6 +110,43 @@ final class Reserva extends Model
     public function danos(): HasMany
     {
         return $this->hasMany(Dano::class);
+    }
+
+    public function estadoMaquina(): ReservaState
+    {
+        return match ($this->estado) {
+            ReservaEstado::Pendiente => new PendienteState,
+            ReservaEstado::Confirmada => new ConfirmadaState,
+            ReservaEstado::Entregada => new EntregadaState,
+            ReservaEstado::Facturada => new FacturadaState,
+            ReservaEstado::Pagada => new PagadaState,
+            ReservaEstado::Cancelada, ReservaEstado::Devuelta => new CanceladaState,
+        };
+    }
+
+    public function confirmar(): void
+    {
+        $this->estadoMaquina()->confirmar($this);
+    }
+
+    public function entregar(): void
+    {
+        $this->estadoMaquina()->entregar($this);
+    }
+
+    public function devolver(): void
+    {
+        $this->estadoMaquina()->devolver($this);
+    }
+
+    public function pagar(): void
+    {
+        $this->estadoMaquina()->pagar($this);
+    }
+
+    public function cancelar(): void
+    {
+        $this->estadoMaquina()->cancelar($this);
     }
 
     public function estaEntregada(): bool

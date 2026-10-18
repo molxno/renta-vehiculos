@@ -4,6 +4,7 @@ use App\Enums\FacturaEstado;
 use App\Models\Factura;
 
 it('renders the invoice HTML page with the documented breakdown', function () {
+    autenticarEmpleado();
     $invoice = Factura::factory()->create([
         'numero' => 'FAC-HTML-001',
         'estado' => FacturaEstado::Pendiente,

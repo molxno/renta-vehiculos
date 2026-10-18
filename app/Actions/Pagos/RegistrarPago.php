@@ -8,9 +8,9 @@ use App\Contracts\PasarelaPago;
 use App\Enums\FacturaEstado;
 use App\Enums\MetodoPago;
 use App\Enums\PagoEstado;
-use App\Enums\ReservaEstado;
 use App\Models\Pago;
 use App\Models\Reserva;
+use App\States\Reserva\FacturadaState;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -33,7 +33,7 @@ final class RegistrarPago
                 ]);
             }
 
-            if ($reserva->estado !== ReservaEstado::Facturada) {
+            if (! $reserva->estadoMaquina() instanceof FacturadaState) {
                 throw ValidationException::withMessages([
                     'monto_centavos' => 'Solo se puede pagar una reserva facturada.',
                 ]);
@@ -64,7 +64,7 @@ final class RegistrarPago
 
             if ($resultado['aprobado']) {
                 $factura->update(['estado' => FacturaEstado::Pagada]);
-                $reserva->update(['estado' => ReservaEstado::Pagada]);
+                $reserva->pagar();
             }
 
             return $pago;

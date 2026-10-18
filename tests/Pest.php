@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\UsuarioRol;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +46,10 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function autenticarEmpleado(UsuarioRol $rol = UsuarioRol::Coordinador): User
 {
-    // ..
+    $empleado = User::factory()->create(['rol' => $rol]);
+    test()->actingAs($empleado);
+
+    return $empleado;
 }

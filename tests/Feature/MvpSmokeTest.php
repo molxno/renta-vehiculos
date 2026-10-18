@@ -32,7 +32,8 @@ test('seeded MVP exposes the complete smoke flow', function () {
     $invoice = Factura::query()->firstOrFail();
     $headers = mvpInertiaHeaders();
 
-    $this->withHeaders($headers)
+    $this->actingAs(User::query()->where('email', 'cliente@renta.test')->sole())
+        ->withHeaders($headers)
         ->get(route('reservas.index'))
         ->assertOk()
         ->assertJsonPath('component', 'Reservas/Index');
@@ -59,22 +60,26 @@ test('seeded MVP exposes the complete smoke flow', function () {
         ->assertJsonPath('props.reservation.qrCode', $reservation->qr_codigo)
         ->assertJsonPath('props.reservation.vehiclePlate', $reservation->vehiculo->placa);
 
-    $this->withHeaders($headers)
+    $this->actingAs(User::query()->where('email', 'coordinador@renta.test')->sole())
+        ->withHeaders($headers)
         ->get(route('entregas.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Entregas/Create');
 
-    $this->withHeaders($headers)
+    $this->actingAs(User::query()->where('email', 'coordinador@renta.test')->sole())
+        ->withHeaders($headers)
         ->get(route('devoluciones.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Devoluciones/Create');
 
-    $this->withHeaders($headers)
+    $this->actingAs(User::query()->where('email', 'cajero@renta.test')->sole())
+        ->withHeaders($headers)
         ->get(route('pagos.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Pagos/Create');
 
-    $this->withHeaders($headers)
+    $this->actingAs(User::query()->where('email', 'cajero@renta.test')->sole())
+        ->withHeaders($headers)
         ->get(route('facturas.show', $invoice))
         ->assertOk()
         ->assertJsonPath('component', 'Facturas/Show');
@@ -162,6 +167,8 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         ->assertJsonPath('props.reservation.qrCode', 'FAKE-QR-'.$reserva->id)
         ->assertJsonPath('props.reservation.totalCents', 53550000);
 
+    $this->actingAs(User::query()->where('email', 'coordinador@renta.test')->sole());
+
     $this->post(route('entregas.store', $reserva), [
         'entregado_at' => '2026-12-01 09:00:00',
         'checklist' => [
@@ -193,9 +200,12 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
     $factura = $reserva->factura()->sole();
 
     expect($reserva->estado)->toBe(ReservaEstado::Facturada)
+        ->and($reserva->vehiculo->estado)->toBe(VehiculoEstado::Disponible)
         ->and($reserva->actaDevolucion)->not->toBeNull()
         ->and($factura->estado)->toBe(FacturaEstado::Pendiente)
         ->and($factura->numero)->toBe(sprintf('FAC-%06d', $reserva->id));
+
+    $this->actingAs(User::query()->where('email', 'cajero@renta.test')->sole());
 
     $this->post(route('pagos.store', $reserva), [
         'metodo' => MetodoPago::Tarjeta->value,

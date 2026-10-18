@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Fakes;
+namespace App\Services;
 
 use App\Contracts\TarifaService;
 use App\Models\Convenio;
@@ -13,9 +13,11 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 
-final class FakeTarifaService implements TarifaService
+final class TarifaServiceEstandar implements TarifaService
 {
     private const int IMPUESTO_PORCENTAJE = 19;
+
+    public function __construct(private ConvertidorTrm $convertidor) {}
 
     public function cotizar(
         int $vehiculoId,
@@ -87,7 +89,7 @@ final class FakeTarifaService implements TarifaService
                 ]);
             }
 
-            $trmEscalada = $this->escalarDecimal($trm->valor);
+            $trmEscalada = $this->convertidor->escalarDecimal($trm->valor);
 
             if ($trmEscalada <= 0) {
                 throw ValidationException::withMessages([
@@ -95,9 +97,9 @@ final class FakeTarifaService implements TarifaService
                 ]);
             }
 
-            $subtotalCentavos = $this->convertirACentavosUsd($subtotalCentavos, $trmEscalada);
-            $descuentoCentavos = $this->convertirACentavosUsd($descuentoCentavos, $trmEscalada);
-            $impuestosCentavos = $this->convertirACentavosUsd($impuestosCentavos, $trmEscalada);
+            $subtotalCentavos = $this->convertidor->convertirACentavosUsd($subtotalCentavos, $trmEscalada);
+            $descuentoCentavos = $this->convertidor->convertirACentavosUsd($descuentoCentavos, $trmEscalada);
+            $impuestosCentavos = $this->convertidor->convertirACentavosUsd($impuestosCentavos, $trmEscalada);
             $totalCentavos = $subtotalCentavos - $descuentoCentavos + $impuestosCentavos;
         }
 
@@ -132,21 +134,5 @@ final class FakeTarifaService implements TarifaService
                 ->where('tipo_vehiculo', $vehiculo->tipo)
                 ->tap($vigencia)
                 ->first();
-    }
-
-    private function escalarDecimal(string $valor): int
-    {
-        [$entero, $decimal] = array_pad(explode('.', $valor, 2), 2, '');
-
-        return ((int) $entero * 10000) + (int) str_pad(substr($decimal, 0, 4), 4, '0');
-    }
-
-    private function convertirACentavosUsd(int $centavosCop, int $trmEscalada): int
-    {
-        $unidadesEnteras = intdiv($centavosCop, $trmEscalada);
-        $resto = $centavosCop % $trmEscalada;
-        $centavosFraccionarios = intdiv(($resto * 10000) + intdiv($trmEscalada, 2), $trmEscalada);
-
-        return ($unidadesEnteras * 10000) + $centavosFraccionarios;
     }
 }

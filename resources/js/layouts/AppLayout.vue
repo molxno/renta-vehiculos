@@ -50,14 +50,14 @@ const logoutUrl = logout.url();
                     Renta Vehículos
                 </Link>
                 <nav class="hidden items-center gap-5 md:flex">
-                    <a
+                    <Link
                         v-for="item in navigation[currentRole]"
                         :key="item"
                         :href="navigationHrefs[item] ?? '#'"
                         class="text-sm font-medium text-slate-600 hover:text-brand-ink"
                     >
                         {{ item }}
-                    </a>
+                    </Link>
                 </nav>
                 <Link v-if="authUser" :href="logoutUrl" method="post">
                     <Button variant="secondary">Cerrar sesión</Button>

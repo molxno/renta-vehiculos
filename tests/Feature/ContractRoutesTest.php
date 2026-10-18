@@ -9,11 +9,11 @@ use App\Contracts\PasarelaPago;
 use App\Contracts\TarifaService;
 use App\Fakes\FakeDisponibilidadService;
 use App\Fakes\FakeGeneradorQr;
-use App\Fakes\FakePasarelaPago;
-use App\Fakes\FakeTarifaService;
 use App\Models\Reserva;
 use App\Models\User;
+use App\Services\Adapters\PasarelaPagoAdapter;
 use App\Services\CalculadoraDevolucionEstandar;
+use App\Services\TarifaServiceEstandar;
 use Illuminate\Support\Facades\Route;
 
 test('contract routes expose the documented pages and redirects', function () {
@@ -47,8 +47,8 @@ test('contract routes expose the documented pages and redirects', function () {
 
 test('application contracts resolve to the phase fakes', function () {
     expect(app(DisponibilidadService::class))->toBeInstanceOf(FakeDisponibilidadService::class)
-        ->and(app(TarifaService::class))->toBeInstanceOf(FakeTarifaService::class)
-        ->and(app(PasarelaPago::class))->toBeInstanceOf(FakePasarelaPago::class)
+        ->and(app(TarifaService::class))->toBeInstanceOf(TarifaServiceEstandar::class)
+        ->and(app(PasarelaPago::class))->toBeInstanceOf(PasarelaPagoAdapter::class)
         ->and(app(GeneradorQr::class))->toBeInstanceOf(FakeGeneradorQr::class)
         ->and(app(CalculadoraDevolucion::class))->toBeInstanceOf(CalculadoraDevolucionEstandar::class);
 });
@@ -65,7 +65,8 @@ test('reservation pages expose their documented Inertia props', function () {
         'X-Requested-With' => 'XMLHttpRequest',
     ];
 
-    $this->withHeaders($headers)
+    $this->actingAs(User::factory()->cliente()->create())
+        ->withHeaders($headers)
         ->get(route('reservas.index'))
         ->assertOk()
         ->assertJsonPath('component', 'Reservas/Index')

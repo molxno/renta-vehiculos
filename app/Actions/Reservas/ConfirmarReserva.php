@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Reservas;
 
 use App\Contracts\GeneradorQr;
-use App\Enums\ReservaEstado;
+use App\Exceptions\TransicionEstadoInvalida;
 use App\Models\Reserva;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -22,14 +22,15 @@ final class ConfirmarReserva
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($reserva->estado !== ReservaEstado::Pendiente) {
+            try {
+                $reserva->confirmar();
+            } catch (TransicionEstadoInvalida $excepcion) {
                 throw ValidationException::withMessages([
-                    'reserva' => 'Solo se pueden confirmar reservas pendientes.',
+                    'reserva' => $excepcion->getMessage(),
                 ]);
             }
 
             $reserva->update([
-                'estado' => ReservaEstado::Confirmada,
                 'qr_codigo' => $this->generadorQr->generar($reserva->id),
             ]);
 

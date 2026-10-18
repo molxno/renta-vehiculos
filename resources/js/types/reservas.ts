@@ -32,3 +32,14 @@ export type ReservationReceipt = {
     currency: string;
     qrCode: string | null;
 };
+
+export type ReservationListItem = {
+    id: number;
+    status: string;
+    vehicleLabel: string;
+    vehiclePlate: string;
+    startsAt: string;
+    endsAt: string;
+    totalCents: number;
+    currency: string;
+};

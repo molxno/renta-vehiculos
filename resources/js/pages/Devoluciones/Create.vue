@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Badge from '@/components/ui/Badge.vue';
 import Button from '@/components/ui/Button.vue';
@@ -36,14 +36,20 @@ const props = defineProps<{
         checklist: Record<string, unknown> | null;
     } | null;
     storeUrl: string;
+    createUrl: string;
+    filters: {
+        devuelto_at: string;
+        kilometraje: string;
+        combustible: string;
+    };
     nivelesCombustible: Array<{ value: string; label: string }>;
 }>();
 
 const form = useForm({
-    devuelto_at: '',
+    devuelto_at: props.filters.devuelto_at,
     checklist: {
-        kilometraje: '',
-        combustible: '',
+        kilometraje: props.filters.kilometraje,
+        combustible: props.filters.combustible,
     },
     danos: [] as Array<{
         descripcion: string;
@@ -67,6 +73,18 @@ function agregarDano(): void {
 
 function quitarDano(indice: number): void {
     form.danos.splice(indice, 1);
+}
+
+function actualizarCosto(): void {
+    router.get(
+        props.createUrl,
+        {
+            devuelto_at: form.devuelto_at,
+            kilometraje: form.checklist.kilometraje,
+            combustible: form.checklist.combustible,
+        },
+        { preserveScroll: true },
+    );
 }
 
 function enviar(): void {
@@ -316,7 +334,14 @@ function enviar(): void {
                         {{ form.errors.reserva }}
                     </p>
 
-                    <div>
+                    <div class="flex flex-col gap-3 sm:flex-row">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            @click="actualizarCosto"
+                        >
+                            Actualizar costo
+                        </Button>
                         <Button type="submit" :disabled="form.processing">
                             Registrar devolución
                         </Button>
