@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { create as crearReserva } from '@/actions/App/Http/Controllers/ReservaController';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { categoryLabel, pickupLocations } from '@/lib/vehiclePresentation';
 import { catalogo, home } from '@/routes';
 import type { CatalogFilters, CatalogVehicle } from '@/types';
 
@@ -28,16 +29,6 @@ const statusLabels: Record<CatalogVehicle['status'], string> = {
     contingencia: 'Contingencia',
     mantenimiento: 'Mantenimiento',
 };
-
-function categoryLabel(category: string): string {
-    const labels: Record<string, string> = {
-        sedan: 'Sedán',
-        camioneta: 'Camioneta',
-        compacto: 'Compacto',
-    };
-
-    return labels[category] ?? category;
-}
 
 function filterQuery(
     overrides: Partial<CatalogFilters> = {},
@@ -96,6 +87,10 @@ function reservationUrl(vehicle: CatalogVehicle): string {
         query.fin = props.filters.endDate;
     }
 
+    if (props.filters.location !== '') {
+        query.location = props.filters.location;
+    }
+
     return crearReserva.url({ query });
 }
 </script>
@@ -138,11 +133,23 @@ function reservationUrl(vehicle: CatalogVehicle): string {
                     name="category"
                     :value="filters.category"
                 />
-                <input
-                    type="hidden"
-                    name="location"
-                    :value="filters.location"
-                />
+                <label class="flex flex-col gap-1.5 text-sm font-medium">
+                    Sede de recogida
+                    <select
+                        name="location"
+                        :value="filters.location"
+                        class="rounded-lg border border-neutral-border px-3 py-2 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
+                    >
+                        <option value="">Seleccionar sede</option>
+                        <option
+                            v-for="location in pickupLocations"
+                            :key="location"
+                            :value="location"
+                        >
+                            {{ location }}
+                        </option>
+                    </select>
+                </label>
                 <label class="flex flex-col gap-1.5 text-sm font-medium">
                     Fecha de recogida
                     <input
@@ -161,7 +168,7 @@ function reservationUrl(vehicle: CatalogVehicle): string {
                         class="rounded-lg border border-neutral-border px-3 py-2 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
                     />
                 </label>
-                <div class="flex items-end md:col-span-2">
+                <div class="flex items-end">
                     <button
                         type="submit"
                         class="w-full rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-teal-dark"
