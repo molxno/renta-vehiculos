@@ -237,6 +237,17 @@ Todos los contratos expresan importes en centavos enteros y declaran la moneda
 en el resultado cuando corresponde. Esto evita ambigüedad de redondeo entre
 PHP, la base de datos y TypeScript.
 
+### Disponibilidad por fechas
+
+`DisponibilidadService::consultar` devuelve los vehículos filtrados por ID
+cuando se proporciona y determina disponibilidad con intervalos semiabiertos:
+una reserva existente bloquea si su inicio es anterior al fin de la consulta y
+su fin es posterior al inicio. Las reservas canceladas no bloquean; los
+vehículos cuyo estado no sea `disponible` tampoco se ofrecen. Si ninguno de
+los vehículos consultados está disponible, el motivo recomienda modificar las
+fechas o seleccionar otro vehículo. El fixture independiente puede cargarse
+con `php artisan db:seed --class=DisponibilidadSeeder`.
+
 ### FormRequests previstos
 
 PR3a publicará estos requests, sin duplicar reglas en controladores:
