@@ -76,7 +76,6 @@ test('all documented write routes validate and redirect', function () {
     $vehicle = Vehiculo::factory()->create();
     $reservation = Reserva::factory()->create([
         'user_id' => $user->id,
-        'vehiculo_id' => $vehicle->id,
     ]);
 
     $this->actingAs($user)->post(route('reservas.store'), [

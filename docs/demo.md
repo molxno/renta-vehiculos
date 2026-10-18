@@ -54,18 +54,21 @@ php artisan tinker --execute "App\Models\Reserva::query()->get(['id','qr_codigo'
 
 ## Qué está simulado
 
-- **Crear reserva.** `GET /reservas/crear` y `POST /reservas` son
-  placeholders: no persisten una reserva nueva ni muestran un QR generado.
-  La demo usa las reservas sembradas.
+- **Crear reserva.** El backend persiste reservas pendientes mediante
+  `POST /reservas` para clientes autenticados y valida la disponibilidad.
+  Al confirmar una reserva pendiente se genera su QR. La pantalla
+  `Reservas/Create` aún no existe en Vue, por lo que la demo usa las reservas
+  sembradas en lugar de crear una desde la interfaz.
 - **Listado y detalle de reservas.** El backend responde las rutas
   `/reservas` y `/reservas/{reserva}`, pero aún no hay páginas Vue
   `Reservas/Index` ni `Reservas/Show`. Tras guardar una entrega, una
   devolución o un pago, Inertia redirige a ese detalle: si el navegador
   muestra un componente faltante, copien el `#id` del título de la
   pantalla anterior y sigan a la URL del paso siguiente.
-- **Disponibilidad.** El catálogo filtra por categoría y, si hay ambas
-  fechas, consulta `DisponibilidadService`. El fake actual marca todos los
-  vehículos como disponibles (SCRUM-40 sigue en revisión).
+- **Disponibilidad.** El catálogo filtra por categoría y fechas y consulta
+  `DisponibilidadService`. El fake excluye vehículos fuera de servicio y
+  reservas no canceladas que se solapan; permite reservas consecutivas. Si no
+  hay vehículos disponibles, sugiere cambiar las fechas o seleccionar otro.
 - **Ubicación.** El buscador de la landing y del catálogo envía `location`,
   pero ese valor no filtra la flota todavía.
 - **Pasarela.** Cualquier tarjeta que no termine en `0000` se aprueba.
