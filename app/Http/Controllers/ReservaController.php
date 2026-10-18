@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Reservas\CrearReserva;
 use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\StoreReservaRequest;
 use App\Models\Reserva;
@@ -28,9 +29,18 @@ final class ReservaController extends Controller
         ]);
     }
 
-    public function store(StoreReservaRequest $request): RedirectResponse
+    public function store(StoreReservaRequest $request, CrearReserva $crearReserva): RedirectResponse
     {
-        return to_route('reservas.index');
+        $reserva = $crearReserva->handle(
+            $request->integer('user_id'),
+            $request->integer('vehiculo_id'),
+            $request->inicio(),
+            $request->fin(),
+            $request->convenioId(),
+            $request->moneda(),
+        );
+
+        return to_route('reservas.show', $reserva);
     }
 
     public function show(Reserva $reserva): Response
