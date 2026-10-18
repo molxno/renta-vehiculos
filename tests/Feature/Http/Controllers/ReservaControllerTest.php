@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Contracts\DisponibilidadService;
 use App\Enums\ReservaEstado;
+use App\Models\Convenio;
 use App\Models\Reserva;
 use App\Models\User;
 use App\Models\Vehiculo;
@@ -36,6 +37,30 @@ describe('creación de reservas', function () {
             'total_centavos' => 53550000,
             'moneda' => 'COP',
             'qr_codigo' => null,
+        ]);
+    });
+
+    it('applies the agreement discount when creating a reservation', function () {
+        $cliente = User::factory()->cliente()->create();
+        $vehiculo = Vehiculo::factory()->create();
+        $convenio = Convenio::factory()->create();
+
+        $respuesta = $this->actingAs($cliente)->post(route('reservas.store'), [
+            'vehiculo_id' => $vehiculo->id,
+            'convenio_id' => $convenio->id,
+            'inicio' => '2026-11-10 09:00:00',
+            'fin' => '2026-11-12 09:00:00',
+        ]);
+
+        $reserva = Reserva::query()->sole();
+
+        $respuesta->assertRedirectToRoute('reservas.show', $reserva);
+
+        $this->assertDatabaseHas('reservas', [
+            'id' => $reserva->id,
+            'convenio_id' => $convenio->id,
+            'total_centavos' => 49050000,
+            'estado' => 'pendiente',
         ]);
     });
 

@@ -9,9 +9,7 @@ use App\Actions\Reservas\CrearReserva;
 use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\StoreReservaRequest;
 use App\Models\Reserva;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Carbon;
 use Inertia\Response;
 
 final class ReservaController extends Controller
@@ -34,18 +32,12 @@ final class ReservaController extends Controller
 
     public function store(StoreReservaRequest $request, CrearReserva $crearReserva): RedirectResponse
     {
-        $cliente = $request->user();
-
-        if (! $cliente instanceof User) {
-            abort(403);
-        }
-
         $reserva = $crearReserva->handle(
-            $cliente,
+            $request->cliente(),
             $request->integer('vehiculo_id'),
-            $request->filled('convenio_id') ? $request->integer('convenio_id') : null,
-            Carbon::parse($request->string('inicio')->toString()),
-            Carbon::parse($request->string('fin')->toString()),
+            $request->convenioId(),
+            $request->inicio(),
+            $request->fin(),
         );
 
         return to_route('reservas.show', $reserva);

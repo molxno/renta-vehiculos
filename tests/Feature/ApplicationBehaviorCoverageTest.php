@@ -71,23 +71,23 @@ test('all documented pages expose their Inertia contracts', function () {
 });
 
 test('all documented write routes validate and redirect', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->cliente()->create();
     LicenciaConduccion::factory()->create(['user_id' => $user->id]);
-    $vehicle = Vehiculo::factory()->create();
+    $availableVehicle = Vehiculo::factory()->create();
     $reservation = Reserva::factory()->create([
         'user_id' => $user->id,
     ]);
 
     $this->actingAs($user)->post(route('reservas.store'), [
-        'vehiculo_id' => $vehicle->id,
+        'vehiculo_id' => $availableVehicle->id,
         'inicio' => now()->addDay()->toDateTimeString(),
         'fin' => now()->addDays(2)->toDateTimeString(),
     ])->assertRedirectToRoute(
         'reservas.show',
-        Reserva::query()->latest('id')->firstOrFail(),
+        Reserva::query()->where('vehiculo_id', $availableVehicle->id)->sole(),
     );
 
-    $reservaPendiente = Reserva::query()->latest('id')->firstOrFail();
+    $reservaPendiente = Reserva::query()->where('vehiculo_id', $availableVehicle->id)->sole();
     $this->post(route('reservas.confirmar', $reservaPendiente))
         ->assertRedirectToRoute('reservas.show', $reservaPendiente);
 

@@ -6,7 +6,9 @@ namespace App\Http\Requests;
 
 use App\Enums\UsuarioRol;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Date;
 
 final class StoreReservaRequest extends FormRequest
 {
@@ -43,5 +45,27 @@ final class StoreReservaRequest extends FormRequest
             'fin.date' => 'La fecha de fin no es válida.',
             'fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
         ];
+    }
+
+    public function cliente(): User
+    {
+        $usuario = $this->user();
+
+        return $usuario instanceof User ? $usuario : abort(403);
+    }
+
+    public function inicio(): CarbonInterface
+    {
+        return Date::parse($this->string('inicio')->toString());
+    }
+
+    public function fin(): CarbonInterface
+    {
+        return Date::parse($this->string('fin')->toString());
+    }
+
+    public function convenioId(): ?int
+    {
+        return $this->filled('convenio_id') ? $this->integer('convenio_id') : null;
     }
 }
