@@ -27,8 +27,9 @@ final class CrearReserva
         ?int $convenioId,
         DateTimeInterface $inicio,
         DateTimeInterface $fin,
+        ?string $moneda = null,
     ): Reserva {
-        return DB::transaction(function () use ($cliente, $vehiculoId, $convenioId, $inicio, $fin): Reserva {
+        return DB::transaction(function () use ($cliente, $vehiculoId, $convenioId, $inicio, $fin, $moneda): Reserva {
             Vehiculo::query()->whereKey($vehiculoId)->lockForUpdate()->firstOrFail();
 
             $vehiculoDisponible = false;
@@ -51,7 +52,7 @@ final class CrearReserva
                 ]);
             }
 
-            $cotizacion = $this->tarifa->cotizar($vehiculoId, $inicio, $fin, $convenioId);
+            $cotizacion = $this->tarifa->cotizar($vehiculoId, $inicio, $fin, $convenioId, $moneda);
 
             return Reserva::query()->create([
                 'user_id' => $cliente->id,

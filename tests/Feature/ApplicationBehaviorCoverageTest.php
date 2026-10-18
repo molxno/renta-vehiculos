@@ -77,6 +77,11 @@ test('all documented write routes validate and redirect', function () {
     $user = User::factory()->cliente()->create();
     LicenciaConduccion::factory()->create(['user_id' => $user->id]);
     $availableVehicle = Vehiculo::factory()->create();
+    Tarifa::factory()->create([
+        'vehiculo_id' => $availableVehicle->id,
+        'tipo_vehiculo' => $availableVehicle->tipo,
+        'vigente_desde' => now()->startOfYear()->toDateString(),
+    ]);
     $reservation = Reserva::factory()->create([
         'user_id' => $user->id,
     ]);
@@ -151,7 +156,7 @@ test('requests expose authorization and validation contracts', function () {
         ]],
         [new StorePagoRequest, ['metodo', 'monto_centavos', 'numero_tarjeta']],
         [$prepararReservaRequest, ['vehiculo_id', 'inicio', 'fin']],
-        [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin']],
+        [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
     ];
 

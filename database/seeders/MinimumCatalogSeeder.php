@@ -88,8 +88,8 @@ class MinimumCatalogSeeder extends Seeder
         );
 
         $trm = Trm::whereDate('fecha', '2026-01-01')->first() ?? new Trm;
-        $trm->fecha = '2026-01-01';
-        $trm->valor = 4200.0000;
+        $trm->setAttribute('fecha', '2026-01-01');
+        $trm->setAttribute('valor', '4200.0000');
         $trm->save();
     }
 }
