@@ -26,7 +26,7 @@ function submit(): void {
 <template>
     <Head title="Registro" />
     <div
-        class="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12 text-slate-900"
+        class="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 py-12 text-slate-900"
     >
         <Card class="w-full max-w-md">
             <p

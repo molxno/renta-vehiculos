@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import RentGoLogo from '@/components/storefront/RentGoLogo.vue';
+import { catalogo, home } from '@/routes';
 
+const catalogoUrl = catalogo.url();
+const homeUrl = home.url();
 const copyrightYear = new Date().getFullYear();
 </script>
 
 <template>
-    <footer id="contacto" class="bg-brand-navy text-white">
+    <footer id="contacto" class="mt-auto w-full bg-brand-navy text-white">
         <div class="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-4">
             <div>
                 <RentGoLogo />
@@ -43,12 +47,14 @@ const copyrightYear = new Date().getFullYear();
                 </p>
                 <ul class="mt-4 space-y-2 text-sm text-white/75">
                     <li>
-                        <a href="#vehiculos" class="hover:text-brand-teal"
-                            >Catálogo</a
+                        <Link :href="catalogoUrl" class="hover:text-brand-teal"
+                            >Catálogo</Link
                         >
                     </li>
                     <li>
-                        <a href="#categorias" class="hover:text-brand-teal"
+                        <a
+                            :href="`${homeUrl}#categorias`"
+                            class="hover:text-brand-teal"
                             >Precios</a
                         >
                     </li>
