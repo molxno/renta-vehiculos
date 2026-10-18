@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { heroImage } from '@/components/storefront/mocks';
+import { pickupLocations } from '@/lib/vehiclePresentation';
 import { catalogo } from '@/routes';
 import type { HomeSearch } from '@/types';
 
@@ -13,15 +14,17 @@ const catalogoUrl = catalogo.url();
 <template>
     <section
         id="inicio"
-        class="relative flex min-h-[calc(100vh-80px)] items-center justify-center overflow-hidden bg-brand-navy text-white"
+        class="relative flex min-h-[calc(100vh-4rem)] items-center justify-center bg-brand-navy text-white"
     >
-        <img
-            :src="heroImage"
-            alt="Vehículo de la flota RENT-GO en carretera"
-            class="absolute inset-0 h-full w-full object-cover opacity-40 mix-blend-overlay"
-        />
+        <div class="absolute inset-0 overflow-hidden">
+            <img
+                :src="heroImage"
+                alt="Vehículo de la flota RENT-GO en carretera"
+                class="h-full w-full object-cover opacity-40 mix-blend-overlay"
+            />
+        </div>
         <div
-            class="relative mx-auto flex w-full max-w-5xl flex-col items-center px-6 pt-16 pb-28 text-center"
+            class="relative mx-auto flex w-full max-w-5xl flex-col items-center px-6 pt-16 pb-16 text-center"
         >
             <p
                 class="rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-semibold tracking-wide uppercase"
@@ -37,42 +40,55 @@ const catalogoUrl = catalogo.url();
             <p class="mt-4 max-w-xl text-lg text-white/80">
                 Encuentra, reserva y disfruta el vehículo ideal para cada viaje.
             </p>
-            <!-- TODO: REEMPLAZAR MOCK CON PROPS DINÁMICAS DEL BACKEND CUANDO EL CATÁLOGOS/RESERVAS ESTÉ LISTO -->
             <form
                 method="get"
                 :action="catalogoUrl"
-                class="relative mt-10 grid w-full gap-3 rounded-2xl bg-white p-4 text-left text-slate-900 shadow-xl md:grid-cols-4"
+                class="relative mt-10 grid w-full max-w-4xl gap-3 rounded-[28px] bg-white p-3 text-left text-slate-900 shadow-xl sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_auto] lg:items-end lg:gap-2 lg:p-4"
             >
-                <label class="flex flex-col gap-1.5 text-sm font-medium">
+                <label
+                    class="flex min-w-0 flex-col gap-1 px-3 py-1.5 text-[10px] font-bold tracking-widest text-slate-400 uppercase"
+                >
                     Sede de recogida
-                    <input
+                    <select
                         name="location"
                         :value="search.location"
-                        placeholder="Ciudad o sucursal"
-                        class="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
-                    />
+                        class="w-full appearance-none border-0 bg-transparent p-0 text-sm font-medium tracking-normal text-slate-900 normal-case outline-none"
+                    >
+                        <option value="">Seleccionar sede</option>
+                        <option
+                            v-for="location in pickupLocations"
+                            :key="location"
+                            :value="location"
+                        >
+                            {{ location }}
+                        </option>
+                    </select>
                 </label>
-                <label class="flex flex-col gap-1.5 text-sm font-medium">
+                <label
+                    class="flex min-w-0 flex-col gap-1 px-3 py-1.5 text-[10px] font-bold tracking-widest text-slate-400 uppercase"
+                >
                     Fecha de recogida
                     <input
                         name="startDate"
                         type="date"
                         :value="search.startDate"
-                        class="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
+                        class="w-full border-0 bg-transparent p-0 text-sm font-medium tracking-normal text-slate-900 normal-case outline-none"
                     />
                 </label>
-                <label class="flex flex-col gap-1.5 text-sm font-medium">
+                <label
+                    class="flex min-w-0 flex-col gap-1 px-3 py-1.5 text-[10px] font-bold tracking-widest text-slate-400 uppercase"
+                >
                     Fecha de devolución
                     <input
                         name="endDate"
                         type="date"
                         :value="search.endDate"
-                        class="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
+                        class="w-full border-0 bg-transparent p-0 text-sm font-medium tracking-normal text-slate-900 normal-case outline-none"
                     />
                 </label>
                 <button
                     type="submit"
-                    class="self-end rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-teal-dark"
+                    class="rounded-xl bg-brand-teal px-5 py-3 text-sm font-semibold text-white hover:bg-brand-teal-dark lg:mb-1"
                 >
                     Buscar vehículos
                 </button>
