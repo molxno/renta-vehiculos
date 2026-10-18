@@ -74,6 +74,11 @@ test('all documented write routes validate and redirect', function () {
     $user = User::factory()->cliente()->create();
     LicenciaConduccion::factory()->create(['user_id' => $user->id]);
     $availableVehicle = Vehiculo::factory()->create();
+    Tarifa::factory()->create([
+        'vehiculo_id' => $availableVehicle->id,
+        'tipo_vehiculo' => $availableVehicle->tipo,
+        'vigente_desde' => now()->startOfYear()->toDateString(),
+    ]);
     $reservation = Reserva::factory()->create([
         'user_id' => $user->id,
     ]);

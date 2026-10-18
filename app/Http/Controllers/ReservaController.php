@@ -38,6 +38,7 @@ final class ReservaController extends Controller
             $request->convenioId(),
             $request->inicio(),
             $request->fin(),
+            $request->moneda(),
         );
 
         return to_route('reservas.show', $reserva);

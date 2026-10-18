@@ -6,15 +6,24 @@ use App\Contracts\DisponibilidadService;
 use App\Enums\ReservaEstado;
 use App\Models\Convenio;
 use App\Models\Reserva;
+use App\Models\Tarifa;
+use App\Models\Trm;
 use App\Models\User;
 use App\Models\Vehiculo;
 use DateTimeInterface;
+use Illuminate\Support\Carbon;
 
 describe('creación de reservas', function () {
     it('persists a pending reservation for the authenticated client with a server-calculated quote', function () {
         $cliente = User::factory()->cliente()->create();
         $otroCliente = User::factory()->cliente()->create();
         $vehiculo = Vehiculo::factory()->create();
+        Tarifa::factory()->create([
+            'vehiculo_id' => $vehiculo->id,
+            'tipo_vehiculo' => $vehiculo->tipo,
+            'valor_diario_centavos' => 15000000,
+            'vigente_desde' => '2026-01-01',
+        ]);
 
         $respuesta = $this->actingAs($cliente)->post(route('reservas.store'), [
             'user_id' => $otroCliente->id,
@@ -34,7 +43,7 @@ describe('creación de reservas', function () {
             'estado' => 'pendiente',
             'inicio' => '2026-11-10 09:00:00',
             'fin' => '2026-11-12 09:00:00',
-            'total_centavos' => 53550000,
+            'total_centavos' => 35700000,
             'moneda' => 'COP',
             'qr_codigo' => null,
         ]);
@@ -43,7 +52,13 @@ describe('creación de reservas', function () {
     it('applies the agreement discount when creating a reservation', function () {
         $cliente = User::factory()->cliente()->create();
         $vehiculo = Vehiculo::factory()->create();
-        $convenio = Convenio::factory()->create();
+        Tarifa::factory()->create([
+            'vehiculo_id' => $vehiculo->id,
+            'tipo_vehiculo' => $vehiculo->tipo,
+            'valor_diario_centavos' => 15000000,
+            'vigente_desde' => '2026-01-01',
+        ]);
+        $convenio = Convenio::factory()->create(['descuento_porcentaje' => 10]);
 
         $respuesta = $this->actingAs($cliente)->post(route('reservas.store'), [
             'vehiculo_id' => $vehiculo->id,
@@ -59,9 +74,53 @@ describe('creación de reservas', function () {
         $this->assertDatabaseHas('reservas', [
             'id' => $reserva->id,
             'convenio_id' => $convenio->id,
-            'total_centavos' => 49050000,
+            'total_centavos' => 32700000,
             'estado' => 'pendiente',
         ]);
+    });
+
+    it('persists a reservation quote in USD using the current saved TRM', function () {
+        $this->travelTo(Carbon::parse('2026-11-01 10:00:00'));
+        $cliente = User::factory()->cliente()->create();
+        $vehiculo = Vehiculo::factory()->create();
+        Tarifa::factory()->create([
+            'vehiculo_id' => $vehiculo->id,
+            'tipo_vehiculo' => $vehiculo->tipo,
+            'valor_diario_centavos' => 15000000,
+            'vigente_desde' => '2026-01-01',
+        ]);
+        Trm::factory()->create([
+            'fecha' => '2026-11-01',
+            'valor' => '4200.2500',
+        ]);
+
+        $respuesta = $this->actingAs($cliente)->post(route('reservas.store'), [
+            'vehiculo_id' => $vehiculo->id,
+            'inicio' => '2026-11-10 09:00:00',
+            'fin' => '2026-11-12 09:00:00',
+            'moneda' => 'USD',
+        ]);
+
+        $reserva = Reserva::query()->sole();
+
+        $respuesta->assertRedirectToRoute('reservas.show', $reserva);
+
+        expect($reserva->total_centavos)->toBe(8499)
+            ->and($reserva->moneda)->toBe('USD');
+    });
+
+    it('rejects an unsupported reservation currency before creating a reservation', function () {
+        $cliente = User::factory()->cliente()->create();
+        $vehiculo = Vehiculo::factory()->create();
+
+        $this->actingAs($cliente)->post(route('reservas.store'), [
+            'vehiculo_id' => $vehiculo->id,
+            'inicio' => '2026-11-10 09:00:00',
+            'fin' => '2026-11-12 09:00:00',
+            'moneda' => 'EUR',
+        ])->assertSessionHasErrors('moneda');
+
+        expect(Reserva::query()->count())->toBe(0);
     });
 
     it('redirects guests to sign in without creating a reservation', function () {

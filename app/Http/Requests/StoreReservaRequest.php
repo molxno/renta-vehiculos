@@ -27,6 +27,7 @@ final class StoreReservaRequest extends FormRequest
             'convenio_id' => ['nullable', 'integer', 'exists:convenios,id'],
             'inicio' => ['required', 'date'],
             'fin' => ['required', 'date', 'after:inicio'],
+            'moneda' => ['nullable', 'string', 'in:COP,USD'],
         ];
     }
 
@@ -67,5 +68,12 @@ final class StoreReservaRequest extends FormRequest
     public function convenioId(): ?int
     {
         return $this->filled('convenio_id') ? $this->integer('convenio_id') : null;
+    }
+
+    public function moneda(): string
+    {
+        return $this->filled('moneda')
+            ? strtoupper($this->string('moneda')->toString())
+            : 'COP';
     }
 }

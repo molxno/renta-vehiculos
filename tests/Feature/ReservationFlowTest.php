@@ -15,11 +15,17 @@ use App\Models\Contrato;
 use App\Models\Factura;
 use App\Models\Pago;
 use App\Models\Reserva;
+use App\Models\Tarifa;
 use App\Models\Vehiculo;
 use Illuminate\Support\Carbon;
 
 test('completes the reservation delivery return and payment contract flow', function () {
     $vehicle = Vehiculo::factory()->create();
+    Tarifa::factory()->create([
+        'vehiculo_id' => $vehicle->id,
+        'tipo_vehiculo' => $vehicle->tipo,
+        'vigente_desde' => '2026-01-01',
+    ]);
     $reservationStart = Carbon::parse('2026-10-13 09:00:00');
     $reservationEnd = Carbon::parse('2026-10-15 09:00:00');
     $availability = app(DisponibilidadService::class)->consultar(
