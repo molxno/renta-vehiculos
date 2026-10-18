@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Database\Factories\TarifaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+final class Tarifa extends Model
+{
+    /** @use HasFactory<TarifaFactory> */
+    use HasFactory;
+
+    protected $table = 'tarifas';
+
+    protected $fillable = [
+        'vehiculo_id', 'tipo_vehiculo', 'valor_diario_centavos',
+        'vigente_desde', 'vigente_hasta',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'valor_diario_centavos' => 'integer',
+            'vigente_desde' => 'date',
+            'vigente_hasta' => 'date',
+        ];
+    }
+
+    /** @return BelongsTo<Vehiculo, $this> */
+    public function vehiculo(): BelongsTo
+    {
+        return $this->belongsTo(Vehiculo::class);
+    }
+}
