@@ -32,7 +32,7 @@ describe('registro de devolución', function () {
         expect($record->observaciones)->toBe('Sin novedades')
             ->and($record->checklist)->toBe(['documentos' => true, 'llantas' => true])
             ->and($record->devuelto_at->toDateTimeString())->toBe('2026-10-16 10:00:00')
-            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Devuelta);
+            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Facturada);
     });
 
     it('generates the pending invoice from the delivery fixture with every charge', function () {
@@ -64,7 +64,7 @@ describe('registro de devolución', function () {
             ->and($invoice->total_centavos)->toBe(202300000)
             ->and(Dano::query()->where('reserva_id', $reservation->id)->pluck('descripcion')->all())->toBe(['Rayón en puerta'])
             ->and($reservation->fresh()->actaDevolucion->checklist)->toBe(['kilometraje' => 10450, 'combustible' => 'cuarto'])
-            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Devuelta);
+            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Facturada);
     });
 
     it('rejects a second return for the same reservation without failing', function () {
