@@ -1,0 +1,20 @@
+C4Context
+title C4 Nivel 1 — Contexto de RENT-GO (main 0a2dced)
+
+Person(cliente, "Cliente", "Rol users.rol = cliente. Se registra, inicia sesión, consulta el catálogo y crea/confirma su reserva.")
+Person(coordinador, "Coordinador", "Rol coordinador. Registra actas de entrega y devolución.")
+Person(cajero, "Cajero", "Rol cajero. Cobra la factura pendiente y consulta el HTML de factura.")
+Person(admin, "Administrador", "Rol administrador. Publica la TRM vigente y también puede operar entrega, devolución y pago.")
+
+System(rentgo, "RENT-GO", "Monolito web Laravel 13 + Inertia Vue 3. Flujo MVP: registro, reserva, entrega, devolución y pago.")
+
+System_Ext(pasarela, "Pasarela / SDK bancario", "BankPaymentGateway in-process. Firma processTransaction distinta de PasarelaPago. Se traduce con PasarelaPagoAdapter. Rechaza tarjetas que terminan en 0000.")
+System_Ext(trm, "TRM", "Tasa de cambio persistida en la tabla local trm. No hay API HTTP. El administrador la actualiza; TarifaServiceEstandar la lee para cotizar en USD.")
+
+Rel(cliente, rentgo, "Registro, login, catálogo y reserva", "HTTPS / Inertia")
+Rel(coordinador, rentgo, "Entrega y devolución", "HTTPS / Inertia + auth + rol")
+Rel(cajero, rentgo, "Pago de factura y consulta de factura HTML", "HTTPS / Inertia + auth + rol")
+Rel(admin, rentgo, "CRUD de TRM y operación de staff", "HTTPS / Inertia + auth + rol:administrador")
+Rel(rentgo, pasarela, "Autoriza cobros con tarjeta", "PasarelaPagoAdapter → BankPaymentGateway")
+Rel(admin, trm, "PUT /administracion/trm publica la tasa del día")
+Rel(rentgo, trm, "Lee Trm.vigente() al cotizar USD")

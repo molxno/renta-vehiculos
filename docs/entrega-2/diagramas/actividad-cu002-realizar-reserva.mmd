@@ -1,0 +1,28 @@
+---
+title: CU-002 Realizar reserva — main 0a2dced
+---
+flowchart TD
+    start([Visitante abre GET /catalogo]) --> listar[ListarCatalogoVehiculos + FakeDisponibilidadService]
+    listar --> elegir[Pulsa Reservar con vehiculo y fechas]
+    elegir --> auth{Sesion de cliente?}
+    auth -->|No| login[Redirige a /iniciar-sesion]
+    login --> auth
+    auth -->|Si, PrepararReservaRequest exige rol cliente| create[GET /reservas/crear]
+    create --> cotizar[ReservaController.create llama TarifaServiceEstandar.cotizar en COP]
+    cotizar --> usd{Moneda USD?}
+    usd -->|Si| trm[ConvertidorTrm usa Trm.vigente]
+    usd -->|No, default COP| form
+    trm --> form[Muestra quote en Reservas/Create]
+    form --> post[POST /reservas StoreReservaRequest]
+    post --> disp{DisponibilidadService: vehiculo libre?}
+    disp -->|No| errorDisp[ValidationException: vehiculo no disponible]
+    errorDisp --> create
+    disp -->|Si| crear[CrearReserva persiste Reserva estado pendiente]
+    crear --> show[GET /reservas/id]
+    show --> confirmar[POST /reservas/id/confirmar — dueño y rol cliente]
+    confirmar --> state{PendienteState.confirmar}
+    state -->|TransicionEstadoInvalida| errorEstado[ValidationException]
+    errorEstado --> show
+    state -->|OK| qr[ConfirmarReserva guarda qr_codigo via FakeGeneradorQr]
+    qr --> showOk[Reservas/Show con estado confirmada y QR de texto]
+    showOk --> fin([Fin])
