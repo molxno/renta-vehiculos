@@ -7,7 +7,6 @@ use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
 use App\Models\Factura;
-use App\Models\LicenciaConduccion;
 use App\Models\Reserva;
 use App\Models\User;
 use App\Models\Vehiculo;
@@ -90,15 +89,12 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
     $headers = mvpInertiaHeaders();
 
     $this->from(route('register'))
-        ->post(route('register.store'), [
+        ->post(route('register.store'), datosRegistroCliente([
             'name' => 'Cliente Humo',
             'email' => 'cliente.humo@renta.test',
-            'tipo_documento' => 'CC',
             'numero_documento' => '1099000111',
             'telefono' => '3001112233',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ])
+        ]))
         ->assertRedirect(route('reservas.index'));
 
     $cliente = User::query()->where('email', 'cliente.humo@renta.test')->firstOrFail();
@@ -116,12 +112,6 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         ->assertRedirect(route('reservas.index'));
 
     $this->assertAuthenticatedAs($cliente);
-
-    LicenciaConduccion::factory()->create([
-        'user_id' => $cliente->id,
-        'numero' => 'LIC-HUMO-001',
-        'fecha_vencimiento' => '2028-12-31',
-    ]);
 
     $catalogo = $this->withHeaders($headers)
         ->get(route('catalogo', [

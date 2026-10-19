@@ -191,17 +191,11 @@ describe('registro mínimo', function () {
 
     it('creates a client and starts the session', function () {
         $this->from(route('register'))
-            ->post(route('register.store'), [
-                'name' => 'Ana Cliente',
-                'email' => 'ana.nueva@renta.test',
-                'tipo_documento' => 'CC',
-                'numero_documento' => '1098765432',
-                'telefono' => '3001234567',
-                'password' => 'password',
-                'password_confirmation' => 'password',
+            ->post(route('register.store'), datosRegistroCliente([
                 'rol' => UsuarioRol::Administrador->value,
-            ])
-            ->assertRedirect(route('reservas.index'));
+            ]))
+            ->assertRedirect(route('reservas.index'))
+            ->assertSessionHas('success', 'Cuenta creada');
 
         $user = User::query()->where('email', 'ana.nueva@renta.test')->firstOrFail();
 
@@ -210,7 +204,9 @@ describe('registro mínimo', function () {
             ->and($user->tipo_documento)->toBe('CC')
             ->and($user->numero_documento)->toBe('1098765432')
             ->and($user->telefono)->toBe('3001234567')
-            ->and($user->rol)->toBe(UsuarioRol::Cliente);
+            ->and($user->rol)->toBe(UsuarioRol::Cliente)
+            ->and($user->licenciaConduccion?->numero)->toBe('LIC-12345678')
+            ->and($user->licenciaConduccion?->categoria)->toBe('B1');
     });
 
     it('rejects a registration without the required fields', function () {
@@ -224,6 +220,9 @@ describe('registro mínimo', function () {
                 'numero_documento',
                 'telefono',
                 'password',
+                'licencia_numero',
+                'licencia_categoria',
+                'licencia_vencimiento',
             ]);
 
         expect(User::query()->count())->toBe(0);
@@ -233,15 +232,12 @@ describe('registro mínimo', function () {
         User::factory()->create(['email' => 'existente@renta.test']);
 
         $this->from(route('register'))
-            ->post(route('register.store'), [
+            ->post(route('register.store'), datosRegistroCliente([
                 'name' => 'Otra Persona',
                 'email' => 'existente@renta.test',
-                'tipo_documento' => 'CC',
                 'numero_documento' => '1987654321',
                 'telefono' => '3007654321',
-                'password' => 'password',
-                'password_confirmation' => 'password',
-            ])
+            ]))
             ->assertRedirect(route('register'))
             ->assertSessionHasErrors('email');
 
