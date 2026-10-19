@@ -212,9 +212,32 @@ describe('formulario, vista previa y éxito de devolución', function () {
             ->assertJsonPath('props.acta.kilometraje', 10450)
             ->assertJsonPath('props.acta.combustible', 'cuarto')
             ->assertJsonPath('props.acta.observaciones', 'Inspección con novedades')
+            ->assertJsonPath('props.factura.numero', sprintf('FAC-%06d', $reservation->id))
             ->assertJsonPath('props.factura.totalCents', 202300000)
-            ->assertJsonPath('props.pagoUrl', route('pagos.create', $reservation));
+            ->assertJsonPath('props.pagoUrl', null)
+            ->assertJsonPath('props.puedeCobrar', false);
     });
+
+    it('shows the collect payment link only to cashiers and administrators', function (UsuarioRol $rol) {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Facturada]);
+        ActaDevolucion::factory()->create(['reserva_id' => $reservation->id]);
+        Factura::factory()->create([
+            'reserva_id' => $reservation->id,
+            'numero' => 'FAC-COBRO-DEMO',
+        ]);
+
+        autenticarEmpleado($rol);
+
+        $this->withHeaders(cabecerasInertiaDevolucion())
+            ->get(route('devoluciones.show', $reservation))
+            ->assertOk()
+            ->assertJsonPath('props.factura.numero', 'FAC-COBRO-DEMO')
+            ->assertJsonPath('props.pagoUrl', route('pagos.create', $reservation))
+            ->assertJsonPath('props.puedeCobrar', true);
+    })->with([
+        'cajero' => UsuarioRol::Cajero,
+        'administrador' => UsuarioRol::Administrador,
+    ]);
 
     it('shows empty acta details when the return checklist has no values', function () {
         $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Facturada]);

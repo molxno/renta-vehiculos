@@ -8,11 +8,13 @@ use App\Actions\Devoluciones\ListarReservasParaDevolucion;
 use App\Actions\Devoluciones\RegistrarDevolucion;
 use App\Contracts\CalculadoraDevolucion;
 use App\Enums\NivelCombustible;
+use App\Enums\UsuarioRol;
 use App\Http\Requests\FiltrarDevolucionesRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Models\ActaDevolucion;
 use App\Models\Factura;
 use App\Models\Reserva;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -106,13 +108,17 @@ final class DevolucionController extends Controller
         return to_route('devoluciones.show', $reserva);
     }
 
-    public function show(Reserva $reserva): RedirectResponse|Response
+    public function show(Request $request, Reserva $reserva): RedirectResponse|Response
     {
         $reserva->load(['user', 'vehiculo', 'actaDevolucion', 'factura']);
 
         if (! $reserva->actaDevolucion instanceof ActaDevolucion || ! $reserva->factura instanceof Factura) {
             return to_route('devoluciones.create', $reserva);
         }
+
+        $usuario = $request->user();
+        $puedeCobrar = $usuario instanceof User
+            && in_array($usuario->rol, [UsuarioRol::Cajero, UsuarioRol::Administrador], true);
 
         return inertia('Devoluciones/Show', [
             'reservation' => [
@@ -133,7 +139,8 @@ final class DevolucionController extends Controller
                 'totalCents' => $reserva->factura->total_centavos,
                 'desglose' => $reserva->factura->desglose,
             ],
-            'pagoUrl' => route('pagos.create', $reserva),
+            'pagoUrl' => $puedeCobrar ? route('pagos.create', $reserva) : null,
+            'puedeCobrar' => $puedeCobrar,
         ]);
     }
 
