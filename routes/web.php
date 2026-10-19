@@ -49,8 +49,13 @@ Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(funct
     Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'store'])->name('devoluciones.store');
     Route::get('/reservas/{reserva}/devolucion/exito', [DevolucionController::class, 'show'])->name('devoluciones.show');
     Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
+});
+
+Route::middleware(['auth', 'rol:cajero,administrador'])->group(function (): void {
+    Route::get('/pagos', [PagoController::class, 'index'])->name('pagos.index');
     Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
     Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');
+    Route::get('/reservas/{reserva}/pago/exito', [PagoController::class, 'show'])->name('pagos.show');
 });
 
 require __DIR__.'/auth.php';

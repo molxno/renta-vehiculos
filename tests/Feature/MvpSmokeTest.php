@@ -211,7 +211,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         'metodo' => MetodoPago::Tarjeta->value,
         'monto_centavos' => $factura->total_centavos,
         'numero_tarjeta' => '4111111111111111',
-    ])->assertRedirectToRoute('reservas.show', $reserva);
+    ])->assertRedirectToRoute('pagos.show', $reserva);
 
     $reserva->refresh();
     $factura->refresh();

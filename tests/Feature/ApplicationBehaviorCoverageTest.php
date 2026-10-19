@@ -12,6 +12,7 @@ use App\Enums\VehiculoEstado;
 use App\Http\Requests\FiltrarCatalogoRequest;
 use App\Http\Requests\FiltrarDevolucionesRequest;
 use App\Http\Requests\FiltrarEntregasRequest;
+use App\Http\Requests\FiltrarPagosRequest;
 use App\Http\Requests\PrepararReservaRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Http\Requests\StoreActaEntregaRequest;
@@ -78,7 +79,13 @@ test('all documented pages expose their Inertia contracts', function () {
         ->assertJsonPath('component', 'Devoluciones/Create')
         ->assertJsonPath('props.estimatedChargesCents', 0);
 
-    $this->actingAs($empleado)->withHeaders($headers)->get(route('pagos.create', $reservation))
+    $cajero = User::factory()->cajero()->create();
+
+    $this->actingAs($cajero)->withHeaders($headers)->get(route('pagos.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Pagos/Index');
+
+    $this->actingAs($cajero)->withHeaders($headers)->get(route('pagos.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Pagos/Create')
         ->assertJsonPath('props.currency', 'COP');
@@ -139,10 +146,10 @@ test('all documented write routes validate and redirect', function () {
         'total_centavos' => 100,
     ]);
 
-    $this->actingAs($empleado)->post(route('pagos.store', $reservation), [
+    $this->actingAs(User::factory()->cajero()->create())->post(route('pagos.store', $reservation), [
         'metodo' => MetodoPago::Efectivo->value,
         'monto_centavos' => $invoice->total_centavos,
-    ])->assertRedirectToRoute('reservas.show', $reservation);
+    ])->assertRedirectToRoute('pagos.show', $reservation);
 });
 
 test('requests expose authorization and validation contracts', function () {
@@ -179,6 +186,7 @@ test('requests expose authorization and validation contracts', function () {
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
         [new FiltrarEntregasRequest, ['q']],
         [new FiltrarDevolucionesRequest, ['q']],
+        [new FiltrarPagosRequest, ['q']],
     ];
 
     foreach ($requests as [$request, $fields]) {

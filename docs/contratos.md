@@ -85,8 +85,10 @@ documenta; serán registradas con controladores placeholder en PR3a.
 | `devoluciones.store`  | POST   | `/reservas/{reserva}/devolucion`       | redirección a `devoluciones.show` |
 | `devoluciones.show`   | GET    | `/reservas/{reserva}/devolucion/exito` | `Devoluciones/Show`               |
 | `facturas.show`       | GET    | `/facturas/{factura}`                  | `Facturas/Show`                   |
+| `pagos.index`         | GET    | `/pagos`                               | `Pagos/Index`                     |
 | `pagos.create`        | GET    | `/reservas/{reserva}/pago`             | `Pagos/Create`                    |
-| `pagos.store`         | POST   | `/reservas/{reserva}/pago`             | redirección                       |
+| `pagos.store`         | POST   | `/reservas/{reserva}/pago`             | redirección a `pagos.show`        |
+| `pagos.show`          | GET    | `/reservas/{reserva}/pago/exito`       | `Pagos/Show`                      |
 | `admin.trm.edit`      | GET    | `/administracion/trm`                  | `Administracion/Trm/Edit`         |
 | `admin.trm.update`    | PUT    | `/administracion/trm`                  | redirección a `admin.trm.edit`    |
 
@@ -298,15 +300,15 @@ deben sustituirlo por props provenientes de los controladores contractuales.
 
 ## Mapa de historias, rutas y props
 
-| Historia                         | Ruta(s)                                                                                | Página Inertia                                                   | Props principales                                                |
-| -------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Consultar catálogo               | `catalogo`                                                                             | `Catalogo/Index`                                                 | `vehicles`, `categories`, `filters`                              |
-| Crear y consultar reservas       | `reservas.index`, `reservas.create`, `reservas.store`, `reservas.show`                 | `Reservas/Index`, `Reservas/Create`, `Reservas/Show`             | `reservations`, `filters`, `vehicles`, `quote`, `reservation`    |
-| Confirmar o cancelar una reserva | `reservas.confirmar`, `reservas.cancelar`                                              | redirección a `Reservas/Show`                                    | `reservation`                                                    |
-| Registrar entrega                | `entregas.index`, `entregas.create`, `entregas.store`, `entregas.show`                 | `Entregas/Index`, `Entregas/Create`, `Entregas/Show`             | `reservations`, `filters`, `reservation`, `checklist`, `bloqueo` |
-| Registrar devolución             | `devoluciones.index`, `devoluciones.create`, `devoluciones.store`, `devoluciones.show` | `Devoluciones/Index`, `Devoluciones/Create`, `Devoluciones/Show` | `reservations`, `filters`, `reservation`, `checklist`, `cobro`   |
-| Consultar factura                | `facturas.show`                                                                        | `Facturas/Show`                                                  | `invoice`                                                        |
-| Registrar pago                   | `pagos.create`, `pagos.store`                                                          | `Pagos/Create` y redirección                                     | `reservation`, `amountCents`, `currency`, `methods`              |
+| Historia                         | Ruta(s)                                                                                | Página Inertia                                                   | Props principales                                                          |
+| -------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Consultar catálogo               | `catalogo`                                                                             | `Catalogo/Index`                                                 | `vehicles`, `categories`, `filters`                                        |
+| Crear y consultar reservas       | `reservas.index`, `reservas.create`, `reservas.store`, `reservas.show`                 | `Reservas/Index`, `Reservas/Create`, `Reservas/Show`             | `reservations`, `filters`, `vehicles`, `quote`, `reservation`              |
+| Confirmar o cancelar una reserva | `reservas.confirmar`, `reservas.cancelar`                                              | redirección a `Reservas/Show`                                    | `reservation`                                                              |
+| Registrar entrega                | `entregas.index`, `entregas.create`, `entregas.store`, `entregas.show`                 | `Entregas/Index`, `Entregas/Create`, `Entregas/Show`             | `reservations`, `filters`, `reservation`, `checklist`, `bloqueo`           |
+| Registrar devolución             | `devoluciones.index`, `devoluciones.create`, `devoluciones.store`, `devoluciones.show` | `Devoluciones/Index`, `Devoluciones/Create`, `Devoluciones/Show` | `reservations`, `filters`, `reservation`, `checklist`, `cobro`             |
+| Consultar factura                | `facturas.show`                                                                        | `Facturas/Show`                                                  | `invoice`                                                                  |
+| Registrar pago                   | `pagos.index`, `pagos.create`, `pagos.store`, `pagos.show`                             | `Pagos/Index`, `Pagos/Create`, `Pagos/Show`                      | `invoices`, `invoice`, `amountCents`, `currency`, `methods`, `lastPayment` |
 
 Las páginas de catálogo y creación/detalle de reservas están implementadas con
 props tipadas. El listado de reservas continúa pendiente; otros flujos usan los
