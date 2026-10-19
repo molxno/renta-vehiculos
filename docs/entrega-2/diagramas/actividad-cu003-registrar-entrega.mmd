@@ -1,0 +1,26 @@
+---
+title: CU-003 Registrar entrega — main 0a2dced
+---
+flowchart TD
+    start([Staff abre GET /reservas/id/entrega]) --> mw{auth + EnsureUserHasRole coordinador, cajero o administrador?}
+    mw -->|No autenticado| login[Redirige a /iniciar-sesion]
+    mw -->|Rol distinto| forbid[HTTP 403]
+    mw -->|Si| pantalla[Entregas/Create: licencia, bloqueo y anticipo 30 por ciento]
+    pantalla --> post[POST entrega: fecha, km, combustible, observaciones, aceptacion, foto opcional]
+    post --> rules{StoreActaEntregaRequest}
+    rules -->|Sin aceptacion| errAcepta[Debe aceptar las condiciones del contrato]
+    errAcepta --> pantalla
+    rules -->|Ya tiene acta o no esta confirmada| errEstado[Error de reserva]
+    errEstado --> pantalla
+    rules -->|Licencia ausente o vencida| errLic[Bloqueo por licencia]
+    errLic --> pantalla
+    rules -->|Valido| action[RegistrarEntrega en transaccion]
+    action --> contrato[Crea Contrato CTR-id con km incluido y combustible]
+    contrato --> acta[Crea ActaEntrega; foto a disk public/entregas]
+    acta --> anticipo[Crea Pago anticipo efectivo aprobado ANT-id]
+    anticipo --> state[Reserva.entregar → ConfirmadaState → entregada]
+    state --> veh[Vehiculo.estado = alquilado]
+    veh --> show[Redirige a reservas.show]
+    show --> fin([Fin])
+    login --> fin
+    forbid --> fin

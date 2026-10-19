@@ -1,0 +1,30 @@
+---
+title: CU-005 Pago y factura — main 0a2dced
+---
+flowchart TD
+    start([Staff abre GET /reservas/id/pago]) --> mw{auth + rol coordinador, cajero o administrador?}
+    mw -->|No| login[Login o HTTP 403]
+    mw -->|Si| pantalla[Pagos/Create muestra total de Factura pendiente]
+    pantalla --> post[POST metodo, monto_centavos, numero_tarjeta si aplica]
+    post --> rules{StorePagoRequest}
+    rules -->|Tarjeta sin numero 13-19 digitos| errCard[Error de validacion]
+    errCard --> pantalla
+    rules -->|Valido| action[RegistrarPago]
+    action --> pre{Factura pendiente y Reserva en FacturadaState y monto igual al total?}
+    pre -->|No| errPre[ValidationException]
+    errPre --> pantalla
+    pre -->|Si| metodo{MetodoPago}
+    metodo -->|tarjeta| adapter[PasarelaPagoAdapter.autorizar]
+    adapter --> sdk[BankPaymentGateway.processTransaction monto en unidades]
+    sdk --> card{Tarjeta termina en 0000 o monto menor o igual a 0?}
+    card -->|Si| rech[Pago estado rechazado]
+    rech --> errRech[ValidationException: Pago rechazado]
+    errRech --> pantalla
+    card -->|No| okPay[Pago aprobado FAKE-PAY-id]
+    metodo -->|efectivo o transferencia| okLocal[Aprueba sin SDK: FAKE-METODO-id]
+    okPay --> close[Factura.estado = pagada y Reserva.pagar → PagadaState]
+    okLocal --> close
+    close --> show[Redirige a reservas.show]
+    show --> html[GET /facturas/id FacturaController HTML Facturas/Show]
+    html --> fin([Fin])
+    login --> fin

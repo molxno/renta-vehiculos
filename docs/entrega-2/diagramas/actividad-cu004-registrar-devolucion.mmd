@@ -1,0 +1,25 @@
+---
+title: CU-004 Registrar devolucion — main 0a2dced
+---
+flowchart TD
+    start([Staff abre GET /reservas/id/devolucion]) --> mw{auth + rol coordinador, cajero o administrador?}
+    mw -->|No| login[Login o HTTP 403]
+    mw -->|Si| preview[DevolucionController.create calcula cobro con fecha y checklist del query]
+    preview --> calcPrev[CalculadoraDevolucionEstandar recorre Strategies]
+    calcPrev --> form[Devoluciones/Create muestra cobro]
+    form --> post[POST: fecha, km, combustible, danos, evidencia opcional]
+    post --> rules{StoreActaDevolucionRequest}
+    rules -->|Ya hay acta o reserva no entregada| errEstado[Error de reserva]
+    errEstado --> form
+    rules -->|Km final menor al de entrega| errKm[Error de kilometraje]
+    errKm --> form
+    rules -->|Valido| action[RegistrarDevolucion en transaccion]
+    action --> danos[Persiste Dano por cada linea]
+    danos --> acta[Crea ActaDevolucion; evidencia a disk public/devoluciones]
+    acta --> calc[Calculadora: renta base + Retraso + Kilometraje + Combustible + Dano/Multa + IVA 19]
+    calc --> fac[Crea Factura FAC-id estado pendiente con desglose JSON]
+    fac --> state[Reserva.devolver → EntregadaState → facturada]
+    state --> veh[Vehiculo.estado = disponible]
+    veh --> show[Redirige a reservas.show]
+    show --> fin([Fin])
+    login --> fin
