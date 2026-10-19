@@ -25,9 +25,28 @@ describe('landing pública', function () {
             ->assertJsonStructure([
                 'props' => [
                     'featuredVehicles',
+                    'vehiclesAvailableCount',
                     'search' => ['location', 'startDate', 'endDate'],
                 ],
-            ]);
+            ])
+            ->assertJsonPath('props.vehiclesAvailableCount', 0);
+    });
+
+    it('exposes the real count of available vehicles instead of a marketing figure', function () {
+        Vehiculo::factory()->count(2)->create([
+            'estado' => VehiculoEstado::Disponible,
+        ]);
+        Vehiculo::factory()->create([
+            'estado' => VehiculoEstado::Mantenimiento,
+        ]);
+        Vehiculo::factory()->create([
+            'estado' => VehiculoEstado::Alquilado,
+        ]);
+
+        $this->withHeaders(inertiaHomeHeaders())
+            ->get(route('home'))
+            ->assertOk()
+            ->assertJsonPath('props.vehiclesAvailableCount', 2);
     });
 
     it('exposes featured available vehicles with their daily rate', function () {
