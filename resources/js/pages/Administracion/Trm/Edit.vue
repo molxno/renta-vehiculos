@@ -26,7 +26,7 @@ function guardar(): void {
 
 <template>
     <Head title="Administrar TRM" />
-    <AppLayout role="administrador">
+    <AppLayout>
         <div class="flex flex-col gap-6">
             <div>
                 <p

@@ -1,52 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { index as devolucionesIndex } from '@/actions/App/Http/Controllers/DevolucionController';
-import { index as entregasIndex } from '@/actions/App/Http/Controllers/EntregaController';
-import { index as pagosIndex } from '@/actions/App/Http/Controllers/PagoController';
-import { index as reservasIndex } from '@/actions/App/Http/Controllers/ReservaController';
-import { edit as editarTrm } from '@/actions/App/Http/Controllers/TrmController';
 import { login, logout } from '@/routes';
-import type { UserRole } from '@/types';
-
-const props = withDefaults(
-    defineProps<{
-        role?: UserRole;
-    }>(),
-    { role: 'cliente' },
-);
 
 const page = usePage();
 const authUser = computed(() => page.props.auth?.user ?? null);
-const currentRole = computed(() => authUser.value?.role ?? props.role);
-
-const navigation = {
-    cliente: ['Mis reservas', 'Facturas', 'Pagos'],
-    coordinador: ['Reservas', 'Entregas', 'Devoluciones'],
-    cajero: ['Facturas', 'Pagos', 'Cierres de caja'],
-    administrador: [
-        'Dashboard',
-        'Tasa de cambio',
-        'Entregas',
-        'Devoluciones',
-        'Pagos',
-        'Usuarios',
-        'Reportes',
-    ],
-    gerente: ['Dashboard', 'Reportes', 'Indicadores'],
-} as const;
-
-const navigationHrefs = computed<Record<string, string>>(() => ({
-    'Mis reservas': reservasIndex.url(),
-    Reservas: reservasIndex.url(),
-    Entregas: entregasIndex.url(),
-    Devoluciones: devolucionesIndex.url(),
-    Pagos:
-        currentRole.value === 'cajero' || currentRole.value === 'administrador'
-            ? pagosIndex.url()
-            : '#',
-    'Tasa de cambio': editarTrm.url(),
-}));
+const navigation = computed(() => page.props.navigation ?? []);
 const loginUrl = login.url();
 const logoutUrl = logout.url();
 </script>
@@ -67,12 +26,12 @@ const logoutUrl = logout.url();
                 </Link>
                 <nav class="hidden items-center gap-5 md:flex">
                     <Link
-                        v-for="item in navigation[currentRole]"
-                        :key="item"
-                        :href="navigationHrefs[item] ?? '#'"
+                        v-for="item in navigation"
+                        :key="item.label"
+                        :href="item.href"
                         class="text-sm font-medium text-white/80 hover:text-brand-teal"
                     >
-                        {{ item }}
+                        {{ item.label }}
                     </Link>
                 </nav>
                 <Link
