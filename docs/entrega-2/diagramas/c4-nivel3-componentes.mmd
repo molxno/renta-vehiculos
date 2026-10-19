@@ -1,0 +1,56 @@
+C4Component
+title C4 Nivel 3 — Componentes del runtime Laravel (main 0a2dced)
+
+Container_Ext(spa, "SPA Vue 3 + Inertia", "Páginas Vue que consumen props y envían formularios.")
+
+Container_Boundary(http, "Capa HTTP") {
+    Component(mwRol, "EnsureUserHasRole", "Middleware alias rol", "Exige sesión y uno de los roles declarados. TRM: administrador. Entrega, devolución, pago y factura: coordinador, cajero o administrador.")
+    Component(authCtrl, "Auth", "RegistroController / SesionController", "GET/POST /registro, /iniciar-sesion y POST /cerrar-sesion.")
+    Component(catalogoCtrl, "CatalogoController", "Controller", "GET /catalogo. Lista vehículos con disponibilidad.")
+    Component(reservaCtrl, "ReservaController", "Controller", "Index, create/cotizar, store, show, confirmar, cancelar y lookup por QR.")
+    Component(entregaCtrl, "EntregaController", "Controller", "GET/POST /reservas/{reserva}/entrega.")
+    Component(devolucionCtrl, "DevolucionController", "Controller", "GET/POST /reservas/{reserva}/devolucion. El GET recalcula cobro con CalculadoraDevolucion.")
+    Component(pagoCtrl, "PagoController", "Controller", "GET/POST /reservas/{reserva}/pago. FacturaController muestra HTML.")
+}
+
+Container_Boundary(dominio, "Acciones, servicios y puertos") {
+    Component(acciones, "Actions", "Casos de uso", "RegistrarCliente, IniciarSesion, CrearReserva, ConfirmarReserva, ListarReservas, RegistrarEntrega, RegistrarDevolucion, RegistrarPago, ActualizarTrm.")
+    Component(tarifa, "TarifaServiceEstandar", "TarifaService", "Cotiza COP/USD con tarifa vigente, convenio e IVA 19 por ciento.")
+    Component(convertidor, "ConvertidorTrm", "Service", "Escala el valor TRM y convierte centavos COP a centavos USD.")
+    Component(calculadora, "CalculadoraDevolucionEstandar", "CalculadoraDevolucion", "Suma renta base más líneas de Strategy e IVA.")
+    Component(strategy, "CargoDevolucionStrategy", "GoF Strategy", "Retraso, Kilometraje, Combustible y Dano/Multa.")
+    Component(state, "ReservaState", "GoF State", "Pendiente, Confirmada, Entregada, Facturada, Pagada y Cancelada.")
+    Component(adapter, "PasarelaPagoAdapter", "GoF Adapter", "Traduce BankPaymentGateway.processTransaction a PasarelaPago.autorizar.")
+}
+
+ContainerDb(db, "SQLite / PostgreSQL", "Modelos Eloquent del dominio.")
+Container_Ext(sdk, "BankPaymentGateway", "SDK simulado. success=false si la tarjeta termina en 0000.")
+Container_Ext(trmExt, "Tabla TRM", "Trm vigente y ActualizarTrm.")
+
+Rel(spa, mwRol, "Rutas protegidas pasan por auth y rol")
+Rel(spa, authCtrl, "Registro e inicio de sesión")
+Rel(spa, catalogoCtrl, "Consulta catálogo")
+Rel(spa, reservaCtrl, "Crea y confirma reserva")
+Rel(spa, entregaCtrl, "Registra entrega")
+Rel(spa, devolucionCtrl, "Registra devolución")
+Rel(spa, pagoCtrl, "Cobra factura")
+Rel(mwRol, entregaCtrl, "Guarda coordinador,cajero,administrador")
+Rel(mwRol, devolucionCtrl, "Guarda coordinador,cajero,administrador")
+Rel(mwRol, pagoCtrl, "Guarda coordinador,cajero,administrador")
+Rel(authCtrl, acciones, "RegistrarCliente / IniciarSesion")
+Rel(catalogoCtrl, acciones, "ListarCatalogoVehiculos")
+Rel(reservaCtrl, acciones, "CrearReserva / ConfirmarReserva / ListarReservas")
+Rel(reservaCtrl, tarifa, "cotizar() en GET /reservas/crear")
+Rel(entregaCtrl, acciones, "RegistrarEntrega")
+Rel(devolucionCtrl, acciones, "RegistrarDevolucion")
+Rel(devolucionCtrl, calculadora, "Preview de cobro en GET")
+Rel(pagoCtrl, acciones, "RegistrarPago")
+Rel(acciones, tarifa, "CrearReserva.cotizar")
+Rel(tarifa, convertidor, "USD usa ConvertidorTrm")
+Rel(tarifa, trmExt, "Lee TRM vigente")
+Rel(acciones, calculadora, "RegistrarDevolucion.calcular")
+Rel(calculadora, strategy, "Recorre estrategias inyectadas")
+Rel(acciones, state, "Reserva.confirmar/entregar/devolver/pagar/cancelar")
+Rel(acciones, adapter, "RegistrarPago.autorizar si método tarjeta")
+Rel(adapter, sdk, "processTransaction(monto, tarjeta)")
+Rel(acciones, db, "Persiste User, Reserva, actas, factura y pagos")

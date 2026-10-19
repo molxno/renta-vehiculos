@@ -1,0 +1,21 @@
+---
+title: CU-001 Registrar usuario — main 0a2dced
+---
+flowchart TD
+    start([Invitado abre GET /registro]) --> form[Completa nombre, correo, tipo y numero de documento, telefono y contraseña confirmada]
+    form --> post[POST /registro → RegistroController.store]
+    post --> valid{RegistrarClienteRequest valido?}
+    valid -->|No: email o documento duplicado, password menor a 8, tipo fuera de CC/CE/PAS| errores[Devuelve errores de validacion]
+    errores --> form
+    valid -->|Si| crear[RegistrarCliente crea User con rol cliente]
+    crear --> login[Auth.login y session.regenerate]
+    login --> home[Redirige a GET / home autenticado]
+    home --> salir{Quiere cerrar sesion?}
+    salir -->|Si| logout[POST /cerrar-sesion → CerrarSesion]
+    logout --> loginPage[GET /iniciar-sesion]
+    loginPage --> creds[IniciarSesion: email, password, RateLimiter 5 intentos]
+    creds --> okLogin{Credenciales validas?}
+    okLogin -->|No| creds
+    okLogin -->|Si| home
+    salir -->|No| fin([Fin])
+    home --> fin
