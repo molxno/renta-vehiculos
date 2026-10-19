@@ -65,28 +65,30 @@ pertenece a `DisponibilidadService`.
 Las rutas siguientes son el contrato HTTP de las historias. PR0 solo las
 documenta; serán registradas con controladores placeholder en PR3a.
 
-| Nombre                | Método | URI                                 | Página                         |
-| --------------------- | ------ | ----------------------------------- | ------------------------------ |
-| `home`                | GET    | `/`                                 | `Welcome`                      |
-| `catalogo`            | GET    | `/catalogo`                         | `Catalogo/Index`               |
-| `reservas.index`      | GET    | `/reservas`                         | `Reservas/Index`               |
-| `reservas.create`     | GET    | `/reservas/crear`                   | `Reservas/Create`              |
-| `reservas.store`      | POST   | `/reservas`                         | redirección a `reservas.show`  |
-| `reservas.qr`         | GET    | `/reservas/qr/{qrCodigo}`           | redirección a `reservas.show`  |
-| `reservas.show`       | GET    | `/reservas/{reserva}`               | `Reservas/Show`                |
-| `reservas.confirmar`  | POST   | `/reservas/{reserva}/confirmar`     | redirección                    |
-| `reservas.cancelar`   | POST   | `/reservas/{reserva}/cancelar`      | redirección                    |
-| `entregas.index`      | GET    | `/entregas`                         | `Entregas/Index`               |
-| `entregas.create`     | GET    | `/reservas/{reserva}/entrega`       | `Entregas/Create`              |
-| `entregas.store`      | POST   | `/reservas/{reserva}/entrega`       | redirección a `entregas.show`  |
-| `entregas.show`       | GET    | `/reservas/{reserva}/entrega/exito` | `Entregas/Show`                |
-| `devoluciones.create` | GET    | `/reservas/{reserva}/devolucion`    | `Devoluciones/Create`          |
-| `devoluciones.store`  | POST   | `/reservas/{reserva}/devolucion`    | redirección                    |
-| `facturas.show`       | GET    | `/facturas/{factura}`               | `Facturas/Show`                |
-| `pagos.create`        | GET    | `/reservas/{reserva}/pago`          | `Pagos/Create`                 |
-| `pagos.store`         | POST   | `/reservas/{reserva}/pago`          | redirección                    |
-| `admin.trm.edit`      | GET    | `/administracion/trm`               | `Administracion/Trm/Edit`      |
-| `admin.trm.update`    | PUT    | `/administracion/trm`               | redirección a `admin.trm.edit` |
+| Nombre                | Método | URI                                    | Página                            |
+| --------------------- | ------ | -------------------------------------- | --------------------------------- |
+| `home`                | GET    | `/`                                    | `Welcome`                         |
+| `catalogo`            | GET    | `/catalogo`                            | `Catalogo/Index`                  |
+| `reservas.index`      | GET    | `/reservas`                            | `Reservas/Index`                  |
+| `reservas.create`     | GET    | `/reservas/crear`                      | `Reservas/Create`                 |
+| `reservas.store`      | POST   | `/reservas`                            | redirección a `reservas.show`     |
+| `reservas.qr`         | GET    | `/reservas/qr/{qrCodigo}`              | redirección a `reservas.show`     |
+| `reservas.show`       | GET    | `/reservas/{reserva}`                  | `Reservas/Show`                   |
+| `reservas.confirmar`  | POST   | `/reservas/{reserva}/confirmar`        | redirección                       |
+| `reservas.cancelar`   | POST   | `/reservas/{reserva}/cancelar`         | redirección                       |
+| `entregas.index`      | GET    | `/entregas`                            | `Entregas/Index`                  |
+| `entregas.create`     | GET    | `/reservas/{reserva}/entrega`          | `Entregas/Create`                 |
+| `entregas.store`      | POST   | `/reservas/{reserva}/entrega`          | redirección a `entregas.show`     |
+| `entregas.show`       | GET    | `/reservas/{reserva}/entrega/exito`    | `Entregas/Show`                   |
+| `devoluciones.index`  | GET    | `/devoluciones`                        | `Devoluciones/Index`              |
+| `devoluciones.create` | GET    | `/reservas/{reserva}/devolucion`       | `Devoluciones/Create`             |
+| `devoluciones.store`  | POST   | `/reservas/{reserva}/devolucion`       | redirección a `devoluciones.show` |
+| `devoluciones.show`   | GET    | `/reservas/{reserva}/devolucion/exito` | `Devoluciones/Show`               |
+| `facturas.show`       | GET    | `/facturas/{factura}`                  | `Facturas/Show`                   |
+| `pagos.create`        | GET    | `/reservas/{reserva}/pago`             | `Pagos/Create`                    |
+| `pagos.store`         | POST   | `/reservas/{reserva}/pago`             | redirección                       |
+| `admin.trm.edit`      | GET    | `/administracion/trm`                  | `Administracion/Trm/Edit`         |
+| `admin.trm.update`    | PUT    | `/administracion/trm`                  | redirección a `admin.trm.edit`    |
 
 ### Props comunes
 
@@ -296,15 +298,15 @@ deben sustituirlo por props provenientes de los controladores contractuales.
 
 ## Mapa de historias, rutas y props
 
-| Historia                         | Ruta(s)                                                                | Página Inertia                                       | Props principales                                                |
-| -------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------- |
-| Consultar catálogo               | `catalogo`                                                             | `Catalogo/Index`                                     | `vehicles`, `categories`, `filters`                              |
-| Crear y consultar reservas       | `reservas.index`, `reservas.create`, `reservas.store`, `reservas.show` | `Reservas/Index`, `Reservas/Create`, `Reservas/Show` | `reservations`, `filters`, `vehicles`, `quote`, `reservation`    |
-| Confirmar o cancelar una reserva | `reservas.confirmar`, `reservas.cancelar`                              | redirección a `Reservas/Show`                        | `reservation`                                                    |
-| Registrar entrega                | `entregas.index`, `entregas.create`, `entregas.store`, `entregas.show` | `Entregas/Index`, `Entregas/Create`, `Entregas/Show` | `reservations`, `filters`, `reservation`, `checklist`, `bloqueo` |
-| Registrar devolución             | `devoluciones.create`, `devoluciones.store`                            | `Devoluciones/Create`                                | `reservation`, `checklist`, `estimatedChargesCents`              |
-| Consultar factura                | `facturas.show`                                                        | `Facturas/Show`                                      | `invoice`                                                        |
-| Registrar pago                   | `pagos.create`, `pagos.store`                                          | `Pagos/Create` y redirección                         | `reservation`, `amountCents`, `currency`, `methods`              |
+| Historia                         | Ruta(s)                                                                                | Página Inertia                                                   | Props principales                                                |
+| -------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Consultar catálogo               | `catalogo`                                                                             | `Catalogo/Index`                                                 | `vehicles`, `categories`, `filters`                              |
+| Crear y consultar reservas       | `reservas.index`, `reservas.create`, `reservas.store`, `reservas.show`                 | `Reservas/Index`, `Reservas/Create`, `Reservas/Show`             | `reservations`, `filters`, `vehicles`, `quote`, `reservation`    |
+| Confirmar o cancelar una reserva | `reservas.confirmar`, `reservas.cancelar`                                              | redirección a `Reservas/Show`                                    | `reservation`                                                    |
+| Registrar entrega                | `entregas.index`, `entregas.create`, `entregas.store`, `entregas.show`                 | `Entregas/Index`, `Entregas/Create`, `Entregas/Show`             | `reservations`, `filters`, `reservation`, `checklist`, `bloqueo` |
+| Registrar devolución             | `devoluciones.index`, `devoluciones.create`, `devoluciones.store`, `devoluciones.show` | `Devoluciones/Index`, `Devoluciones/Create`, `Devoluciones/Show` | `reservations`, `filters`, `reservation`, `checklist`, `cobro`   |
+| Consultar factura                | `facturas.show`                                                                        | `Facturas/Show`                                                  | `invoice`                                                        |
+| Registrar pago                   | `pagos.create`, `pagos.store`                                                          | `Pagos/Create` y redirección                                     | `reservation`, `amountCents`, `currency`, `methods`              |
 
 Las páginas de catálogo y creación/detalle de reservas están implementadas con
 props tipadas. El listado de reservas continúa pendiente; otros flujos usan los

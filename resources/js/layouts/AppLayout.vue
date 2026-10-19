@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import { index as devolucionesIndex } from '@/actions/App/Http/Controllers/DevolucionController';
 import { index as entregasIndex } from '@/actions/App/Http/Controllers/EntregaController';
 import { index as reservasIndex } from '@/actions/App/Http/Controllers/ReservaController';
 import { edit as editarTrm } from '@/actions/App/Http/Controllers/TrmController';
@@ -26,6 +27,7 @@ const navigation = {
         'Dashboard',
         'Tasa de cambio',
         'Entregas',
+        'Devoluciones',
         'Usuarios',
         'Reportes',
     ],
@@ -36,6 +38,7 @@ const navigationHrefs: Record<string, string> = {
     'Mis reservas': reservasIndex.url(),
     Reservas: reservasIndex.url(),
     Entregas: entregasIndex.url(),
+    Devoluciones: devolucionesIndex.url(),
     'Tasa de cambio': editarTrm.url(),
 };
 const loginUrl = login.url();
