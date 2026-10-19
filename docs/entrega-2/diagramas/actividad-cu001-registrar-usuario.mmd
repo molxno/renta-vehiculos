@@ -1,15 +1,15 @@
 ---
-title: CU-001 Registrar usuario — main 0a2dced
+title: CU-001 Registrar usuario — main 3eb6d86
 ---
 flowchart TD
-    start([Invitado abre GET /registro]) --> form[Completa nombre, correo, tipo y numero de documento, telefono y contraseña confirmada]
+    start([Invitado abre GET /registro]) --> form[Completa nombre, correo, tipo y numero de documento, telefono, licencia de conduccion: numero, categoria y vencimiento, y contraseña confirmada]
     form --> post[POST /registro → RegistroController.store]
     post --> valid{RegistrarClienteRequest valido?}
     valid -->|No: email o documento duplicado, password menor a 8, tipo fuera de CC/CE/PAS| errores[Devuelve errores de validacion]
     errores --> form
-    valid -->|Si| crear[RegistrarCliente crea User con rol cliente]
+    valid -->|Si| crear[RegistrarCliente crea User con rol cliente y su LicenciaConduccion]
     crear --> login[Auth.login y session.regenerate]
-    login --> home[Redirige a GET / home autenticado]
+    login --> home[Redirige a GET /reservas Mis reservas con aviso Cuenta creada]
     home --> salir{Quiere cerrar sesion?}
     salir -->|Si| logout[POST /cerrar-sesion → CerrarSesion]
     logout --> loginPage[GET /iniciar-sesion]
