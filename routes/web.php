@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\FacturaController;
@@ -14,6 +15,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('/catalogo', CatalogoController::class)->name('catalogo');
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/cuenta', [CuentaController::class, 'show'])->name('cuenta.show');
+    Route::put('/cuenta/licencia', [CuentaController::class, 'update'])->name('cuenta.update');
+});
 
 Route::get('/reservas', [ReservaController::class, 'index'])
     ->middleware('auth')
@@ -39,14 +45,30 @@ Route::middleware(['auth', 'rol:administrador'])
         Route::put('/trm', [TrmController::class, 'update'])->name('trm.update');
     });
 
-Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(function (): void {
+Route::get('/reservas/{reserva}/entrega/acta', [EntregaController::class, 'acta'])
+    ->middleware('auth')
+    ->name('entregas.acta');
+
+Route::middleware(['auth', 'rol:coordinador,administrador'])->group(function (): void {
+    Route::get('/entregas', [EntregaController::class, 'index'])->name('entregas.index');
     Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');
     Route::post('/reservas/{reserva}/entrega', [EntregaController::class, 'store'])->name('entregas.store');
+    Route::get('/reservas/{reserva}/entrega/exito', [EntregaController::class, 'show'])->name('entregas.show');
+    Route::get('/devoluciones', [DevolucionController::class, 'index'])->name('devoluciones.index');
     Route::get('/reservas/{reserva}/devolucion', [DevolucionController::class, 'create'])->name('devoluciones.create');
     Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'store'])->name('devoluciones.store');
+    Route::get('/reservas/{reserva}/devolucion/exito', [DevolucionController::class, 'show'])->name('devoluciones.show');
+});
+
+Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(function (): void {
     Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
+});
+
+Route::middleware(['auth', 'rol:cajero,administrador'])->group(function (): void {
+    Route::get('/pagos', [PagoController::class, 'index'])->name('pagos.index');
     Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
     Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');
+    Route::get('/reservas/{reserva}/pago/exito', [PagoController::class, 'show'])->name('pagos.show');
 });
 
 require __DIR__.'/auth.php';

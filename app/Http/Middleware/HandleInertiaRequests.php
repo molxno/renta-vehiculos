@@ -52,10 +52,26 @@ final class HandleInertiaRequests extends Middleware
                     ]
                     : null,
             ],
+            'navigation' => $this->navigationFor($user),
+            'landingHref' => $user instanceof User
+                ? $user->rol->urlAterrizaje()
+                : route('home'),
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
         ];
+    }
+
+    /**
+     * @return list<array{label: string, href: string}>
+     */
+    private function navigationFor(?User $user): array
+    {
+        if (! $user instanceof User) {
+            return [];
+        }
+
+        return $user->rol->enlacesNavegacion();
     }
 }

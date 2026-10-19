@@ -157,6 +157,45 @@ describe('calculadora de devolución', function () {
         expect($cobro['desglose'])->toContain(['concepto' => 'Combustible faltante (2 cuarto(s) de tanque)', 'monto_centavos' => 7000000]);
     });
 
+    it('includes unsaved preview damages from the submitted conditions', function () {
+        $reserva = reservaEntregada();
+
+        $cobro = app(CalculadoraDevolucion::class)->calcular(
+            $reserva->id,
+            Carbon::parse('2026-02-08 09:00:00'),
+            [
+                'danos' => [
+                    ['descripcion' => 'Rayón en puerta', 'monto_centavos' => 5000000],
+                    'x',
+                    ['descripcion' => '', 'monto_centavos' => ''],
+                    ['descripcion' => 'Golpe', 'monto_centavos' => 'abc'],
+                ],
+            ],
+        );
+
+        expect($cobro['desglose'])->toBe([
+            ['concepto' => 'Renta base', 'monto_centavos' => 66000000],
+            ['concepto' => 'Daño: Rayón en puerta', 'monto_centavos' => 5000000],
+            ['concepto' => 'Daño: Golpe', 'monto_centavos' => 0],
+        ])
+            ->and($cobro['cargos_centavos'])->toBe(5000000);
+    });
+
+    it('ignores a non array preview damage payload', function () {
+        $reserva = reservaEntregada();
+
+        $cobro = app(CalculadoraDevolucion::class)->calcular(
+            $reserva->id,
+            Carbon::parse('2026-02-08 09:00:00'),
+            ['danos' => 'invalido'],
+        );
+
+        expect($cobro['cargos_centavos'])->toBe(0)
+            ->and($cobro['desglose'])->toBe([
+                ['concepto' => 'Renta base', 'monto_centavos' => 66000000],
+            ]);
+    });
+
     it('includes registered damages and fines in the final cost', function () {
         $reserva = reservaEntregada();
         Dano::factory()->create(['reserva_id' => $reserva->id, 'descripcion' => 'Rayón en puerta', 'monto_centavos' => 5000000]);

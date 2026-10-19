@@ -34,6 +34,11 @@ final class LicenciaConduccion extends Model
         return $this->fecha_vencimiento->gte(now()->toDateString());
     }
 
+    public function categoriaValida(): bool
+    {
+        return in_array($this->categoria, (array) config('entrega.categorias_validas', []), true);
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {

@@ -22,6 +22,11 @@ class ActaEntregaFactory extends Factory
     {
         return [
             'reserva_id' => Reserva::factory(),
+            'numero' => null,
+            'coordinador_id' => null,
+            'firmante_nombre' => null,
+            'firmado_at' => null,
+            'licencia_resultado' => null,
             'entregado_at' => now(),
             'checklist' => ['documentos' => true, 'llantas' => true, 'combustible' => 'lleno'],
             'observaciones' => null,

@@ -188,6 +188,24 @@ final.
 | Administrador | `administrador@renta.test` | `password` | Catálogo mínimo                                           |
 | Gerente       | `gerente@renta.test`       | `password` | Catálogo mínimo                                           |
 
+Un solo `php artisan migrate:fresh --seed` deja listos estos códigos de demo:
+
+| Escenario                               | Código                                               | Uso en la demo                                                                |
+| --------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Reserva confirmada, entregable hoy      | `QR-RESERVA-CONFIRMADA`                              | Coordinador en Entregas (inicio hoy, fin +3d, America/Bogota)                 |
+| Reserva confirmada a futuro (bloqueada) | `QR-RESERVA-FUTURA`                                  | Coordinador en Entregas: botón deshabilitado                                  |
+| Reserva confirmada vencida (bloqueada)  | `QR-RESERVA-VENCIDA`                                 | Coordinador en Entregas: motivo «Vencida»                                     |
+| Alquiler entregado, listo para devolver | `QR-ALQUILER-ENTREGADO`                              | Coordinador en Devoluciones. Fechas fijas de febrero 2026 (retraso / cargos). |
+| Factura pendiente de cobro              | `QR-DEVOLUCION-FACTURA` / `FAC-DEVOLUCION-PENDIENTE` | Coordinador ve el FAC; cajero cobra en Pagos                                  |
+| Pago rechazado, reintento en caja       | `QR-PAGO-RECHAZADO` / `FAC-PAGO-RECHAZADO`           | Cajero en Pagos                                                               |
+
+Tarjetas de prueba de la pasarela simulada:
+
+| Número             | Resultado |
+| ------------------ | --------- |
+| `4111111111111111` | Aprueba   |
+| `4111111111110000` | Rechaza   |
+
 Para cargar todo:
 
 ```text

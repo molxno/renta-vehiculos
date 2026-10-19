@@ -9,7 +9,11 @@ use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
+use App\Http\Requests\ActualizarLicenciaRequest;
 use App\Http\Requests\FiltrarCatalogoRequest;
+use App\Http\Requests\FiltrarDevolucionesRequest;
+use App\Http\Requests\FiltrarEntregasRequest;
+use App\Http\Requests\FiltrarPagosRequest;
 use App\Http\Requests\PrepararReservaRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
 use App\Http\Requests\StoreActaEntregaRequest;
@@ -50,25 +54,44 @@ test('all documented pages expose their Inertia contracts', function () {
     $this->actingAs($user)->withHeaders($headers)->get(route('reservas.create'))
         ->assertOk()
         ->assertJsonPath('component', 'Reservas/Create')
-        ->assertJsonStructure(['props' => ['vehicles', 'quote']]);
+        ->assertJsonStructure(['props' => ['vehicles', 'quote', 'rentalNotes', 'rentalDisclaimer']]);
 
     $this->actingAs($user)->withHeaders($headers)->get(route('reservas.index'))
         ->assertOk()
         ->assertJsonPath('component', 'Reservas/Index');
 
+    $this->actingAs($user)->withHeaders($headers)->get(route('cuenta.show'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Cuenta/Show')
+        ->assertJsonStructure(['props' => ['perfil', 'licencia', 'categoriasLicencia', 'updateUrl']]);
+
     $empleado = User::factory()->coordinador()->create();
+
+    $this->actingAs($empleado)->withHeaders($headers)->get(route('entregas.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Entregas/Index');
 
     $this->actingAs($empleado)->withHeaders($headers)->get(route('entregas.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Entregas/Create')
         ->assertJsonPath('props.reservation.id', $reservation->id);
 
+    $this->actingAs($empleado)->withHeaders($headers)->get(route('devoluciones.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Devoluciones/Index');
+
     $this->actingAs($empleado)->withHeaders($headers)->get(route('devoluciones.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Devoluciones/Create')
         ->assertJsonPath('props.estimatedChargesCents', 0);
 
-    $this->actingAs($empleado)->withHeaders($headers)->get(route('pagos.create', $reservation))
+    $cajero = User::factory()->cajero()->create();
+
+    $this->actingAs($cajero)->withHeaders($headers)->get(route('pagos.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Pagos/Index');
+
+    $this->actingAs($cajero)->withHeaders($headers)->get(route('pagos.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Pagos/Create')
         ->assertJsonPath('props.currency', 'COP');
@@ -111,16 +134,21 @@ test('all documented write routes validate and redirect', function () {
 
     $empleado = User::factory()->coordinador()->create();
 
+    $reservation->update([
+        'inicio' => now()->startOfDay(),
+        'fin' => now()->addDays(3)->startOfDay(),
+    ]);
+
     $this->actingAs($empleado)->post(route('entregas.store', $reservation), [
         'entregado_at' => now()->toDateTimeString(),
         'aceptacion' => '1',
-    ])->assertRedirectToRoute('reservas.show', $reservation);
+    ])->assertRedirectToRoute('entregas.show', $reservation);
 
     $reservation->update(['estado' => ReservaEstado::Entregada]);
 
     $this->actingAs($empleado)->post(route('devoluciones.store', $reservation), [
         'devuelto_at' => now()->toDateTimeString(),
-    ])->assertRedirectToRoute('reservas.show', $reservation);
+    ])->assertRedirectToRoute('devoluciones.show', $reservation);
 
     $reservation->refresh();
     $reservation->update(['estado' => ReservaEstado::Facturada]);
@@ -129,10 +157,10 @@ test('all documented write routes validate and redirect', function () {
         'total_centavos' => 100,
     ]);
 
-    $this->actingAs($empleado)->post(route('pagos.store', $reservation), [
+    $this->actingAs(User::factory()->cajero()->create())->post(route('pagos.store', $reservation), [
         'metodo' => MetodoPago::Efectivo->value,
         'monto_centavos' => $invoice->total_centavos,
-    ])->assertRedirectToRoute('reservas.show', $reservation);
+    ])->assertRedirectToRoute('pagos.show', $reservation);
 });
 
 test('requests expose authorization and validation contracts', function () {
@@ -141,6 +169,8 @@ test('requests expose authorization and validation contracts', function () {
     $prepararReservaRequest->setUserResolver(fn (): User => $client);
     $storeReservaRequest = new StoreReservaRequest;
     $storeReservaRequest->setUserResolver(fn (): User => $client);
+    $actualizarLicenciaRequest = new ActualizarLicenciaRequest;
+    $actualizarLicenciaRequest->setUserResolver(fn (): User => $client);
 
     $requests = [
         [new StoreActaDevolucionRequest, [
@@ -167,6 +197,10 @@ test('requests expose authorization and validation contracts', function () {
         [$prepararReservaRequest, ['vehiculo_id', 'inicio', 'fin']],
         [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
+        [new FiltrarEntregasRequest, ['q']],
+        [new FiltrarDevolucionesRequest, ['q']],
+        [new FiltrarPagosRequest, ['q']],
+        [$actualizarLicenciaRequest, ['licencia_numero', 'licencia_categoria', 'licencia_vencimiento']],
     ];
 
     foreach ($requests as [$request, $fields]) {
@@ -178,7 +212,7 @@ test('requests expose authorization and validation contracts', function () {
 test('models expose their casts and relationships', function () {
     $models = [
         [new ActaDevolucion, ['devuelto_at', 'checklist'], ['reserva' => BelongsTo::class]],
-        [new ActaEntrega, ['entregado_at', 'checklist'], ['reserva' => BelongsTo::class]],
+        [new ActaEntrega, ['entregado_at', 'firmado_at', 'checklist'], ['reserva' => BelongsTo::class, 'coordinador' => BelongsTo::class]],
         [new Contrato, ['condiciones', 'firmado_at'], ['reserva' => BelongsTo::class]],
         [new Convenio, ['descuento_porcentaje', 'activo'], ['reservas' => HasMany::class]],
         [new Dano, ['monto_centavos'], ['reserva' => BelongsTo::class]],

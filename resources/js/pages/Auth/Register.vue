@@ -6,6 +6,10 @@ import { home, login } from '@/routes';
 import RentGoLogo from '@/components/storefront/RentGoLogo.vue';
 import { registerHeroImage } from '@/components/storefront/mocks';
 
+defineProps<{
+    categoriasLicencia: string[];
+}>();
+
 const form = useForm({
     name: '',
     email: '',
@@ -14,6 +18,9 @@ const form = useForm({
     telefono: '',
     direccion: '',
     codigo_postal: '',
+    licencia_numero: '',
+    licencia_categoria: '',
+    licencia_vencimiento: '',
     password: '',
     password_confirmation: '',
 });
@@ -25,8 +32,8 @@ const loginUrl = login.url();
 
 const steps = [
     { number: 1, label: 'Datos personales', active: true },
-    { number: 2, label: 'Datos de conducción', active: false },
-    { number: 3, label: 'Seguridad', active: false },
+    { number: 2, label: 'Datos de conducción', active: true },
+    { number: 3, label: 'Seguridad', active: true },
 ] as const;
 
 const controlClass =
@@ -39,6 +46,9 @@ function submit(): void {
         tipo_documento: data.tipo_documento,
         numero_documento: data.numero_documento,
         telefono: data.telefono,
+        licencia_numero: data.licencia_numero,
+        licencia_categoria: data.licencia_categoria,
+        licencia_vencimiento: data.licencia_vencimiento,
         password: data.password,
         password_confirmation: data.password_confirmation,
     })).post(store.url());
@@ -120,7 +130,8 @@ function submit(): void {
                         Datos personales
                     </h2>
                     <p class="mt-2 text-slate-600">
-                        Paso 1 de 3 · ¿Ya tienes cuenta?
+                        Datos personales, conducción y seguridad · ¿Ya tienes
+                        cuenta?
                         <Link
                             :href="loginUrl"
                             class="font-semibold text-brand-teal hover:text-brand-teal-dark"
@@ -264,6 +275,82 @@ function submit(): void {
                                 {{ form.errors.email }}
                             </span>
                         </label>
+
+                        <h3
+                            class="mt-4 text-lg font-semibold text-brand-navy sm:col-span-2"
+                        >
+                            Datos de conducción
+                        </h3>
+
+                        <label
+                            class="flex flex-col gap-1.5 text-xs font-semibold tracking-wide text-slate-500 uppercase"
+                        >
+                            Número de licencia
+                            <input
+                                v-model="form.licencia_numero"
+                                type="text"
+                                name="licencia_numero"
+                                autocomplete="off"
+                                placeholder="LIC-12345678"
+                                :class="controlClass"
+                            />
+                            <span
+                                v-if="form.errors.licencia_numero"
+                                class="text-xs font-normal tracking-normal text-red-600 normal-case"
+                            >
+                                {{ form.errors.licencia_numero }}
+                            </span>
+                        </label>
+
+                        <label
+                            class="flex flex-col gap-1.5 text-xs font-semibold tracking-wide text-slate-500 uppercase"
+                        >
+                            Categoría
+                            <select
+                                v-model="form.licencia_categoria"
+                                name="licencia_categoria"
+                                :class="controlClass"
+                            >
+                                <option disabled value="">Selecciona</option>
+                                <option
+                                    v-for="categoria in categoriasLicencia"
+                                    :key="categoria"
+                                    :value="categoria"
+                                >
+                                    {{ categoria }}
+                                </option>
+                            </select>
+                            <span
+                                v-if="form.errors.licencia_categoria"
+                                class="text-xs font-normal tracking-normal text-red-600 normal-case"
+                            >
+                                {{ form.errors.licencia_categoria }}
+                            </span>
+                        </label>
+
+                        <label
+                            class="flex flex-col gap-1.5 text-xs font-semibold tracking-wide text-slate-500 uppercase sm:col-span-2"
+                        >
+                            Fecha de vencimiento
+                            <input
+                                v-model="form.licencia_vencimiento"
+                                type="date"
+                                name="licencia_vencimiento"
+                                :class="controlClass"
+                            />
+                            <span
+                                v-if="form.errors.licencia_vencimiento"
+                                class="text-xs font-normal tracking-normal text-red-600 normal-case"
+                            >
+                                {{ form.errors.licencia_vencimiento }}
+                            </span>
+                        </label>
+
+                        <h3
+                            class="mt-4 text-lg font-semibold text-brand-navy sm:col-span-2"
+                        >
+                            Seguridad
+                        </h3>
 
                         <label
                             class="flex flex-col gap-1.5 text-xs font-semibold tracking-wide text-slate-500 uppercase"

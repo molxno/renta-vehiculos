@@ -47,6 +47,11 @@ final class CalculadoraDevolucionEstandar implements CalculadoraDevolucion
             }
         }
 
+        foreach ($this->lineasDanosDeCondiciones($condiciones) as $linea) {
+            $desglose[] = $linea;
+            $cargos += $linea['monto_centavos'];
+        }
+
         $subtotal = $reserva->total_centavos + $cargos;
         $impuestos = intdiv($subtotal * (int) config('devolucion.iva_porcentaje'), 100);
 
@@ -57,5 +62,42 @@ final class CalculadoraDevolucionEstandar implements CalculadoraDevolucion
             'total_centavos' => $subtotal + $impuestos,
             'desglose' => $desglose,
         ];
+    }
+
+    /**
+     * Incluye daños aún no persistidos para la vista previa (RNF-011).
+     *
+     * @param  array<string, mixed>  $condiciones
+     * @return array<int, array{concepto: string, monto_centavos: int}>
+     */
+    private function lineasDanosDeCondiciones(array $condiciones): array
+    {
+        $danos = $condiciones['danos'] ?? [];
+
+        if (! is_array($danos)) {
+            return [];
+        }
+
+        $lineas = [];
+
+        foreach ($danos as $dano) {
+            if (! is_array($dano)) {
+                continue;
+            }
+
+            $descripcion = trim((string) ($dano['descripcion'] ?? ''));
+            $monto = $dano['monto_centavos'] ?? 0;
+
+            if ($descripcion === '' && (int) $monto === 0) {
+                continue;
+            }
+
+            $lineas[] = [
+                'concepto' => 'Daño: '.$descripcion,
+                'monto_centavos' => is_numeric($monto) ? (int) $monto : 0,
+            ];
+        }
+
+        return $lineas;
     }
 }

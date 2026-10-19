@@ -109,6 +109,39 @@ describe('creación de reservas', function () {
             ->and($reserva->moneda)->toBe('USD');
     });
 
+    it('exposes only rental notes backed by the MVP instead of deposit, age or free cancellation', function () {
+        $cliente = User::factory()->cliente()->create();
+
+        $this->actingAs($cliente)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->get(route('reservas.create'))
+            ->assertOk()
+            ->assertJsonPath('props.rentalNotes.0', 'La licencia de conducción vigente se verifica al entregar el vehículo.')
+            ->assertJsonPath('props.rentalNotes.1', 'Combustible: devolver al mismo nivel; hay cargo si falta.')
+            ->assertJsonPath('props.rentalNotes.2', 'Entrega y devolución en la sede elegida (informativo).')
+            ->assertJsonPath(
+                'props.rentalDisclaimer',
+                'Sin cargos al reservar. El cobro se hace al devolver el vehículo. Cancelar una reserva no forma parte de este MVP.',
+            );
+
+        $notes = $this->actingAs($cliente)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->get(route('reservas.create'))
+            ->json('props.rentalNotes');
+
+        expect($notes)->not->toContain('Licencia tipo B requerida')
+            ->and($notes)->not->toContain('Edad mínima: 21 años')
+            ->and($notes)->not->toContain('Depósito: $500 (reembolsable)');
+    });
+
     it('shows the current TRM on the reservation form and ignores a future rate', function () {
         $this->travelTo(Carbon::parse('2026-11-01 10:00:00'));
         $cliente = User::factory()->cliente()->create();
@@ -316,5 +349,46 @@ describe('confirmación y búsqueda de reservas', function () {
 
         expect($reserva->fresh()->estado)->toBe(ReservaEstado::Confirmada)
             ->and($reserva->fresh()->qr_codigo)->toBe('FAKE-QR-EXISTENTE');
+    });
+
+    it('keeps the chosen calendar dates in America/Bogota on the reservation receipt', function () {
+        expect(config('app.timezone'))->toBe('America/Bogota');
+
+        $cliente = User::factory()->cliente()->create();
+        $vehiculo = Vehiculo::factory()->create();
+        Tarifa::factory()->create([
+            'vehiculo_id' => $vehiculo->id,
+            'tipo_vehiculo' => $vehiculo->tipo,
+            'valor_diario_centavos' => 15000000,
+            'vigente_desde' => '2026-01-01',
+        ]);
+
+        $this->actingAs($cliente)->post(route('reservas.store'), [
+            'vehiculo_id' => $vehiculo->id,
+            'inicio' => '2026-10-19',
+            'fin' => '2026-10-21',
+        ])->assertRedirect();
+
+        $reserva = Reserva::query()->sole();
+
+        $this->actingAs($cliente)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->get(route('reservas.show', $reserva))
+            ->assertOk()
+            ->assertJsonPath('props.reservation.startsAt', '2026-10-19T00:00:00-05:00')
+            ->assertJsonPath('props.reservation.endsAt', '2026-10-21T00:00:00-05:00');
+
+        expect($reserva->inicio->timezone('America/Bogota')->format('d/m/Y'))->toBe('19/10/2026')
+            ->and($reserva->fin->timezone('America/Bogota')->format('d/m/Y'))->toBe('21/10/2026')
+            ->and($reserva->total_centavos)->toBe(35700000)
+            ->and(app(DisponibilidadService::class)->consultar(
+                Carbon::parse('2026-10-19'),
+                Carbon::parse('2026-10-21'),
+                $vehiculo->id,
+            )[0]['disponible'])->toBeFalse();
     });
 });

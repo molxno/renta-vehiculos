@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import { index as listarReservas } from '@/actions/App/Http/Controllers/ReservaController';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { formatFechaHora } from '@/lib/utils';
 import { catalogo } from '@/routes';
-import type { ReservationReceipt } from '@/types';
+import type { ReservationReceipt, ReservationTimelineItem } from '@/types';
 
 defineProps<{
     reservation: ReservationReceipt;
+    timeline: ReservationTimelineItem[];
+    actaUrl: string | null;
+    avisoLicencia: string | null;
+    cuentaUrl: string;
 }>();
 
 function pesos(centavos: number, currency: string): string {
@@ -19,10 +25,7 @@ function pesos(centavos: number, currency: string): string {
 }
 
 function fecha(value: string): string {
-    return new Intl.DateTimeFormat('es-CO', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
+    return formatFechaHora(value);
 }
 </script>
 
@@ -42,12 +45,29 @@ function fecha(value: string): string {
                 <p class="mt-2 text-sm text-white/75">
                     Guarda el código QR para identificar tu reserva.
                 </p>
+                <p class="mt-3 max-w-2xl text-sm text-white/80">
+                    El anticipo se registra al entregar el vehículo y el saldo
+                    se cobra en caja al devolverlo.
+                </p>
             </div>
         </section>
 
         <section
             class="mx-auto grid max-w-5xl gap-6 px-6 py-8 md:grid-cols-[minmax(0,1fr)_300px]"
         >
+            <div
+                v-if="avisoLicencia"
+                class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 md:col-span-2"
+                role="status"
+            >
+                <p class="font-semibold">{{ avisoLicencia }}</p>
+                <Link
+                    :href="cuentaUrl"
+                    class="mt-2 inline-flex font-semibold text-brand-teal hover:text-brand-teal-dark"
+                >
+                    Ir a Mi cuenta
+                </Link>
+            </div>
             <Card>
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -86,6 +106,54 @@ function fecha(value: string): string {
                         }}
                     </p>
                 </div>
+
+                <ol class="mt-8 space-y-3 border-t border-slate-200 pt-5">
+                    <li
+                        v-for="hito in timeline"
+                        :key="hito.key"
+                        class="flex items-start justify-between gap-3"
+                    >
+                        <div>
+                            <p
+                                class="font-semibold"
+                                :class="
+                                    hito.done
+                                        ? 'text-brand-navy'
+                                        : 'text-slate-400'
+                                "
+                            >
+                                {{ hito.label }}
+                            </p>
+                            <p class="text-xs text-slate-500">
+                                {{
+                                    hito.at
+                                        ? fecha(hito.at)
+                                        : hito.done
+                                          ? 'Hora no registrada'
+                                          : 'Pendiente'
+                                }}
+                            </p>
+                        </div>
+                        <span
+                            class="mt-0.5 rounded-full px-2 py-0.5 text-xs font-semibold"
+                            :class="
+                                hito.done
+                                    ? 'bg-teal-50 text-brand-teal'
+                                    : 'bg-slate-100 text-slate-500'
+                            "
+                        >
+                            {{ hito.done ? 'Listo' : 'Pendiente' }}
+                        </span>
+                    </li>
+                </ol>
+
+                <Link
+                    v-if="actaUrl"
+                    :href="actaUrl"
+                    class="mt-6 inline-flex items-center justify-center rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
+                >
+                    Ver acta de entrega
+                </Link>
             </Card>
 
             <Card class="flex flex-col items-center text-center">
@@ -120,8 +188,14 @@ function fecha(value: string): string {
                     Código único de prueba asociado a esta reserva.
                 </p>
                 <Link
+                    :href="listarReservas.url()"
+                    class="mt-5 inline-flex w-full justify-center rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-teal-dark focus:ring-2 focus:ring-brand-teal/40 focus:ring-offset-2 focus:outline-none"
+                >
+                    Ver mis reservas
+                </Link>
+                <Link
                     :href="catalogo.url()"
-                    class="mt-5 inline-flex w-full justify-center rounded-lg border border-brand-ink bg-white px-4 py-2 text-sm font-semibold text-brand-ink transition hover:bg-brand-ink/5 focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 focus:outline-none"
+                    class="mt-3 inline-flex w-full justify-center rounded-lg border border-brand-ink bg-white px-4 py-2 text-sm font-semibold text-brand-ink transition hover:bg-brand-ink/5 focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 focus:outline-none"
                 >
                     Volver al catálogo
                 </Link>

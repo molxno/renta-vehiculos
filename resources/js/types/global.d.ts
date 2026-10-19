@@ -19,6 +19,8 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
+            navigation: import('@/types/auth').NavigationItem[];
+            landingHref: string;
             sidebarOpen: boolean;
             flash?: {
                 success?: string;

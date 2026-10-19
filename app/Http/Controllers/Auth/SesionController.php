@@ -8,6 +8,8 @@ use App\Actions\Auth\CerrarSesion;
 use App\Actions\Auth\IniciarSesion;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\IniciarSesionRequest;
+use App\Models\User;
+use App\Services\AterrizajePorRol;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
@@ -19,8 +21,11 @@ final class SesionController extends Controller
         return inertia('Auth/Login');
     }
 
-    public function store(IniciarSesionRequest $request, IniciarSesion $iniciarSesion): RedirectResponse
-    {
+    public function store(
+        IniciarSesionRequest $request,
+        IniciarSesion $iniciarSesion,
+        AterrizajePorRol $aterrizajePorRol,
+    ): RedirectResponse {
         $iniciarSesion->handle(
             $request->string('email')->toString(),
             $request->string('password')->toString(),
@@ -30,7 +35,10 @@ final class SesionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home'));
+        $user = $request->user();
+        assert($user instanceof User);
+
+        return redirect()->to($aterrizajePorRol->urlTrasAutenticacion($user, $request));
     }
 
     public function destroy(Request $request, CerrarSesion $cerrarSesion): RedirectResponse

@@ -30,7 +30,7 @@ describe('registro de devolución', function () {
             'devuelto_at' => '2026-10-16 10:00:00',
             'checklist' => ['documentos' => true, 'llantas' => true],
             'observaciones' => 'Sin novedades',
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('devoluciones.show', $reservation);
 
         $record = ActaDevolucion::query()->where('reserva_id', $reservation->id)->sole();
 
@@ -50,7 +50,7 @@ describe('registro de devolución', function () {
             'danos' => [
                 ['descripcion' => 'Rayón en puerta', 'monto_centavos' => 5000000],
             ],
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('devoluciones.show', $reservation);
 
         $invoice = Factura::query()->where('reserva_id', $reservation->id)->sole();
 
@@ -256,7 +256,7 @@ describe('registro de devolución', function () {
         $this->post(route('devoluciones.store', $reservation), [
             'devuelto_at' => '2026-10-16 10:00:00',
             'evidencia' => $file,
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('devoluciones.show', $reservation);
 
         $record = ActaDevolucion::query()->where('reserva_id', $reservation->id)->sole();
 
