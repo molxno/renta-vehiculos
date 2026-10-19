@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Entregas\EvaluarVentanaDeEntrega;
 use App\Actions\Entregas\ListarReservasParaEntrega;
 use App\Actions\Entregas\RegistrarEntrega;
 use App\Enums\NivelCombustible;
+use App\Exceptions\EntregaFueraDeVentana;
 use App\Http\Requests\FiltrarEntregasRequest;
 use App\Http\Requests\StoreActaEntregaRequest;
+use App\Http\Requests\VerActaEntregaRequest;
 use App\Models\ActaEntrega;
 use App\Models\LicenciaConduccion;
 use App\Models\Reserva;
@@ -27,9 +30,19 @@ final class EntregaController extends Controller
         ]);
     }
 
-    public function create(Reserva $reserva): Response
-    {
+    public function create(
+        Reserva $reserva,
+        EvaluarVentanaDeEntrega $evaluarVentanaDeEntrega,
+    ): RedirectResponse|Response {
         $reserva->load(['user.licenciaConduccion', 'vehiculo']);
+
+        if ($reserva->mensajeBloqueoEntrega() === null) {
+            try {
+                $evaluarVentanaDeEntrega->asegurar($reserva);
+            } catch (EntregaFueraDeVentana $excepcion) {
+                return $excepcion->render();
+            }
+        }
 
         $licencia = $reserva->user->licenciaConduccion;
 
@@ -94,9 +107,56 @@ final class EntregaController extends Controller
                 'qrCode' => $reserva->qr_codigo,
                 'currency' => $reserva->moneda,
             ],
-            'acta' => $this->actaProps($reserva->actaEntrega),
+            'acta' => $this->actaProps($reserva->actaEntrega, $reserva),
             'anticipoCents' => $reserva->anticipoCentavos(),
             'devolucionUrl' => route('devoluciones.create', $reserva),
+        ]);
+    }
+
+    public function acta(VerActaEntregaRequest $request, Reserva $reserva): Response
+    {
+        $request->validated();
+        $reserva->load(['user.licenciaConduccion', 'vehiculo', 'actaEntrega.coordinador']);
+
+        $acta = $reserva->actaEntrega;
+
+        if (! $acta instanceof ActaEntrega) {
+            abort(404);
+        }
+
+        $checklist = is_array($acta->checklist) ? $acta->checklist : [];
+        $kilometraje = $checklist['kilometraje'] ?? null;
+        $combustible = $checklist['combustible'] ?? null;
+        $nivel = is_string($combustible) ? NivelCombustible::tryFrom($combustible) : null;
+        $licencia = $reserva->user->licenciaConduccion;
+
+        return inertia('Entregas/Acta', [
+            'acta' => [
+                'numero' => $acta->numero !== null && $acta->numero !== ''
+                    ? $acta->numero
+                    : sprintf('%s-%d', (string) config('entrega.prefijo_acta'), $acta->id),
+                'entregadoAt' => $acta->entregado_at?->toIso8601String(),
+                'firmadoAt' => $acta->firmado_at?->toIso8601String(),
+                'firmanteNombre' => $acta->firmante_nombre,
+                'licenciaResultado' => $acta->licencia_resultado,
+                'kilometraje' => is_numeric($kilometraje) ? (int) $kilometraje : null,
+                'combustible' => $nivel instanceof NivelCombustible ? $nivel->etiqueta() : (is_string($combustible) ? $combustible : null),
+            ],
+            'reservation' => [
+                'id' => $reserva->id,
+                'qrCode' => $reserva->qr_codigo,
+            ],
+            'cliente' => [
+                'nombre' => $reserva->user->name,
+                'documento' => $reserva->user->numero_documento,
+            ],
+            'vehiculo' => [
+                'label' => trim($reserva->vehiculo->marca.' '.$reserva->vehiculo->modelo),
+                'placa' => $reserva->vehiculo->placa,
+            ],
+            'licencia' => $this->licenciaProps($licencia),
+            'coordinador' => $acta->coordinador?->name,
+            'aviso' => 'Documento generado por RENT-GO (demo)',
         ]);
     }
 
@@ -119,18 +179,33 @@ final class EntregaController extends Controller
     }
 
     /**
-     * @return array{entregadoAt: string|null, kilometraje: int|null, combustible: string|null}
+     * @return array{numero: string|null, entregadoAt: string|null, kilometraje: int|null, combustible: string|null, actaUrl: string|null}
      */
-    private function actaProps(?ActaEntrega $acta): array
+    private function actaProps(?ActaEntrega $acta, Reserva $reserva): array
     {
-        $checklist = is_array($acta?->checklist) ? $acta->checklist : [];
+        if (! $acta instanceof ActaEntrega) {
+            return [
+                'numero' => null,
+                'entregadoAt' => null,
+                'kilometraje' => null,
+                'combustible' => null,
+                'actaUrl' => null,
+            ];
+        }
+
+        $checklist = is_array($acta->checklist) ? $acta->checklist : [];
         $kilometraje = $checklist['kilometraje'] ?? null;
         $combustible = $checklist['combustible'] ?? null;
+        $numero = $acta->numero !== null && $acta->numero !== ''
+            ? $acta->numero
+            : sprintf('%s-%d', (string) config('entrega.prefijo_acta'), $acta->id);
 
         return [
-            'entregadoAt' => $acta?->entregado_at?->toIso8601String(),
+            'numero' => $numero,
+            'entregadoAt' => $acta->entregado_at?->toIso8601String(),
             'kilometraje' => is_numeric($kilometraje) ? (int) $kilometraje : null,
             'combustible' => is_string($combustible) ? $combustible : null,
+            'actaUrl' => route('entregas.acta', $reserva),
         ];
     }
 }

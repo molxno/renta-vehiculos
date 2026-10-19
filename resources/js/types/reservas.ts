@@ -22,6 +22,13 @@ export type ReservationFormProps = {
     rentalDisclaimer: string;
 };
 
+export type ReservationTimelineItem = {
+    key: string;
+    label: string;
+    at: string | null;
+    done: boolean;
+};
+
 export type ReservationReceipt = {
     id: number;
     status: string;

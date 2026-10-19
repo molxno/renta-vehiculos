@@ -39,6 +39,10 @@ Route::middleware(['auth', 'rol:administrador'])
         Route::put('/trm', [TrmController::class, 'update'])->name('trm.update');
     });
 
+Route::get('/reservas/{reserva}/entrega/acta', [EntregaController::class, 'acta'])
+    ->middleware('auth')
+    ->name('entregas.acta');
+
 Route::middleware(['auth', 'rol:coordinador,administrador'])->group(function (): void {
     Route::get('/entregas', [EntregaController::class, 'index'])->name('entregas.index');
     Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');

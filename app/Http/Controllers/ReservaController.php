@@ -9,10 +9,14 @@ use App\Actions\Reservas\ConfirmarReserva as ConfirmarReservaAction;
 use App\Actions\Reservas\CrearReserva;
 use App\Actions\Reservas\ListarReservas;
 use App\Contracts\TarifaService;
+use App\Enums\FacturaEstado;
+use App\Enums\PagoEstado;
+use App\Enums\ReservaEstado;
 use App\Exceptions\TransicionEstadoInvalida;
 use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\PrepararReservaRequest;
 use App\Http\Requests\StoreReservaRequest;
+use App\Models\Pago;
 use App\Models\Reserva;
 use App\Models\Trm;
 use App\Models\User;
@@ -118,7 +122,7 @@ final class ReservaController extends Controller
 
     public function show(Reserva $reserva): Response
     {
-        $reserva->loadMissing('vehiculo');
+        $reserva->loadMissing(['vehiculo', 'actaEntrega', 'factura', 'pagos']);
 
         return inertia('Reservas/Show', [
             'reservation' => [
@@ -133,6 +137,8 @@ final class ReservaController extends Controller
                 'currency' => $reserva->moneda,
                 'qrCode' => $reserva->qr_codigo,
             ],
+            'timeline' => $this->lineaDeTiempo($reserva),
+            'actaUrl' => $reserva->actaEntrega ? route('entregas.acta', $reserva) : null,
         ]);
     }
 
@@ -164,5 +170,57 @@ final class ReservaController extends Controller
         }
 
         return to_route('reservas.show', $reserva);
+    }
+
+    /**
+     * @return list<array{key: string, label: string, at: string|null, done: bool}>
+     */
+    private function lineaDeTiempo(Reserva $reserva): array
+    {
+        $pagoAprobado = $reserva->pagos->first(
+            fn (Pago $pago): bool => $pago->estado === PagoEstado::Aprobado,
+        );
+
+        $confirmada = ! in_array($reserva->estado, [ReservaEstado::Pendiente, ReservaEstado::Cancelada], true);
+        $entregada = $reserva->actaEntrega !== null
+            || in_array($reserva->estado, [
+                ReservaEstado::Entregada,
+                ReservaEstado::Devuelta,
+                ReservaEstado::Facturada,
+                ReservaEstado::Pagada,
+            ], true);
+        $facturada = $reserva->factura !== null
+            || in_array($reserva->estado, [ReservaEstado::Facturada, ReservaEstado::Pagada], true);
+        $pagada = $reserva->estado === ReservaEstado::Pagada
+            || $reserva->factura?->estado === FacturaEstado::Pagada
+            || $pagoAprobado instanceof Pago;
+
+        return [
+            [
+                'key' => 'confirmada',
+                'label' => 'Confirmada',
+                'at' => $confirmada ? $reserva->created_at?->toIso8601String() : null,
+                'done' => $confirmada,
+            ],
+            [
+                'key' => 'entregada',
+                'label' => 'Entregada',
+                'at' => $reserva->actaEntrega?->entregado_at?->toIso8601String(),
+                'done' => $entregada,
+            ],
+            [
+                'key' => 'facturada',
+                'label' => 'Facturada',
+                'at' => $reserva->factura?->created_at?->toIso8601String(),
+                'done' => $facturada,
+            ],
+            [
+                'key' => 'pagada',
+                'label' => 'Pagada',
+                'at' => $pagoAprobado?->created_at?->toIso8601String()
+                    ?? ($pagada ? $reserva->factura?->updated_at?->toIso8601String() : null),
+                'done' => $pagada,
+            ],
+        ];
     }
 }

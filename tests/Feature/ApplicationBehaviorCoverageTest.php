@@ -128,6 +128,11 @@ test('all documented write routes validate and redirect', function () {
 
     $empleado = User::factory()->coordinador()->create();
 
+    $reservation->update([
+        'inicio' => now()->startOfDay(),
+        'fin' => now()->addDays(3)->startOfDay(),
+    ]);
+
     $this->actingAs($empleado)->post(route('entregas.store', $reservation), [
         'entregado_at' => now()->toDateTimeString(),
         'aceptacion' => '1',
@@ -198,7 +203,7 @@ test('requests expose authorization and validation contracts', function () {
 test('models expose their casts and relationships', function () {
     $models = [
         [new ActaDevolucion, ['devuelto_at', 'checklist'], ['reserva' => BelongsTo::class]],
-        [new ActaEntrega, ['entregado_at', 'checklist'], ['reserva' => BelongsTo::class]],
+        [new ActaEntrega, ['entregado_at', 'firmado_at', 'checklist'], ['reserva' => BelongsTo::class, 'coordinador' => BelongsTo::class]],
         [new Contrato, ['condiciones', 'firmado_at'], ['reserva' => BelongsTo::class]],
         [new Convenio, ['descuento_porcentaje', 'activo'], ['reservas' => HasMany::class]],
         [new Dano, ['monto_centavos'], ['reserva' => BelongsTo::class]],

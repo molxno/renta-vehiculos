@@ -17,9 +17,11 @@ const props = defineProps<{
         currency: string;
     };
     acta: {
+        numero: string | null;
         entregadoAt: string | null;
         kilometraje: number | null;
         combustible: string | null;
+        actaUrl: string | null;
     };
     anticipoCents: number;
     devolucionUrl: string;
@@ -55,6 +57,12 @@ function fecha(value: string | null): string {
                     La reserva #{{ reservation.id }} quedó entregada. El
                     vehículo {{ reservation.vehicleLabel }} ahora figura como
                     alquilado.
+                </p>
+                <p
+                    v-if="acta.numero"
+                    class="mt-3 text-sm font-semibold text-brand-navy"
+                >
+                    Acta {{ acta.numero }}
                 </p>
             </div>
 
@@ -113,6 +121,13 @@ function fecha(value: string | null): string {
                 </p>
 
                 <div class="mt-8 flex flex-wrap gap-3">
+                    <Link
+                        v-if="acta.actaUrl"
+                        :href="acta.actaUrl"
+                        class="inline-flex items-center justify-center rounded-lg bg-brand-navy px-4 py-2 text-sm font-semibold text-white hover:bg-brand-navy/90"
+                    >
+                        Ver acta de entrega
+                    </Link>
                     <Link
                         :href="devolucionUrl"
                         class="inline-flex items-center justify-center rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"

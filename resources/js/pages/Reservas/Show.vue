@@ -5,10 +5,12 @@ import Card from '@/components/ui/Card.vue';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { formatFechaHora } from '@/lib/utils';
 import { catalogo } from '@/routes';
-import type { ReservationReceipt } from '@/types';
+import type { ReservationReceipt, ReservationTimelineItem } from '@/types';
 
 defineProps<{
     reservation: ReservationReceipt;
+    timeline: ReservationTimelineItem[];
+    actaUrl: string | null;
 }>();
 
 function pesos(centavos: number, currency: string): string {
@@ -84,6 +86,54 @@ function fecha(value: string): string {
                         }}
                     </p>
                 </div>
+
+                <ol class="mt-8 space-y-3 border-t border-slate-200 pt-5">
+                    <li
+                        v-for="hito in timeline"
+                        :key="hito.key"
+                        class="flex items-start justify-between gap-3"
+                    >
+                        <div>
+                            <p
+                                class="font-semibold"
+                                :class="
+                                    hito.done
+                                        ? 'text-brand-navy'
+                                        : 'text-slate-400'
+                                "
+                            >
+                                {{ hito.label }}
+                            </p>
+                            <p class="text-xs text-slate-500">
+                                {{
+                                    hito.at
+                                        ? fecha(hito.at)
+                                        : hito.done
+                                          ? 'Hora no registrada'
+                                          : 'Pendiente'
+                                }}
+                            </p>
+                        </div>
+                        <span
+                            class="mt-0.5 rounded-full px-2 py-0.5 text-xs font-semibold"
+                            :class="
+                                hito.done
+                                    ? 'bg-teal-50 text-brand-teal'
+                                    : 'bg-slate-100 text-slate-500'
+                            "
+                        >
+                            {{ hito.done ? 'Listo' : 'Pendiente' }}
+                        </span>
+                    </li>
+                </ol>
+
+                <Link
+                    v-if="actaUrl"
+                    :href="actaUrl"
+                    class="mt-6 inline-flex items-center justify-center rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
+                >
+                    Ver acta de entrega
+                </Link>
             </Card>
 
             <Card class="flex flex-col items-center text-center">
