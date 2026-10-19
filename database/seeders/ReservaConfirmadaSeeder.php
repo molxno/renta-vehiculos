@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Enums\ReservaEstado;
@@ -14,14 +16,44 @@ class ReservaConfirmadaSeeder extends Seeder
     {
         $this->call(MinimumCatalogSeeder::class);
 
+        $zona = (string) config('entrega.zona_horaria');
+        $hoy = now()->timezone($zona)->startOfDay();
+        $clienteId = User::where('email', 'cliente@renta.test')->value('id');
+
         Reserva::updateOrCreate(
             ['qr_codigo' => 'QR-RESERVA-CONFIRMADA'],
             [
-                'user_id' => User::where('email', 'cliente@renta.test')->value('id'),
+                'user_id' => $clienteId,
                 'vehiculo_id' => Vehiculo::where('placa', 'ABC-123')->value('id'),
                 'estado' => ReservaEstado::Confirmada,
-                'inicio' => '2026-02-01 09:00:00',
-                'fin' => '2026-02-04 09:00:00',
+                'inicio' => $hoy,
+                'fin' => $hoy->copy()->addDays(3),
+                'total_centavos' => 45000000,
+                'moneda' => 'COP',
+            ],
+        );
+
+        Reserva::updateOrCreate(
+            ['qr_codigo' => 'QR-RESERVA-FUTURA'],
+            [
+                'user_id' => $clienteId,
+                'vehiculo_id' => Vehiculo::where('placa', 'GHI-789')->value('id'),
+                'estado' => ReservaEstado::Confirmada,
+                'inicio' => $hoy->copy()->addDays(2),
+                'fin' => $hoy->copy()->addDays(5),
+                'total_centavos' => 45000000,
+                'moneda' => 'COP',
+            ],
+        );
+
+        Reserva::updateOrCreate(
+            ['qr_codigo' => 'QR-RESERVA-VENCIDA'],
+            [
+                'user_id' => $clienteId,
+                'vehiculo_id' => Vehiculo::where('placa', 'ABC-123')->value('id'),
+                'estado' => ReservaEstado::Confirmada,
+                'inicio' => $hoy->copy()->subDays(10),
+                'fin' => $hoy->copy()->subDays(7),
                 'total_centavos' => 45000000,
                 'moneda' => 'COP',
             ],

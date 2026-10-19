@@ -28,7 +28,7 @@ function mvpInertiaHeaders(): array
 test('seeded MVP exposes the complete smoke flow', function () {
     $this->seed();
 
-    $reservation = Reserva::where('estado', ReservaEstado::Confirmada)->firstOrFail();
+    $reservation = Reserva::where('qr_codigo', 'QR-RESERVA-CONFIRMADA')->firstOrFail();
     $invoice = Factura::query()->firstOrFail();
     $headers = mvpInertiaHeaders();
 
@@ -168,6 +168,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         ->assertJsonPath('props.reservation.totalCents', 53550000);
 
     $this->actingAs(User::query()->where('email', 'coordinador@renta.test')->sole());
+    $this->travelTo('2026-12-01 10:00:00');
 
     $this->post(route('entregas.store', $reserva), [
         'entregado_at' => '2026-12-01 09:00:00',

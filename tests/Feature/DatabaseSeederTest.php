@@ -15,7 +15,7 @@ test('database seeder loads the catalog and flow fixtures', function () {
 
     expect(User::count())->toBe(5)
         ->and(Vehiculo::count())->toBe(3)
-        ->and(Reserva::count())->toBe(4)
+        ->and(Reserva::count())->toBe(6)
         ->and(Factura::count())->toBe(2)
         ->and(Pago::count())->toBe(1);
 
@@ -24,6 +24,8 @@ test('database seeder loads the catalog and flow fixtures', function () {
         ->and(Reserva::where('estado', ReservaEstado::Devuelta)->exists())->toBeTrue()
         ->and(Reserva::where('estado', ReservaEstado::Facturada)->exists())->toBeTrue()
         ->and(Reserva::where('qr_codigo', 'QR-RESERVA-CONFIRMADA')->exists())->toBeTrue()
+        ->and(Reserva::where('qr_codigo', 'QR-RESERVA-FUTURA')->exists())->toBeTrue()
+        ->and(Reserva::where('qr_codigo', 'QR-RESERVA-VENCIDA')->exists())->toBeTrue()
         ->and(Reserva::where('qr_codigo', 'QR-ALQUILER-ENTREGADO')->exists())->toBeTrue()
         ->and(Reserva::where('qr_codigo', 'QR-DEVOLUCION-FACTURA')->exists())->toBeTrue()
         ->and(Reserva::where('qr_codigo', 'QR-PAGO-RECHAZADO')->exists())->toBeTrue()
