@@ -62,6 +62,27 @@ describe('cuenta del cliente', function () {
             ->assertJsonPath('props.updateUrl', route('cuenta.update'));
     });
 
+    it('shows the stored license when the client already has one', function () {
+        $user = User::factory()->cliente()->create();
+        $vencimiento = now()->addYears(2)->toDateString();
+        LicenciaConduccion::factory()->create([
+            'user_id' => $user->id,
+            'numero' => 'LIC-VIGENTE-1',
+            'categoria' => 'B1',
+            'fecha_vencimiento' => $vencimiento,
+        ]);
+
+        $this->actingAs($user)
+            ->withHeaders(cabecerasInertia())
+            ->get(route('cuenta.show'))
+            ->assertOk()
+            ->assertJsonPath('component', 'Cuenta/Show')
+            ->assertJsonPath('props.licencia.numero', 'LIC-VIGENTE-1')
+            ->assertJsonPath('props.licencia.categoria', 'B1')
+            ->assertJsonPath('props.licencia.fecha_vencimiento', $vencimiento)
+            ->assertJsonPath('props.licencia.vigente', true);
+    });
+
     it('registers a license for the authenticated user', function () {
         $user = User::factory()->cliente()->create();
         $vencimiento = now()->addYears(2)->toDateString();
