@@ -15,6 +15,8 @@ use App\Models\Factura;
 use App\Models\Pago;
 use App\Models\Reserva;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Response;
 
 final class PagoController extends Controller
@@ -29,7 +31,7 @@ final class PagoController extends Controller
         ]);
     }
 
-    public function create(Reserva $reserva): Response
+    public function create(Request $request, Reserva $reserva): Response
     {
         $reserva->load(['factura', 'pagos', 'user', 'vehiculo']);
         $factura = $reserva->factura;
@@ -61,6 +63,7 @@ final class PagoController extends Controller
                 MetodoPago::cases(),
             ),
             'lastPayment' => $this->paymentProps($ultimo instanceof Pago ? $ultimo : null),
+            'rechazoActual' => $this->mensajeRechazoActual($request),
             'storeUrl' => route('pagos.store', $reserva),
         ]);
     }
@@ -70,12 +73,24 @@ final class PagoController extends Controller
         Reserva $reserva,
         RegistrarPago $registrarPago,
     ): RedirectResponse {
-        $registrarPago->handle(
-            $reserva,
-            $request->enum('metodo', MetodoPago::class),
-            $request->integer('monto_centavos'),
-            $request->string('numero_tarjeta')->toString() ?: null,
-        );
+        try {
+            $registrarPago->handle(
+                $reserva,
+                $request->enum('metodo', MetodoPago::class),
+                $request->integer('monto_centavos'),
+                $request->string('numero_tarjeta')->toString() ?: null,
+            );
+        } catch (ValidationException $excepcion) {
+            /** @var list<string> $mensajesTarjeta */
+            $mensajesTarjeta = $excepcion->errors()['numero_tarjeta'] ?? [];
+            $mensaje = $mensajesTarjeta[0] ?? null;
+
+            if (is_string($mensaje)) {
+                $request->session()->flash('pago_rechazado', $mensaje);
+            }
+
+            throw $excepcion;
+        }
 
         return to_route('pagos.show', $reserva);
     }
@@ -151,6 +166,13 @@ final class PagoController extends Controller
             'referencia' => $pago->referencia,
             'montoCents' => $pago->monto_centavos,
         ];
+    }
+
+    private function mensajeRechazoActual(Request $request): ?string
+    {
+        $mensaje = $request->session()->get('pago_rechazado');
+
+        return is_string($mensaje) ? $mensaje : null;
     }
 
     private function etiquetaMetodo(MetodoPago $metodo): string

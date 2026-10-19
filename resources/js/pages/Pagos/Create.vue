@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { index as listarPagos } from '@/actions/App/Http/Controllers/PagoController';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
@@ -29,6 +30,7 @@ const props = defineProps<{
     currency: string;
     methods: PagoMetodo[];
     lastPayment: PagoIntento | null;
+    rechazoActual: string | null;
     storeUrl: string;
 }>();
 
@@ -48,6 +50,16 @@ function pesos(centavos: number): string {
 
 function etiquetaMetodo(metodo: string): string {
     return props.methods.find((item) => item.value === metodo)?.label ?? metodo;
+}
+
+const mensajeRechazo = computed(
+    () => props.rechazoActual ?? form.errors.numero_tarjeta ?? null,
+);
+
+function textoRechazo(mensaje: string): string {
+    const razon = mensaje.trim().replace(/[.]+$/u, '');
+
+    return `${razon}. La factura sigue pendiente. Puedes reintentar con otro método o con otra tarjeta.`;
 }
 
 function enviar(): void {
@@ -84,19 +96,12 @@ function enviar(): void {
             </div>
 
             <div
-                v-if="lastPayment?.estado === 'rechazado'"
+                v-if="mensajeRechazo"
                 class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
                 role="alert"
             >
                 <p class="font-semibold">Pago rechazado</p>
-                <p class="mt-1">
-                    {{
-                        lastPayment.mensaje ??
-                        'La pasarela simulada rechazó el cobro.'
-                    }}
-                    La factura sigue pendiente. Puedes reintentar con otro
-                    método o con otra tarjeta.
-                </p>
+                <p class="mt-1">{{ textoRechazo(mensajeRechazo) }}</p>
             </div>
 
             <div class="grid gap-5 lg:grid-cols-3">
