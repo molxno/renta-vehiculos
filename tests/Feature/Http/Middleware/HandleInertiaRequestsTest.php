@@ -18,7 +18,8 @@ it('does not share navigation links for guests', function () {
     $this->withHeaders(cabecerasInertiaNavegacion())
         ->get(route('home'))
         ->assertOk()
-        ->assertJsonPath('props.navigation', []);
+        ->assertJsonPath('props.navigation', [])
+        ->assertJsonPath('props.landingHref', route('home'));
 });
 
 it('shares only working navigation links for each role', function (UsuarioRol $rol) {
@@ -42,12 +43,19 @@ it('shares only working navigation links for each role', function (UsuarioRol $r
         ],
         UsuarioRol::Gerente => [],
     };
+    $aterrizaje = match ($rol) {
+        UsuarioRol::Cliente, UsuarioRol::Administrador => route('reservas.index'),
+        UsuarioRol::Coordinador => route('entregas.index'),
+        UsuarioRol::Cajero => route('pagos.index'),
+        UsuarioRol::Gerente => route('home'),
+    };
 
     $this->actingAs(User::factory()->create(['rol' => $rol]))
         ->withHeaders(cabecerasInertiaNavegacion())
         ->get(route('home'))
         ->assertOk()
-        ->assertJsonPath('props.navigation', $esperado);
+        ->assertJsonPath('props.navigation', $esperado)
+        ->assertJsonPath('props.landingHref', $aterrizaje);
 })->with([
     'cliente' => UsuarioRol::Cliente,
     'coordinador' => UsuarioRol::Coordinador,

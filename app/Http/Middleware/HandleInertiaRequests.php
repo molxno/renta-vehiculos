@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Enums\UsuarioRol;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -54,6 +53,9 @@ final class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'navigation' => $this->navigationFor($user),
+            'landingHref' => $user instanceof User
+                ? $user->rol->urlAterrizaje()
+                : route('home'),
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
@@ -70,25 +72,6 @@ final class HandleInertiaRequests extends Middleware
             return [];
         }
 
-        return match ($user->rol) {
-            UsuarioRol::Cliente => [
-                ['label' => 'Mis reservas', 'href' => route('reservas.index')],
-            ],
-            UsuarioRol::Coordinador => [
-                ['label' => 'Reservas', 'href' => route('reservas.index')],
-                ['label' => 'Entregas', 'href' => route('entregas.index')],
-                ['label' => 'Devoluciones', 'href' => route('devoluciones.index')],
-            ],
-            UsuarioRol::Cajero => [
-                ['label' => 'Pagos', 'href' => route('pagos.index')],
-            ],
-            UsuarioRol::Administrador => [
-                ['label' => 'Tasa de cambio', 'href' => route('admin.trm.edit')],
-                ['label' => 'Entregas', 'href' => route('entregas.index')],
-                ['label' => 'Devoluciones', 'href' => route('devoluciones.index')],
-                ['label' => 'Pagos', 'href' => route('pagos.index')],
-            ],
-            UsuarioRol::Gerente => [],
-        };
+        return $user->rol->enlacesNavegacion();
     }
 }

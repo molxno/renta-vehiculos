@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Actions\Auth\RegistrarCliente;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegistrarClienteRequest;
+use App\Services\AterrizajePorRol;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
@@ -21,6 +22,7 @@ final class RegistroController extends Controller
     public function store(
         RegistrarClienteRequest $request,
         RegistrarCliente $registrarCliente,
+        AterrizajePorRol $aterrizajePorRol,
     ): RedirectResponse {
         $user = $registrarCliente->handle(
             $request->string('name')->toString(),
@@ -34,6 +36,6 @@ final class RegistroController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return to_route('home');
+        return redirect()->to($aterrizajePorRol->urlTrasAutenticacion($user, $request));
     }
 }

@@ -25,7 +25,7 @@ describe('inicio de sesión', function () {
         'alias en inglés' => '/login',
     ]);
 
-    it('authenticates a seeded user by role', function (string $email, UsuarioRol $rol) {
+    it('authenticates a seeded user by role', function (string $email, UsuarioRol $rol, string $rutaAterrizaje) {
         $this->seed(MinimumCatalogSeeder::class);
 
         $this->from(route('login'))
@@ -33,19 +33,66 @@ describe('inicio de sesión', function () {
                 'email' => $email,
                 'password' => 'password',
             ])
-            ->assertRedirect(route('home'));
+            ->assertRedirect(route($rutaAterrizaje));
 
         $user = User::query()->where('email', $email)->firstOrFail();
 
         $this->assertAuthenticatedAs($user);
         expect($user->rol)->toBe($rol);
     })->with([
-        'cliente' => ['cliente@renta.test', UsuarioRol::Cliente],
-        'coordinador' => ['coordinador@renta.test', UsuarioRol::Coordinador],
-        'cajero' => ['cajero@renta.test', UsuarioRol::Cajero],
-        'administrador' => ['administrador@renta.test', UsuarioRol::Administrador],
-        'gerente' => ['gerente@renta.test', UsuarioRol::Gerente],
+        'cliente' => ['cliente@renta.test', UsuarioRol::Cliente, 'reservas.index'],
+        'coordinador' => ['coordinador@renta.test', UsuarioRol::Coordinador, 'entregas.index'],
+        'cajero' => ['cajero@renta.test', UsuarioRol::Cajero, 'pagos.index'],
+        'administrador' => ['administrador@renta.test', UsuarioRol::Administrador, 'reservas.index'],
+        'gerente' => ['gerente@renta.test', UsuarioRol::Gerente, 'home'],
     ]);
+
+    it('does not return 403 on the landing page of each role', function (UsuarioRol $rol, string $rutaAterrizaje) {
+        $user = User::factory()->create(['rol' => $rol]);
+
+        $this->actingAs($user)
+            ->get(route($rutaAterrizaje))
+            ->assertOk();
+    })->with([
+        'cliente' => [UsuarioRol::Cliente, 'reservas.index'],
+        'coordinador' => [UsuarioRol::Coordinador, 'entregas.index'],
+        'cajero' => [UsuarioRol::Cajero, 'pagos.index'],
+        'administrador' => [UsuarioRol::Administrador, 'reservas.index'],
+        'gerente' => [UsuarioRol::Gerente, 'home'],
+    ]);
+
+    it('honors an intended url the role can access', function () {
+        $user = User::factory()->cajero()->create();
+
+        $this->get(route('pagos.index'))->assertRedirect(route('login'));
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('pagos.index'));
+    });
+
+    it('falls back to the role landing when the intended url is forbidden', function () {
+        $user = User::factory()->cajero()->create();
+
+        $this->get(route('entregas.index'))->assertRedirect(route('login'));
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('pagos.index'));
+    });
+
+    it('does not send a coordinator to the client reservation form after login', function () {
+        $user = User::factory()->coordinador()->create();
+
+        $this->get(route('reservas.create'))->assertRedirect(route('login'));
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('entregas.index'));
+    });
 
     it('rejects invalid credentials without authenticating', function () {
         $user = User::factory()->create([
@@ -154,7 +201,7 @@ describe('registro mínimo', function () {
                 'password_confirmation' => 'password',
                 'rol' => UsuarioRol::Administrador->value,
             ])
-            ->assertRedirect(route('home'));
+            ->assertRedirect(route('reservas.index'));
 
         $user = User::query()->where('email', 'ana.nueva@renta.test')->firstOrFail();
 
@@ -202,23 +249,17 @@ describe('registro mínimo', function () {
         $this->assertGuest();
     });
 
-    it('redirects an authenticated user away from guest pages', function () {
-        $user = User::factory()->create();
+    it('redirects an authenticated user away from guest pages', function (string $path, UsuarioRol $rol, string $rutaAterrizaje) {
+        $user = User::factory()->create(['rol' => $rol]);
 
         $this->actingAs($user)
-            ->get(route('login'))
-            ->assertRedirect(route('home'));
-
-        $this->actingAs($user)
-            ->get('/login')
-            ->assertRedirect(route('home'));
-
-        $this->actingAs($user)
-            ->get(route('register'))
-            ->assertRedirect(route('home'));
-
-        $this->actingAs($user)
-            ->get('/register')
-            ->assertRedirect(route('home'));
-    });
+            ->get($path)
+            ->assertRedirect(route($rutaAterrizaje));
+    })->with([
+        'cliente en iniciar sesión' => ['/iniciar-sesion', UsuarioRol::Cliente, 'reservas.index'],
+        'coordinador en alias login' => ['/login', UsuarioRol::Coordinador, 'entregas.index'],
+        'cajero en registro' => ['/registro', UsuarioRol::Cajero, 'pagos.index'],
+        'administrador en alias register' => ['/register', UsuarioRol::Administrador, 'reservas.index'],
+        'gerente en iniciar sesión' => ['/iniciar-sesion', UsuarioRol::Gerente, 'home'],
+    ]);
 });
