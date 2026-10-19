@@ -4,6 +4,7 @@ import { index as listarEntregas } from '@/actions/App/Http/Controllers/EntregaC
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { fechaHoraLocal } from '@/lib/utils';
 import type { EntregaLicencia } from '@/types';
 
 const props = defineProps<{
@@ -33,13 +34,6 @@ const props = defineProps<{
     storeUrl: string;
     nivelesCombustible: Array<{ value: string; label: string }>;
 }>();
-
-function fechaHoraLocal(): string {
-    const now = new Date();
-    const offset = now.getTimezoneOffset() * 60_000;
-
-    return new Date(ahora.getTime() - offset).toISOString().slice(0, 16);
-}
 
 const form = useForm({
     entregado_at: fechaHoraLocal(),

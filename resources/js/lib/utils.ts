@@ -19,3 +19,9 @@ export function formatFechaHora(value: string | null): string {
         timeZone: APP_TIMEZONE,
     }).format(new Date(value));
 }
+
+export function fechaHoraLocal(fecha: Date = new Date()): string {
+    const offset = fecha.getTimezoneOffset() * 60_000;
+
+    return new Date(fecha.getTime() - offset).toISOString().slice(0, 16);
+}
