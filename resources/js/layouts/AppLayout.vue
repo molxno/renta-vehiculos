@@ -8,6 +8,8 @@ const page = usePage();
 const authUser = computed(() => page.props.auth?.user ?? null);
 const navigation = computed(() => page.props.navigation ?? []);
 const landingHref = computed(() => page.props.landingHref ?? '/');
+const flashError = computed(() => page.props.flash?.error ?? null);
+const flashSuccess = computed(() => page.props.flash?.success ?? null);
 const loginUrl = login.url();
 const logoutUrl = logout.url();
 </script>
@@ -52,6 +54,20 @@ const logoutUrl = logout.url();
         </header>
         <main class="w-full flex-1 bg-slate-50">
             <div class="mx-auto max-w-7xl px-6 py-8">
+                <div
+                    v-if="flashError"
+                    class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                    role="alert"
+                >
+                    {{ flashError }}
+                </div>
+                <div
+                    v-if="flashSuccess"
+                    class="mb-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900"
+                    role="status"
+                >
+                    {{ flashSuccess }}
+                </div>
                 <slot />
             </div>
         </main>

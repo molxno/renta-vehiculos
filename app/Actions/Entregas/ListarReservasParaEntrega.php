@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class ListarReservasParaEntrega
 {
+    public function __construct(private EvaluarVentanaDeEntrega $evaluarVentanaDeEntrega) {}
+
     /**
      * @return array<int, array{
      *     id: int,
@@ -22,7 +24,9 @@ final class ListarReservasParaEntrega
      *     startsAt: string,
      *     endsAt: string,
      *     totalCents: int,
-     *     currency: string
+     *     currency: string,
+     *     deliverable: bool,
+     *     deliveryReason: string|null
      * }>
      */
     public function handle(string $busqueda = ''): array
@@ -53,19 +57,25 @@ final class ListarReservasParaEntrega
         }
 
         return $consulta->get()
-            ->map(fn (Reserva $reserva): array => [
-                'id' => $reserva->id,
-                'status' => $reserva->estado->value,
-                'vehicleLabel' => trim($reserva->vehiculo->marca.' '.$reserva->vehiculo->modelo),
-                'vehiclePlate' => $reserva->vehiculo->placa,
-                'clientName' => $reserva->user->name,
-                'clientDocument' => $reserva->user->numero_documento,
-                'qrCode' => $reserva->qr_codigo,
-                'startsAt' => $reserva->inicio->toIso8601String(),
-                'endsAt' => $reserva->fin->toIso8601String(),
-                'totalCents' => $reserva->total_centavos,
-                'currency' => $reserva->moneda,
-            ])
+            ->map(function (Reserva $reserva): array {
+                $ventana = $this->evaluarVentanaDeEntrega->handle($reserva);
+
+                return [
+                    'id' => $reserva->id,
+                    'status' => $reserva->estado->value,
+                    'vehicleLabel' => trim($reserva->vehiculo->marca.' '.$reserva->vehiculo->modelo),
+                    'vehiclePlate' => $reserva->vehiculo->placa,
+                    'clientName' => $reserva->user->name,
+                    'clientDocument' => $reserva->user->numero_documento,
+                    'qrCode' => $reserva->qr_codigo,
+                    'startsAt' => $reserva->inicio->toIso8601String(),
+                    'endsAt' => $reserva->fin->toIso8601String(),
+                    'totalCents' => $reserva->total_centavos,
+                    'currency' => $reserva->moneda,
+                    'deliverable' => $ventana->puedeEntregar,
+                    'deliveryReason' => $ventana->motivoListado,
+                ];
+            })
             ->values()
             ->all();
     }

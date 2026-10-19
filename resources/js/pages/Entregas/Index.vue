@@ -125,9 +125,10 @@ function fecha(value: string): string {
                             }}
                         </td>
                         <td class="px-4 py-3">
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-col items-start gap-1">
                                 <Badge tone="success">Confirmada</Badge>
                                 <Link
+                                    v-if="reservation.deliverable"
                                     :href="
                                         crearEntrega.url({
                                             reserva: reservation.id,
@@ -137,6 +138,18 @@ function fecha(value: string): string {
                                 >
                                     Registrar entrega
                                 </Link>
+                                <div v-else class="flex flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        disabled
+                                        class="cursor-not-allowed rounded-lg bg-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600"
+                                    >
+                                        Registrar entrega
+                                    </button>
+                                    <span class="text-xs text-slate-500">
+                                        {{ reservation.deliveryReason }}
+                                    </span>
+                                </div>
                             </div>
                         </td>
                     </tr>

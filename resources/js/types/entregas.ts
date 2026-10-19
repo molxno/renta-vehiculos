@@ -10,6 +10,8 @@ export type EntregaListItem = {
     endsAt: string;
     totalCents: number;
     currency: string;
+    deliverable: boolean;
+    deliveryReason: string | null;
 };
 
 export type EntregaLicencia = {
