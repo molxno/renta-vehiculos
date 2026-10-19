@@ -44,4 +44,17 @@ class ReservaFactory extends Factory
             'qr_codigo' => null,
         ]);
     }
+
+    public function enVentanaDeEntrega(): static
+    {
+        return $this->state(function (): array {
+            $zona = (string) config('entrega.zona_horaria');
+            $hoy = now()->timezone($zona)->startOfDay();
+
+            return [
+                'inicio' => $hoy,
+                'fin' => $hoy->copy()->addDays(3),
+            ];
+        });
+    }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Actions\Entregas\EvaluarVentanaDeEntrega;
 use App\Enums\NivelCombustible;
 use App\Models\LicenciaConduccion;
 use App\Models\Reserva;
@@ -67,6 +68,12 @@ final class StoreActaEntregaRequest extends FormRequest
                 }
 
                 $this->validarLicencia($reserva, $validator);
+
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                app(EvaluarVentanaDeEntrega::class)->asegurar($reserva);
             },
         ];
     }
