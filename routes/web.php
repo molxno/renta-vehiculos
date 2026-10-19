@@ -44,8 +44,10 @@ Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(funct
     Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');
     Route::post('/reservas/{reserva}/entrega', [EntregaController::class, 'store'])->name('entregas.store');
     Route::get('/reservas/{reserva}/entrega/exito', [EntregaController::class, 'show'])->name('entregas.show');
+    Route::get('/devoluciones', [DevolucionController::class, 'index'])->name('devoluciones.index');
     Route::get('/reservas/{reserva}/devolucion', [DevolucionController::class, 'create'])->name('devoluciones.create');
     Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'store'])->name('devoluciones.store');
+    Route::get('/reservas/{reserva}/devolucion/exito', [DevolucionController::class, 'show'])->name('devoluciones.show');
     Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
     Route::get('/reservas/{reserva}/pago', [PagoController::class, 'create'])->name('pagos.create');
     Route::post('/reservas/{reserva}/pago', [PagoController::class, 'store'])->name('pagos.store');

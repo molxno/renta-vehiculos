@@ -10,6 +10,7 @@ use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
 use App\Http\Requests\FiltrarCatalogoRequest;
+use App\Http\Requests\FiltrarDevolucionesRequest;
 use App\Http\Requests\FiltrarEntregasRequest;
 use App\Http\Requests\PrepararReservaRequest;
 use App\Http\Requests\StoreActaDevolucionRequest;
@@ -68,6 +69,10 @@ test('all documented pages expose their Inertia contracts', function () {
         ->assertJsonPath('component', 'Entregas/Create')
         ->assertJsonPath('props.reservation.id', $reservation->id);
 
+    $this->actingAs($empleado)->withHeaders($headers)->get(route('devoluciones.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Devoluciones/Index');
+
     $this->actingAs($empleado)->withHeaders($headers)->get(route('devoluciones.create', $reservation))
         ->assertOk()
         ->assertJsonPath('component', 'Devoluciones/Create')
@@ -125,7 +130,7 @@ test('all documented write routes validate and redirect', function () {
 
     $this->actingAs($empleado)->post(route('devoluciones.store', $reservation), [
         'devuelto_at' => now()->toDateTimeString(),
-    ])->assertRedirectToRoute('reservas.show', $reservation);
+    ])->assertRedirectToRoute('devoluciones.show', $reservation);
 
     $reservation->refresh();
     $reservation->update(['estado' => ReservaEstado::Facturada]);
@@ -173,6 +178,7 @@ test('requests expose authorization and validation contracts', function () {
         [$storeReservaRequest, ['vehiculo_id', 'convenio_id', 'inicio', 'fin', 'moneda']],
         [new FiltrarCatalogoRequest, ['category', 'startDate', 'endDate', 'location']],
         [new FiltrarEntregasRequest, ['q']],
+        [new FiltrarDevolucionesRequest, ['q']],
     ];
 
     foreach ($requests as [$request, $fields]) {

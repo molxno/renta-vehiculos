@@ -194,7 +194,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
             'combustible' => 'lleno',
         ],
         'observaciones' => 'Inspección de humo sin novedades',
-    ])->assertRedirectToRoute('reservas.show', $reserva);
+    ])->assertRedirectToRoute('devoluciones.show', $reserva);
 
     $reserva->refresh();
     $factura = $reserva->factura()->sole();
