@@ -1,24 +1,18 @@
-C4Container
-title C4 Nivel 2 — Contenedores de RENT-GO (main 0a2dced)
-
-Person(cliente, "Cliente", "Navegador. Registro, catálogo y reserva.")
-Person(staff, "Coordinador / Cajero / Admin", "Navegador. Operación de entrega, devolución, pago y TRM.")
-
-System_Boundary(rentgo, "RENT-GO") {
-    Container(spa, "SPA Vue 3 + Inertia", "Vue 3.5 / Inertia Vue 3.8 / Tailwind 4 / Vite 8", "Páginas en resources/js/pages: Auth, Catalogo, Reservas, Entregas, Devoluciones, Pagos y Facturas. No hay API REST propia: Inertia visita rutas web.")
-    Container(runtime, "Laravel 13 Runtime", "PHP 8.5 / Laravel 13.35 / FrankenPHP / Caddy", "Un solo proceso web. Rutas en routes/web.php y routes/auth.php. Controladores delgados delegan en Actions. Bindings en config/servicios.php.")
-    ContainerDb(db, "Base de datos", "SQLite por defecto / PostgreSQL en config", "Default DB_CONNECTION=sqlite. La imagen Docker instala pdo_sqlite. Laravel declara también pgsql. Tablas de dominio, sessions, cache y jobs.")
-    Container(storage, "Storage", "Disco local public/private", "Fotos de entrega en storage/app/public/entregas y evidencias de devolución en storage/app/public/devoluciones. El disco s3 está declarado y el flujo MVP no lo usa.")
-}
-
-System_Ext(pasarela, "Pasarela / SDK bancario", "BankPaymentGateway simulado en el mismo proceso PHP.")
-System_Ext(trm, "TRM", "Filas de la tabla trm. El admin las escribe; el runtime las lee.")
-
-Rel(cliente, spa, "Usa el storefront", "HTTPS")
-Rel(staff, spa, "Usa las pantallas operativas", "HTTPS")
-Rel(spa, runtime, "Visitas Inertia y formularios", "XHR / Inertia")
-Rel(runtime, db, "Eloquent lee y escribe el dominio", "PDO")
-Rel(runtime, storage, "Guarda foto de acta y evidencia", "Filesystem disk public")
-Rel(runtime, pasarela, "autorizar() si el método es tarjeta", "Adapter in-process")
-Rel(runtime, trm, "ActualizarTrm / Trm::vigente()")
-Rel(spa, storage, "Muestra archivos públicos vía /storage", "HTTPS")
+flowchart TB
+  usuario["👤 Usuarios<br/>Cliente, coordinador, cajero, administrador"]
+  subgraph rentgo["Sistema RENT-GO (un solo despliegue)"]
+    spa["SPA Vue 3 + Inertia<br/>Páginas en resources/js/pages"]
+    app["Aplicación Laravel 13 (PHP 8.5)<br/>Rutas, controladores, acciones, servicios"]
+    db[("Base de datos<br/>SQLite (por defecto) / PostgreSQL")]
+    sto["Almacenamiento de archivos<br/>Fotos de entrega y devolución"]
+  end
+  pas["Pasarela bancaria simulada<br/>BankPaymentGateway"]
+  usuario -->|"Navegador (HTTPS)"| spa
+  spa -->|"Peticiones Inertia (JSON/HTML)"| app
+  app -->|"Eloquent (SQL)"| db
+  app -->|"Guarda fotos"| sto
+  app -->|"Cobro vía adaptador"| pas
+  classDef c fill:#438dd5,color:#fff,stroke:#2e6295
+  classDef e fill:#999,color:#fff,stroke:#666
+  class spa,app,db,sto c
+  class pas e
