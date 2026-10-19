@@ -8,6 +8,7 @@ import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatFechaHora } from '@/lib/utils';
 import type { EntregaListItem } from '@/types';
 
 const props = defineProps<{
@@ -24,10 +25,7 @@ function pesos(centavos: number, currency: string): string {
 }
 
 function fecha(value: string): string {
-    return new Intl.DateTimeFormat('es-CO', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
+    return formatFechaHora(value);
 }
 </script>
 

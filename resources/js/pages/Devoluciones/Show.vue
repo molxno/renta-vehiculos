@@ -5,6 +5,7 @@ import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatFechaHora } from '@/lib/utils';
 import type { DevolucionCobroLinea } from '@/types';
 
 const props = defineProps<{
@@ -43,14 +44,7 @@ function pesos(centavos: number): string {
 }
 
 function fecha(value: string | null): string {
-    if (value === null) {
-        return 'Sin registrar';
-    }
-
-    return new Intl.DateTimeFormat('es-CO', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
+    return formatFechaHora(value);
 }
 </script>
 

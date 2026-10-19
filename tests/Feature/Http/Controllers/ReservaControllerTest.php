@@ -317,4 +317,45 @@ describe('confirmación y búsqueda de reservas', function () {
         expect($reserva->fresh()->estado)->toBe(ReservaEstado::Confirmada)
             ->and($reserva->fresh()->qr_codigo)->toBe('FAKE-QR-EXISTENTE');
     });
+
+    it('keeps the chosen calendar dates in America/Bogota on the reservation receipt', function () {
+        expect(config('app.timezone'))->toBe('America/Bogota');
+
+        $cliente = User::factory()->cliente()->create();
+        $vehiculo = Vehiculo::factory()->create();
+        Tarifa::factory()->create([
+            'vehiculo_id' => $vehiculo->id,
+            'tipo_vehiculo' => $vehiculo->tipo,
+            'valor_diario_centavos' => 15000000,
+            'vigente_desde' => '2026-01-01',
+        ]);
+
+        $this->actingAs($cliente)->post(route('reservas.store'), [
+            'vehiculo_id' => $vehiculo->id,
+            'inicio' => '2026-10-19',
+            'fin' => '2026-10-21',
+        ])->assertRedirect();
+
+        $reserva = Reserva::query()->sole();
+
+        $this->actingAs($cliente)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->get(route('reservas.show', $reserva))
+            ->assertOk()
+            ->assertJsonPath('props.reservation.startsAt', '2026-10-19T00:00:00-05:00')
+            ->assertJsonPath('props.reservation.endsAt', '2026-10-21T00:00:00-05:00');
+
+        expect($reserva->inicio->timezone('America/Bogota')->format('d/m/Y'))->toBe('19/10/2026')
+            ->and($reserva->fin->timezone('America/Bogota')->format('d/m/Y'))->toBe('21/10/2026')
+            ->and($reserva->total_centavos)->toBe(35700000)
+            ->and(app(DisponibilidadService::class)->consultar(
+                Carbon::parse('2026-10-19'),
+                Carbon::parse('2026-10-21'),
+                $vehiculo->id,
+            )[0]['disponible'])->toBeFalse();
+    });
 });

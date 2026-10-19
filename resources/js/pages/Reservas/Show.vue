@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { formatFechaHora } from '@/lib/utils';
 import { catalogo } from '@/routes';
 import type { ReservationReceipt } from '@/types';
 
@@ -19,10 +20,7 @@ function pesos(centavos: number, currency: string): string {
 }
 
 function fecha(value: string): string {
-    return new Intl.DateTimeFormat('es-CO', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
+    return formatFechaHora(value);
 }
 </script>
 
