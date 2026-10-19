@@ -1,280 +1,25 @@
 classDiagram
-direction TB
-
-class User {
-  +int id
-  +string name
-  +string email
-  +string tipo_documento
-  +string numero_documento
-  +string telefono
-  +UsuarioRol rol
-  +string password
-}
-
-class LicenciaConduccion {
-  +string numero
-  +date fecha_vencimiento
-  +string categoria
-  +estaVigente() bool
-}
-
+direction LR
 class Reserva {
-  +int id
   +ReservaEstado estado
-  +datetime inicio
-  +datetime fin
   +int total_centavos
-  +string moneda
-  +string qr_codigo
   +estadoMaquina() ReservaState
-  +confirmar() void
-  +entregar() void
-  +devolver() void
-  +pagar() void
-  +cancelar() void
   +anticipoCentavos() int
-  +mensajeBloqueoEntrega() string
 }
-
-class Vehiculo {
-  +int id
-  +string placa
-  +string marca
-  +string modelo
-  +int anio
-  +string tipo
-  +VehiculoEstado estado
-}
-
-class Factura {
-  +int id
-  +string numero
-  +FacturaEstado estado
-  +int subtotal_centavos
-  +int impuestos_centavos
-  +int total_centavos
-  +string moneda
-  +json desglose
-}
-
-class Pago {
-  +int id
-  +PagoEstado estado
-  +MetodoPago metodo
-  +int monto_centavos
-  +string referencia
-  +string mensaje
-}
-
-class Tarifa {
-  +int valor_diario_centavos
-  +string tipo_vehiculo
-  +date vigente_desde
-  +date vigente_hasta
-}
-
-class Trm {
-  +date fecha
-  +decimal valor
-  +vigente() self
-}
-
-class Convenio {
-  +string nombre
-  +int descuento_porcentaje
-  +bool activo
-}
-
-class Poliza {
-  +string numero
-  +string aseguradora
-  +date vigencia_desde
-  +date vigencia_hasta
-}
-
-class Contrato {
-  +string numero
-  +json condiciones
-  +datetime firmado_at
-}
-
-class ActaEntrega {
-  +datetime entregado_at
-  +json checklist
-  +string observaciones
-}
-
-class ActaDevolucion {
-  +datetime devuelto_at
-  +json checklist
-  +string observaciones
-}
-
-class Dano {
-  +string descripcion
-  +int monto_centavos
-}
-
-class Multa {
-  +string concepto
-  +int monto_centavos
-}
-
-class UsuarioRol {
-  <<enumeration>>
-  Cliente
-  Coordinador
-  Cajero
-  Administrador
-  Gerente
-}
-
-class ReservaEstado {
-  <<enumeration>>
-  Pendiente
-  Confirmada
-  Entregada
-  Devuelta
-  Facturada
-  Pagada
-  Cancelada
-}
-
-class VehiculoEstado {
-  <<enumeration>>
-  Disponible
-  Alquilado
-  Contingencia
-  Mantenimiento
-}
-
-class FacturaEstado {
-  <<enumeration>>
-  Pendiente
-  Pagada
-  Anulada
-}
-
-class PagoEstado {
-  <<enumeration>>
-  Pendiente
-  Aprobado
-  Rechazado
-}
-
-class MetodoPago {
-  <<enumeration>>
-  Tarjeta
-  Transferencia
-  Efectivo
-}
-
 class ReservaState {
   <<interface>>
-  +confirmar(Reserva) void
-  +entregar(Reserva) void
-  +devolver(Reserva) void
-  +pagar(Reserva) void
-  +cancelar(Reserva) void
+  +confirmar()
+  +entregar()
+  +devolver()
+  +pagar()
 }
-
-class AbstractReservaState {
-  <<abstract>>
-}
-
-class PendienteState {
-  +confirmar() void
-  +cancelar() void
-}
-
-class ConfirmadaState {
-  +entregar() void
-  +cancelar() void
-}
-
-class EntregadaState {
-  +devolver() void
-}
-
-class FacturadaState {
-  +pagar() void
-}
-
+class AbstractReservaState
+class PendienteState
+class ConfirmadaState
+class EntregadaState
+class FacturadaState
 class PagadaState
 class CanceladaState
-
-class CargoDevolucionStrategy {
-  <<interface>>
-  +lineas(Reserva, DateTime, array) array
-}
-
-class RetrasoCargoStrategy
-class KilometrajeCargoStrategy
-class CombustibleCargoStrategy
-class DanoCargoStrategy
-
-class CalculadoraDevolucion {
-  <<interface>>
-  +calcular(int, DateTime, array) array
-}
-
-class CalculadoraDevolucionEstandar {
-  +calcular(int, DateTime, array) array
-}
-
-class TarifaService {
-  <<interface>>
-  +cotizar(int, DateTime, DateTime, int, string) array
-}
-
-class TarifaServiceEstandar {
-  +cotizar(int, DateTime, DateTime, int, string) array
-}
-
-class ConvertidorTrm {
-  +escalarDecimal(string) int
-  +convertirACentavosUsd(int, int) int
-}
-
-class PasarelaPago {
-  <<interface>>
-  +autorizar(int, int, string) array
-}
-
-class PasarelaPagoAdapter {
-  +autorizar(int, int, string) array
-}
-
-class BankPaymentGateway {
-  +processTransaction(float, string) array
-}
-
-class TransicionEstadoInvalida {
-  +para(string, ReservaEstado) self
-}
-
-User "1" --> "0..1" LicenciaConduccion
-User "1" --> "*" Reserva
-User --> UsuarioRol
-Reserva "*" --> "1" Vehiculo
-Reserva "*" --> "0..1" Convenio
-Reserva "1" --> "0..1" Contrato
-Reserva "1" --> "0..1" ActaEntrega
-Reserva "1" --> "0..1" ActaDevolucion
-Reserva "1" --> "0..1" Factura
-Reserva "1" --> "*" Pago
-Reserva "1" --> "*" Dano
-Reserva "1" --> "*" Multa
-Reserva --> ReservaEstado
-Reserva --> ReservaState : estadoMaquina
-Vehiculo "1" --> "*" Poliza
-Vehiculo "1" --> "*" Tarifa
-Vehiculo --> VehiculoEstado
-Factura --> FacturaEstado
-Pago --> PagoEstado
-Pago --> MetodoPago
-
 ReservaState <|.. AbstractReservaState
 AbstractReservaState <|-- PendienteState
 AbstractReservaState <|-- ConfirmadaState
@@ -282,23 +27,37 @@ AbstractReservaState <|-- EntregadaState
 AbstractReservaState <|-- FacturadaState
 AbstractReservaState <|-- PagadaState
 AbstractReservaState <|-- CanceladaState
-AbstractReservaState ..> TransicionEstadoInvalida
-
+Reserva ..> ReservaState : estadoMaquina()
+class CalculadoraDevolucionEstandar
+class CargoDevolucionStrategy {
+  <<interface>>
+  +lineas() array
+}
+class RetrasoCargoStrategy
+class KilometrajeCargoStrategy
+class CombustibleCargoStrategy
+class DanoCargoStrategy
+CalculadoraDevolucionEstandar --> CargoDevolucionStrategy
 CargoDevolucionStrategy <|.. RetrasoCargoStrategy
 CargoDevolucionStrategy <|.. KilometrajeCargoStrategy
 CargoDevolucionStrategy <|.. CombustibleCargoStrategy
 CargoDevolucionStrategy <|.. DanoCargoStrategy
-CalculadoraDevolucion <|.. CalculadoraDevolucionEstandar
-CalculadoraDevolucionEstandar o-- CargoDevolucionStrategy
-CalculadoraDevolucionEstandar ..> Reserva
-DanoCargoStrategy ..> Dano
-DanoCargoStrategy ..> Multa
-
+class PasarelaPago {
+  <<interface>>
+}
+class PasarelaPagoAdapter
+class BankPaymentGateway {
+  +processTransaction()
+}
+PasarelaPago <|.. PasarelaPagoAdapter
+PasarelaPagoAdapter --> BankPaymentGateway
+class RegistrarPago
+RegistrarPago --> PasarelaPago
+class TarifaService {
+  <<interface>>
+  +cotizar() array
+}
+class TarifaServiceEstandar
+class ConvertidorTrm
 TarifaService <|.. TarifaServiceEstandar
 TarifaServiceEstandar --> ConvertidorTrm
-TarifaServiceEstandar ..> Tarifa
-TarifaServiceEstandar ..> Trm
-TarifaServiceEstandar ..> Convenio
-
-PasarelaPago <|.. PasarelaPagoAdapter
-PasarelaPagoAdapter --> BankPaymentGateway : adapta firma del SDK

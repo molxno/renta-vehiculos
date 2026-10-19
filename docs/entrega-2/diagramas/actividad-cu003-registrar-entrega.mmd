@@ -1,5 +1,5 @@
 ---
-title: CU-003 Registrar entrega — main 0a2dced
+title: CU-003 Registrar entrega — main 3eb6d86
 ---
 flowchart TD
     start([Staff abre GET /reservas/id/entrega]) --> mw{auth + EnsureUserHasRole coordinador, cajero o administrador?}
@@ -12,6 +12,8 @@ flowchart TD
     errAcepta --> pantalla
     rules -->|Ya tiene acta o no esta confirmada| errEstado[Error de reserva]
     errEstado --> pantalla
+    rules -->|Fuera de ventana: antes del inicio o desde la fecha fin| errVent[Entrega fuera de la ventana de la reserva]
+    errVent --> pantalla
     rules -->|Licencia ausente o vencida| errLic[Bloqueo por licencia]
     errLic --> pantalla
     rules -->|Valido| action[RegistrarEntrega en transaccion]
