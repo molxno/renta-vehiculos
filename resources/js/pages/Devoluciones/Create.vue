@@ -5,6 +5,7 @@ import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatFecha } from '@/lib/utils';
 import type { DevolucionCobro, DevolucionDano } from '@/types';
 
 const props = defineProps<{
@@ -209,8 +210,8 @@ function enviar(): void {
                         <div>
                             <dt class="text-slate-500">Periodo</dt>
                             <dd class="font-medium text-brand-navy">
-                                {{ reservation.inicio }} —
-                                {{ reservation.fin }}
+                                {{ formatFecha(reservation.inicio) }} —
+                                {{ formatFecha(reservation.fin) }}
                             </dd>
                         </div>
                     </dl>
@@ -221,7 +222,8 @@ function enviar(): void {
                         Acta de entrega
                     </h2>
                     <p v-if="actaEntrega" class="mt-2 text-sm text-slate-500">
-                        Entregado el {{ actaEntrega.entregado_at }}
+                        Entregado el
+                        {{ formatFecha(actaEntrega.entregado_at) }}
                     </p>
                     <p v-else class="mt-2 text-sm text-slate-500">
                         Esta reserva no tiene acta de entrega.

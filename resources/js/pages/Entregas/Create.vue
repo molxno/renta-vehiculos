@@ -4,7 +4,7 @@ import { index as listarEntregas } from '@/actions/App/Http/Controllers/EntregaC
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { fechaHoraLocal } from '@/lib/utils';
+import { fechaHoraLocal, formatFecha } from '@/lib/utils';
 import type { EntregaLicencia } from '@/types';
 
 const props = defineProps<{
@@ -146,8 +146,8 @@ function enviar(): void {
                         <div>
                             <dt class="text-slate-500">Periodo</dt>
                             <dd class="font-medium text-brand-navy">
-                                {{ reservation.inicio }} —
-                                {{ reservation.fin }}
+                                {{ formatFecha(reservation.inicio) }} —
+                                {{ formatFecha(reservation.fin) }}
                             </dd>
                         </div>
                     </dl>
@@ -178,7 +178,7 @@ function enviar(): void {
                         <div>
                             <dt class="text-slate-500">Vencimiento</dt>
                             <dd class="font-medium text-brand-navy">
-                                {{ licencia.fecha_vencimiento }}
+                                {{ formatFecha(licencia.fecha_vencimiento) }}
                             </dd>
                         </div>
                     </dl>

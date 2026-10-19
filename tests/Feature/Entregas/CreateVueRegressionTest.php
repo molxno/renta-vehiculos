@@ -13,7 +13,7 @@ it('usa fechaHoraLocal con Date.getTime y no la variable ahora', function () {
     expect($utils)->toContain('export function fechaHoraLocal')
         ->and($utils)->toContain('fecha.getTime()')
         ->and($utils)->not->toContain('ahora')
-        ->and($create)->toContain("import { fechaHoraLocal } from '@/lib/utils'")
+        ->and($create)->toContain("import { fechaHoraLocal, formatFecha } from '@/lib/utils'")
         ->and($create)->not->toContain('ahora.getTime()')
         ->and($create)->not->toContain('function fechaHoraLocal');
 });
