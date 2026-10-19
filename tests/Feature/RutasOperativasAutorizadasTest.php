@@ -11,6 +11,8 @@ it('redirects guests from operational rental routes to login', function (string 
     $this->get(route($routeName, $parameters))->assertRedirectToRoute('login');
 })->with([
     'entregas' => fn (): array => ['entregas.create', ['reserva' => Reserva::factory()->create()]],
+    'entregas index' => fn (): array => ['entregas.index', []],
+    'entregas show' => fn (): array => ['entregas.show', ['reserva' => Reserva::factory()->create()]],
     'devoluciones' => fn (): array => ['devoluciones.create', ['reserva' => Reserva::factory()->create()]],
     'pagos' => fn (): array => ['pagos.create', ['reserva' => Reserva::factory()->create()]],
     'facturas' => fn (): array => ['facturas.show', ['factura' => Factura::factory()->create()]],
@@ -23,6 +25,8 @@ it('forbids a client from opening operational employee routes', function (string
         ->assertForbidden();
 })->with([
     'entregas' => fn (): array => ['entregas.create', ['reserva' => Reserva::factory()->create()]],
+    'entregas index' => fn (): array => ['entregas.index', []],
+    'entregas show' => fn (): array => ['entregas.show', ['reserva' => Reserva::factory()->create()]],
     'devoluciones' => fn (): array => ['devoluciones.create', ['reserva' => Reserva::factory()->create()]],
     'pagos' => fn (): array => ['pagos.create', ['reserva' => Reserva::factory()->create()]],
     'facturas' => fn (): array => ['facturas.show', ['factura' => Factura::factory()->create()]],
@@ -34,6 +38,7 @@ it('allows an employee to open operational routes', function (UsuarioRol $rol) {
 
     autenticarEmpleado($rol);
 
+    $this->get(route('entregas.index'))->assertOk();
     $this->get(route('entregas.create', $reservation))->assertOk();
     $this->get(route('devoluciones.create', $reservation))->assertOk();
     $this->get(route('pagos.create', $reservation))->assertOk();

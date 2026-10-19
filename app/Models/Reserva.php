@@ -178,6 +178,10 @@ final class Reserva extends Model
             return 'La licencia de conducción está vencida.';
         }
 
+        if (! $licencia->categoriaValida()) {
+            return 'La categoría de la licencia no es válida para entregar el vehículo.';
+        }
+
         if ($this->actaEntrega()->exists()) {
             return 'La reserva ya tiene una entrega registrada.';
         }

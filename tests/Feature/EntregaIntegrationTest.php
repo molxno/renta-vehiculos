@@ -36,7 +36,7 @@ describe('registro de entrega', function () {
             ],
             'observaciones' => 'Entrega sin novedades',
             'aceptacion' => '1',
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('entregas.show', $reservation);
 
         $record = ActaEntrega::query()->where('reserva_id', $reservation->id)->sole();
         $contract = Contrato::query()->where('reserva_id', $reservation->id)->sole();
@@ -266,7 +266,7 @@ describe('registro de entrega', function () {
             'entregado_at' => '2026-02-01 09:00:00',
             'aceptacion' => '1',
             'foto' => $file,
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('entregas.show', $reservation);
 
         $record = ActaEntrega::query()->where('reserva_id', $reservation->id)->sole();
 

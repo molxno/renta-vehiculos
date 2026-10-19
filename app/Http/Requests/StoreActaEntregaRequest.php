@@ -122,10 +122,16 @@ final class StoreActaEntregaRequest extends FormRequest
             return;
         }
 
-        if ($licencia->estaVigente()) {
+        if (! $licencia->estaVigente()) {
+            $validator->errors()->add('licencia', 'La licencia de conducción está vencida.');
+
             return;
         }
 
-        $validator->errors()->add('licencia', 'La licencia de conducción está vencida.');
+        if ($licencia->categoriaValida()) {
+            return;
+        }
+
+        $validator->errors()->add('licencia', 'La categoría de la licencia no es válida para entregar el vehículo.');
     }
 }

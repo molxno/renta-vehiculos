@@ -179,7 +179,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         ],
         'observaciones' => 'Entrega de humo',
         'aceptacion' => '1',
-    ])->assertRedirectToRoute('reservas.show', $reserva);
+    ])->assertRedirectToRoute('entregas.show', $reserva);
 
     $reserva->refresh()->load(['vehiculo', 'actaEntrega', 'contrato']);
     expect($reserva->estado)->toBe(ReservaEstado::Entregada)

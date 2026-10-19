@@ -40,8 +40,10 @@ Route::middleware(['auth', 'rol:administrador'])
     });
 
 Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(function (): void {
+    Route::get('/entregas', [EntregaController::class, 'index'])->name('entregas.index');
     Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');
     Route::post('/reservas/{reserva}/entrega', [EntregaController::class, 'store'])->name('entregas.store');
+    Route::get('/reservas/{reserva}/entrega/exito', [EntregaController::class, 'show'])->name('entregas.show');
     Route::get('/reservas/{reserva}/devolucion', [DevolucionController::class, 'create'])->name('devoluciones.create');
     Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'store'])->name('devoluciones.store');
     Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');

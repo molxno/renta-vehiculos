@@ -8,9 +8,11 @@ use Database\Factories\ActaEntregaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property array<string, mixed>|null $checklist
+ * @property Carbon|null $entregado_at
  */
 final class ActaEntrega extends Model
 {
