@@ -109,6 +109,39 @@ describe('creación de reservas', function () {
             ->and($reserva->moneda)->toBe('USD');
     });
 
+    it('exposes only rental notes backed by the MVP instead of deposit, age or free cancellation', function () {
+        $cliente = User::factory()->cliente()->create();
+
+        $this->actingAs($cliente)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->get(route('reservas.create'))
+            ->assertOk()
+            ->assertJsonPath('props.rentalNotes.0', 'La licencia de conducción vigente se verifica al entregar el vehículo.')
+            ->assertJsonPath('props.rentalNotes.1', 'Combustible: devolver al mismo nivel; hay cargo si falta.')
+            ->assertJsonPath('props.rentalNotes.2', 'Entrega y devolución en la sede elegida (informativo).')
+            ->assertJsonPath(
+                'props.rentalDisclaimer',
+                'Sin cargos al reservar. El cobro se hace al devolver el vehículo. Cancelar una reserva no forma parte de este MVP.',
+            );
+
+        $notes = $this->actingAs($cliente)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->get(route('reservas.create'))
+            ->json('props.rentalNotes');
+
+        expect($notes)->not->toContain('Licencia tipo B requerida')
+            ->and($notes)->not->toContain('Edad mínima: 21 años')
+            ->and($notes)->not->toContain('Depósito: $500 (reembolsable)');
+    });
+
     it('shows the current TRM on the reservation form and ignores a future rate', function () {
         $this->travelTo(Carbon::parse('2026-11-01 10:00:00'));
         $cliente = User::factory()->cliente()->create();

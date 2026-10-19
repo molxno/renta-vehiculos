@@ -53,7 +53,7 @@ test('all documented pages expose their Inertia contracts', function () {
     $this->actingAs($user)->withHeaders($headers)->get(route('reservas.create'))
         ->assertOk()
         ->assertJsonPath('component', 'Reservas/Create')
-        ->assertJsonStructure(['props' => ['vehicles', 'quote']]);
+        ->assertJsonStructure(['props' => ['vehicles', 'quote', 'rentalNotes', 'rentalDisclaimer']]);
 
     $this->actingAs($user)->withHeaders($headers)->get(route('reservas.index'))
         ->assertOk()

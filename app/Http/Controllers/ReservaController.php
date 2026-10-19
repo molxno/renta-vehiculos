@@ -93,6 +93,12 @@ final class ReservaController extends Controller
             ],
             'trm' => $trm instanceof Trm ? (string) $trm->valor : null,
             'quote' => $quote,
+            'rentalNotes' => [
+                'La licencia de conducción vigente se verifica al entregar el vehículo.',
+                'Combustible: devolver al mismo nivel; hay cargo si falta.',
+                'Entrega y devolución en la sede elegida (informativo).',
+            ],
+            'rentalDisclaimer' => 'Sin cargos al reservar. El cobro se hace al devolver el vehículo. Cancelar una reserva no forma parte de este MVP.',
         ]);
     }
 

@@ -37,14 +37,6 @@ const quoting = ref(false);
 const homeUrl = home.url();
 const catalogoUrl = catalogo.url();
 
-const rentalNotes = [
-    'Licencia tipo B requerida',
-    'Edad mínima: 21 años',
-    'Depósito: $500 (reembolsable)',
-    'Combustible: mismo nivel',
-    'Entrega y devolución en sede',
-] as const;
-
 const selectedVehicle = computed(
     () =>
         props.vehicles.find(
@@ -600,8 +592,7 @@ watch(
                                 <p
                                     class="mt-3 text-center text-xs text-neutral-muted"
                                 >
-                                    Sin cargos hasta confirmar. Cancelación
-                                    gratis 24h antes.
+                                    {{ rentalDisclaimer }}
                                 </p>
                             </form>
 

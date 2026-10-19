@@ -18,6 +18,8 @@ export type ReservationFormProps = {
     };
     trm: string | null;
     quote: ReservationQuote | null;
+    rentalNotes: string[];
+    rentalDisclaimer: string;
 };
 
 export type ReservationReceipt = {
