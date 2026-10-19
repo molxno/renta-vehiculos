@@ -20,6 +20,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             navigation: import('@/types/auth').NavigationItem[];
+            landingHref: string;
             sidebarOpen: boolean;
             flash?: {
                 success?: string;

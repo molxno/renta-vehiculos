@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import RentGoLogo from '@/components/storefront/RentGoLogo.vue';
 import { login, logout } from '@/routes';
 
 const page = usePage();
 const authUser = computed(() => page.props.auth?.user ?? null);
 const navigation = computed(() => page.props.navigation ?? []);
+const landingHref = computed(() => page.props.landingHref ?? '/');
 const loginUrl = login.url();
 const logoutUrl = logout.url();
 </script>
@@ -18,11 +20,8 @@ const logoutUrl = logout.url();
             <div
                 class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6"
             >
-                <Link
-                    href="/"
-                    class="text-lg font-bold tracking-tight text-white"
-                >
-                    Renta Vehículos
+                <Link :href="landingHref" class="inline-flex items-center">
+                    <RentGoLogo />
                 </Link>
                 <nav class="hidden items-center gap-5 md:flex">
                     <Link
