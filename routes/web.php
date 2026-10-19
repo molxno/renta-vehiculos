@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\FacturaController;
@@ -14,6 +15,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('/catalogo', CatalogoController::class)->name('catalogo');
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/cuenta', [CuentaController::class, 'show'])->name('cuenta.show');
+    Route::put('/cuenta/licencia', [CuentaController::class, 'update'])->name('cuenta.update');
+});
 
 Route::get('/reservas', [ReservaController::class, 'index'])
     ->middleware('auth')

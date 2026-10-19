@@ -35,6 +35,7 @@ enum UsuarioRol: string
         return match ($this) {
             self::Cliente => [
                 ['label' => 'Mis reservas', 'href' => route('reservas.index')],
+                ['label' => 'Mi cuenta', 'href' => route('cuenta.show')],
             ],
             self::Coordinador => [
                 ['label' => 'Reservas', 'href' => route('reservas.index')],

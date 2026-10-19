@@ -26,6 +26,7 @@ it('shares only working navigation links for each role', function (UsuarioRol $r
     $esperado = match ($rol) {
         UsuarioRol::Cliente => [
             ['label' => 'Mis reservas', 'href' => route('reservas.index')],
+            ['label' => 'Mi cuenta', 'href' => route('cuenta.show')],
         ],
         UsuarioRol::Coordinador => [
             ['label' => 'Reservas', 'href' => route('reservas.index')],

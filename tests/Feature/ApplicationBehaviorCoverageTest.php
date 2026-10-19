@@ -9,6 +9,7 @@ use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
+use App\Http\Requests\ActualizarLicenciaRequest;
 use App\Http\Requests\FiltrarCatalogoRequest;
 use App\Http\Requests\FiltrarDevolucionesRequest;
 use App\Http\Requests\FiltrarEntregasRequest;
@@ -58,6 +59,11 @@ test('all documented pages expose their Inertia contracts', function () {
     $this->actingAs($user)->withHeaders($headers)->get(route('reservas.index'))
         ->assertOk()
         ->assertJsonPath('component', 'Reservas/Index');
+
+    $this->actingAs($user)->withHeaders($headers)->get(route('cuenta.show'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Cuenta/Show')
+        ->assertJsonStructure(['props' => ['perfil', 'licencia', 'categoriasLicencia', 'updateUrl']]);
 
     $empleado = User::factory()->coordinador()->create();
 
@@ -163,6 +169,8 @@ test('requests expose authorization and validation contracts', function () {
     $prepararReservaRequest->setUserResolver(fn (): User => $client);
     $storeReservaRequest = new StoreReservaRequest;
     $storeReservaRequest->setUserResolver(fn (): User => $client);
+    $actualizarLicenciaRequest = new ActualizarLicenciaRequest;
+    $actualizarLicenciaRequest->setUserResolver(fn (): User => $client);
 
     $requests = [
         [new StoreActaDevolucionRequest, [
@@ -192,6 +200,7 @@ test('requests expose authorization and validation contracts', function () {
         [new FiltrarEntregasRequest, ['q']],
         [new FiltrarDevolucionesRequest, ['q']],
         [new FiltrarPagosRequest, ['q']],
+        [$actualizarLicenciaRequest, ['licencia_numero', 'licencia_categoria', 'licencia_vencimiento']],
     ];
 
     foreach ($requests as [$request, $fields]) {

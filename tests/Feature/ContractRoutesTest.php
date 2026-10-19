@@ -41,7 +41,9 @@ test('contract routes expose the documented pages and redirects', function () {
         ->and($routes->getByName('pagos.store')->methods())->toContain('POST')
         ->and($routes->getByName('pagos.show')->methods())->toContain('GET')
         ->and($routes->getByName('admin.trm.edit')->methods())->toContain('GET')
-        ->and($routes->getByName('admin.trm.update')->methods())->toContain('PUT');
+        ->and($routes->getByName('admin.trm.update')->methods())->toContain('PUT')
+        ->and($routes->getByName('cuenta.show')->methods())->toContain('GET')
+        ->and($routes->getByName('cuenta.update')->methods())->toContain('PUT');
 
     $this->actingAs(User::factory()->cliente()->create())
         ->post(route('reservas.store'), [])
