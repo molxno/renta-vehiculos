@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { index as listarEntregas } from '@/actions/App/Http/Controllers/EntregaController';
 import Badge from '@/components/ui/Badge.vue';
-import Button from '@/components/ui/Button.vue';
 import Card from '@/components/ui/Card.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { fechaHoraLocal, formatFecha } from '@/lib/utils';
+import type { EntregaLicencia } from '@/types';
 
 const props = defineProps<{
     reservation: {
@@ -14,14 +16,18 @@ const props = defineProps<{
         total_centavos: number;
         moneda: string;
     };
+    cliente: {
+        nombre: string;
+        documento: string;
+    };
+    vehiculo: {
+        label: string;
+        placa: string;
+    };
+    qrCodigo: string | null;
     checklist: Record<string, unknown>;
     condicionesContrato: Record<string, unknown>;
-    licencia: {
-        numero: string;
-        fecha_vencimiento: string;
-        categoria: string;
-        vigente: boolean;
-    } | null;
+    licencia: EntregaLicencia;
     bloqueo: string | null;
     anticipoCents: number;
     currency: string;
@@ -30,7 +36,7 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-    entregado_at: '',
+    entregado_at: fechaHoraLocal(),
     checklist: {
         kilometraje: String(props.checklist.kilometraje ?? ''),
         combustible: String(props.checklist.combustible ?? ''),
@@ -57,15 +63,15 @@ function enviar(): void {
 
 <template>
     <Head title="Registrar entrega" />
-    <AppLayout role="coordinador">
+    <AppLayout>
         <div class="flex flex-col gap-8">
             <div>
                 <p
-                    class="text-sm font-semibold tracking-wide text-brand-gold uppercase"
+                    class="text-sm font-semibold tracking-wide text-brand-teal uppercase"
                 >
                     Entrega
                 </p>
-                <h1 class="mt-1 text-3xl font-bold text-brand-ink">
+                <h1 class="mt-1 text-3xl font-extrabold text-brand-navy">
                     Registrar entrega #{{ reservation.id }}
                 </h1>
                 <p class="mt-2 text-sm text-slate-500">
@@ -73,78 +79,132 @@ function enviar(): void {
                     {{ pesos(reservation.total_centavos) }}
                 </p>
                 <p class="mt-2 max-w-2xl text-slate-600">
-                    Valida la licencia, registra el acta, acepta el contrato y
-                    cobra el anticipo antes de entregar el vehículo.
+                    Valida la licencia, registra kilometraje y combustible,
+                    cobra el anticipo y confirma la firma del cliente.
                 </p>
+                <Link
+                    :href="listarEntregas.url()"
+                    class="mt-3 inline-block text-sm font-semibold text-brand-teal hover:text-brand-teal-dark"
+                >
+                    Volver al listado de entregas
+                </Link>
             </div>
 
-            <div class="grid gap-5 lg:grid-cols-2">
+            <div
+                v-if="bloqueo"
+                class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                role="alert"
+            >
+                <p class="font-semibold">Entrega bloqueada</p>
+                <p class="mt-1">{{ bloqueo }}</p>
+            </div>
+
+            <div class="grid gap-5 lg:grid-cols-3">
+                <Card>
+                    <h2 class="text-lg font-semibold text-brand-navy">
+                        Reserva y cliente
+                    </h2>
+                    <dl class="mt-4 grid gap-3 text-sm">
+                        <div>
+                            <dt class="text-slate-500">Cliente</dt>
+                            <dd class="font-medium text-brand-navy">
+                                {{ cliente.nombre }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-500">Documento</dt>
+                            <dd class="font-medium text-brand-navy">
+                                {{ cliente.documento }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-500">Código QR</dt>
+                            <dd class="font-mono font-medium text-brand-navy">
+                                {{ qrCodigo ?? 'Sin QR' }}
+                            </dd>
+                        </div>
+                    </dl>
+                </Card>
+
+                <Card>
+                    <h2 class="text-lg font-semibold text-brand-navy">
+                        Vehículo
+                    </h2>
+                    <dl class="mt-4 grid gap-3 text-sm">
+                        <div>
+                            <dt class="text-slate-500">Modelo</dt>
+                            <dd class="font-medium text-brand-navy">
+                                {{ vehiculo.label }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-500">Placa</dt>
+                            <dd class="font-medium text-brand-navy">
+                                {{ vehiculo.placa }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-500">Periodo</dt>
+                            <dd class="font-medium text-brand-navy">
+                                {{ formatFecha(reservation.inicio) }} —
+                                {{ formatFecha(reservation.fin) }}
+                            </dd>
+                        </div>
+                    </dl>
+                </Card>
+
                 <Card>
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-brand-ink">
+                        <h2 class="text-lg font-semibold text-brand-navy">
                             Licencia de conducción
                         </h2>
-                        <Badge
-                            :tone="licencia?.vigente ? 'success' : 'warning'"
-                        >
-                            {{ licencia?.vigente ? 'Vigente' : 'Bloqueada' }}
+                        <Badge :tone="bloqueo ? 'warning' : 'success'">
+                            {{ bloqueo ? 'Bloqueada' : 'Vigente' }}
                         </Badge>
                     </div>
                     <dl v-if="licencia" class="mt-4 grid gap-3 text-sm">
                         <div>
                             <dt class="text-slate-500">Número</dt>
-                            <dd class="font-medium text-brand-ink">
+                            <dd class="font-medium text-brand-navy">
                                 {{ licencia.numero }}
                             </dd>
                         </div>
                         <div>
                             <dt class="text-slate-500">Categoría</dt>
-                            <dd class="font-medium text-brand-ink">
+                            <dd class="font-medium text-brand-navy">
                                 {{ licencia.categoria }}
                             </dd>
                         </div>
                         <div>
                             <dt class="text-slate-500">Vencimiento</dt>
-                            <dd class="font-medium text-brand-ink">
-                                {{ licencia.fecha_vencimiento }}
+                            <dd class="font-medium text-brand-navy">
+                                {{ formatFecha(licencia.fecha_vencimiento) }}
                             </dd>
                         </div>
                     </dl>
                     <p v-else class="mt-4 text-sm text-slate-500">
                         Este cliente no tiene una licencia registrada.
                     </p>
-                    <p
-                        v-if="bloqueo"
-                        class="mt-4 text-sm font-medium text-red-600"
-                    >
-                        {{ bloqueo }}
-                    </p>
-                </Card>
-
-                <Card>
-                    <h2 class="text-lg font-semibold text-brand-ink">
-                        Anticipo
-                    </h2>
-                    <p class="mt-4 text-3xl font-bold text-brand-ink">
-                        {{ pesos(anticipoCents) }}
-                    </p>
-                    <p class="mt-2 text-sm text-slate-500">
-                        Se registra como pago en efectivo al confirmar la
-                        entrega. Reserva del {{ reservation.inicio }} al
-                        {{ reservation.fin }}.
-                    </p>
-                    <p class="mt-2 text-sm text-slate-500">
-                        Kilometraje incluido:
-                        {{ condicionesContrato.kilometraje_incluido ?? 200 }}
-                        km · Combustible:
-                        {{ condicionesContrato.combustible ?? 'lleno' }}
-                    </p>
                 </Card>
             </div>
 
             <Card>
+                <h2 class="text-lg font-semibold text-brand-navy">Anticipo</h2>
+                <p class="mt-4 text-3xl font-extrabold text-brand-navy">
+                    {{ pesos(anticipoCents) }}
+                </p>
+                <p class="mt-2 text-sm text-slate-500">
+                    Se registra como pago en efectivo al confirmar la entrega.
+                    Kilometraje incluido:
+                    {{ condicionesContrato.kilometraje_incluido ?? 200 }} km ·
+                    Combustible:
+                    {{ condicionesContrato.combustible ?? 'lleno' }}.
+                </p>
+            </Card>
+
+            <Card>
                 <form class="flex flex-col gap-5" @submit.prevent="enviar">
-                    <h2 class="text-lg font-semibold text-brand-ink">
+                    <h2 class="text-lg font-semibold text-brand-navy">
                         Acta de entrega
                     </h2>
 
@@ -155,7 +215,7 @@ function enviar(): void {
                         <input
                             v-model="form.entregado_at"
                             type="datetime-local"
-                            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 transition outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30"
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
                         />
                         <span
                             v-if="form.errors.entregado_at"
@@ -168,12 +228,12 @@ function enviar(): void {
                         <label
                             class="flex flex-col gap-1.5 text-sm font-medium text-slate-700"
                         >
-                            <span>Kilometraje de salida</span>
+                            <span>Kilometraje inicial</span>
                             <input
                                 v-model="form.checklist.kilometraje"
                                 type="number"
                                 min="0"
-                                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 transition outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30"
+                                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
                             />
                             <span
                                 v-if="form.errors['checklist.kilometraje']"
@@ -187,10 +247,10 @@ function enviar(): void {
                         <label
                             class="flex flex-col gap-1.5 text-sm font-medium text-slate-700"
                         >
-                            <span>Nivel de combustible</span>
+                            <span>Nivel de gasolina</span>
                             <select
                                 v-model="form.checklist.combustible"
-                                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 transition outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30"
+                                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
                             >
                                 <option value="">Seleccione</option>
                                 <option
@@ -218,7 +278,7 @@ function enviar(): void {
                             <input
                                 v-model="form.checklist.documentos"
                                 type="checkbox"
-                                class="rounded border-slate-300 text-brand-ink focus:ring-brand-gold"
+                                class="rounded border-slate-300 text-brand-teal focus:ring-brand-teal"
                             />
                             <span>Documentos del vehículo</span>
                         </label>
@@ -228,7 +288,7 @@ function enviar(): void {
                             <input
                                 v-model="form.checklist.llantas"
                                 type="checkbox"
-                                class="rounded border-slate-300 text-brand-ink focus:ring-brand-gold"
+                                class="rounded border-slate-300 text-brand-teal focus:ring-brand-teal"
                             />
                             <span>Llantas en buen estado</span>
                         </label>
@@ -241,7 +301,7 @@ function enviar(): void {
                         <textarea
                             v-model="form.observaciones"
                             rows="3"
-                            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 transition outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30"
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30"
                         />
                     </label>
 
@@ -272,11 +332,12 @@ function enviar(): void {
                         <input
                             v-model="form.aceptacion"
                             type="checkbox"
-                            class="mt-1 rounded border-slate-300 text-brand-ink focus:ring-brand-gold"
+                            class="mt-1 rounded border-slate-300 text-brand-teal focus:ring-brand-teal"
                         />
                         <span>
-                            Acepto las condiciones del contrato, incluido el
-                            anticipo de {{ pesos(anticipoCents) }}.
+                            Firma digital: el cliente acepta las condiciones del
+                            contrato, incluido el anticipo de
+                            {{ pesos(anticipoCents) }}.
                         </span>
                     </label>
                     <span
@@ -293,12 +354,13 @@ function enviar(): void {
                     </p>
 
                     <div>
-                        <Button
+                        <button
                             type="submit"
                             :disabled="form.processing || Boolean(bloqueo)"
+                            class="inline-flex items-center justify-center rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-teal-dark focus:ring-2 focus:ring-brand-teal focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             Registrar entrega
-                        </Button>
+                        </button>
                     </div>
                 </form>
             </Card>

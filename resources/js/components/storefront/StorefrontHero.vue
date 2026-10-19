@@ -6,6 +6,7 @@ import type { HomeSearch } from '@/types';
 
 defineProps<{
     search: HomeSearch;
+    vehiclesAvailableCount: number;
 }>();
 
 const catalogoUrl = catalogo.url();
@@ -29,7 +30,12 @@ const catalogoUrl = catalogo.url();
             <p
                 class="rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-semibold tracking-wide uppercase"
             >
-                +40 vehículos disponibles hoy
+                {{ vehiclesAvailableCount }}
+                {{
+                    vehiclesAvailableCount === 1
+                        ? 'vehículo disponible hoy'
+                        : 'vehículos disponibles hoy'
+                }}
             </p>
             <h1
                 class="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl"

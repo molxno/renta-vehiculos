@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $total_centavos
  * @property string $moneda
  * @property array<int, array{concepto: string, monto_centavos: int}> $desglose
+ * @property Reserva $reserva
  */
 final class Factura extends Model
 {

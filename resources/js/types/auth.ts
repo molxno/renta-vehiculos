@@ -20,3 +20,8 @@ export type User = {
 export type Auth = {
     user: User | null;
 };
+
+export type NavigationItem = {
+    label: string;
+    href: string;
+};

@@ -53,3 +53,33 @@ function autenticarEmpleado(UsuarioRol $rol = UsuarioRol::Coordinador): User
 
     return $empleado;
 }
+
+/**
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function datosRegistroCliente(array $overrides = []): array
+{
+    return [
+        'name' => 'Ana Cliente',
+        'email' => 'ana.nueva@renta.test',
+        'tipo_documento' => 'CC',
+        'numero_documento' => '1098765432',
+        'telefono' => '3001234567',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'licencia_numero' => 'LIC-12345678',
+        'licencia_categoria' => 'B1',
+        'licencia_vencimiento' => now()->addYear()->toDateString(),
+        ...$overrides,
+    ];
+}
+
+function cabecerasInertia(): array
+{
+    return [
+        'X-Inertia' => 'true',
+        'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+        'X-Requested-With' => 'XMLHttpRequest',
+    ];
+}

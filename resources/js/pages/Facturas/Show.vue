@@ -33,7 +33,7 @@ function pesos(centavos: number): string {
 
 <template>
     <Head :title="`Factura ${invoice.numero}`" />
-    <AppLayout role="cajero">
+    <AppLayout>
         <div class="flex flex-col gap-8">
             <div>
                 <p

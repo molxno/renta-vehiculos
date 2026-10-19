@@ -34,9 +34,20 @@ class AlquilerEntregadoSeeder extends Seeder
             ['numero' => 'CTR-ALQUILER-ENTREGADO', 'condiciones' => ['combustible' => 'lleno', 'kilometraje_incluido' => 300], 'firmado_at' => '2026-02-05 08:30:00'],
         );
 
-        ActaEntrega::updateOrCreate(
+        $acta = ActaEntrega::updateOrCreate(
             ['reserva_id' => $reserva->id],
-            ['entregado_at' => '2026-02-05 09:00:00', 'checklist' => ['documentos' => true, 'llantas' => true, 'kilometraje' => 10000, 'combustible' => 'lleno'], 'observaciones' => null],
+            [
+                'entregado_at' => '2026-02-05 09:00:00',
+                'checklist' => ['documentos' => true, 'llantas' => true, 'kilometraje' => 10000, 'combustible' => 'lleno'],
+                'observaciones' => null,
+                'coordinador_id' => User::where('email', 'coordinador@renta.test')->value('id'),
+                'firmante_nombre' => 'Cliente Demo',
+                'firmado_at' => '2026-02-05 09:00:00',
+                'licencia_resultado' => 'Licencia LIC-DEMO-001 vigente, categoría B1 válida',
+            ],
         );
+        $acta->update([
+            'numero' => sprintf('%s-%d', (string) config('entrega.prefijo_acta'), $acta->id),
+        ]);
     }
 }

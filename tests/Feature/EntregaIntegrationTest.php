@@ -36,7 +36,7 @@ describe('registro de entrega', function () {
             ],
             'observaciones' => 'Entrega sin novedades',
             'aceptacion' => '1',
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('entregas.show', $reservation);
 
         $record = ActaEntrega::query()->where('reserva_id', $reservation->id)->sole();
         $contract = Contrato::query()->where('reserva_id', $reservation->id)->sole();
@@ -51,6 +51,9 @@ describe('registro de entrega', function () {
                 'combustible' => 'lleno',
             ])
             ->and($record->entregado_at->toDateTimeString())->toBe('2026-02-01 09:00:00')
+            ->and($record->numero)->toBe('ACT-'.$record->id)
+            ->and($record->firmante_nombre)->toBe($reservation->user->name)
+            ->and($record->licencia_resultado)->toContain('LIC-DEMO-001')
             ->and($contract->numero)->toBe(sprintf('CTR-%06d', $reservation->id))
             ->and($contract->firmado_at?->toDateTimeString())->toBe('2026-02-01 09:00:00')
             ->and($contract->condiciones)->toBe([
@@ -75,7 +78,7 @@ describe('registro de entrega', function () {
                 'aceptacion' => '1',
             ])
             ->assertRedirectToRoute('entregas.create', $reservation)
-            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción no está registrada.']);
+            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción no está registrada. El cliente debe registrarla en su cuenta.']);
 
         expect(ActaEntrega::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse()
             ->and(Contrato::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse()
@@ -84,9 +87,9 @@ describe('registro de entrega', function () {
     });
 
     it('rejects delivery when the driving license is expired', function () {
-        $reservation = reservaConfirmadaConLicencia(['fecha_vencimiento' => '2026-01-31']);
-
         $this->travelTo('2026-02-01 09:00:00');
+
+        $reservation = reservaConfirmadaConLicencia(['fecha_vencimiento' => '2026-01-31']);
 
         $this->from(route('entregas.create', $reservation))
             ->post(route('entregas.store', $reservation), [
@@ -94,7 +97,7 @@ describe('registro de entrega', function () {
                 'aceptacion' => '1',
             ])
             ->assertRedirectToRoute('entregas.create', $reservation)
-            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción está vencida.']);
+            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción está vencida. El cliente debe actualizarla en su cuenta.']);
 
         expect(ActaEntrega::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse()
             ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Confirmada);
@@ -172,13 +175,13 @@ describe('registro de entrega', function () {
     });
 
     it('shows the license, deposit and blocks an expired license', function () {
+        $this->travelTo('2026-02-01 09:00:00');
+
         $reservation = reservaConfirmadaConLicencia([
             'numero' => 'LIC-VENCIDA',
             'fecha_vencimiento' => '2026-01-31',
             'categoria' => 'B1',
         ]);
-
-        $this->travelTo('2026-02-01 09:00:00');
 
         $this->withHeaders(inertiaHeaders())
             ->get(route('entregas.create', $reservation))
@@ -188,17 +191,17 @@ describe('registro de entrega', function () {
             ->assertJsonPath('props.currency', 'COP')
             ->assertJsonPath('props.licencia.numero', 'LIC-VENCIDA')
             ->assertJsonPath('props.licencia.vigente', false)
-            ->assertJsonPath('props.bloqueo', 'La licencia de conducción está vencida.')
+            ->assertJsonPath('props.bloqueo', 'La licencia de conducción está vencida. El cliente debe actualizarla en su cuenta.')
             ->assertJsonPath('props.nivelesCombustible.4.value', 'lleno');
     });
 
     it('shows a valid license without blocking a confirmed reservation', function () {
+        $this->travelTo('2026-02-01 09:00:00');
+
         $reservation = reservaConfirmadaConLicencia([
             'numero' => 'LIC-VIGENTE',
             'fecha_vencimiento' => '2028-12-31',
         ]);
-
-        $this->travelTo('2026-02-01 09:00:00');
 
         $this->withHeaders(inertiaHeaders())
             ->get(route('entregas.create', $reservation))
@@ -217,7 +220,7 @@ describe('registro de entrega', function () {
             ->get(route('entregas.create', $reservation))
             ->assertOk()
             ->assertJsonPath('props.licencia', null)
-            ->assertJsonPath('props.bloqueo', 'La licencia de conducción no está registrada.');
+            ->assertJsonPath('props.bloqueo', 'La licencia de conducción no está registrada. El cliente debe registrarla en su cuenta.');
     });
 
     it('blocks delivery when the reservation is not confirmed', function () {
@@ -266,7 +269,7 @@ describe('registro de entrega', function () {
             'entregado_at' => '2026-02-01 09:00:00',
             'aceptacion' => '1',
             'foto' => $file,
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('entregas.show', $reservation);
 
         $record = ActaEntrega::query()->where('reserva_id', $reservation->id)->sole();
 
@@ -294,7 +297,7 @@ describe('registro de entrega', function () {
  */
 function reservaConfirmadaConLicencia(array $licencia = []): Reserva
 {
-    $reservation = Reserva::factory()->create([
+    $reservation = Reserva::factory()->enVentanaDeEntrega()->create([
         'estado' => ReservaEstado::Confirmada,
         'total_centavos' => 45000000,
         'moneda' => 'COP',

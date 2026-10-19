@@ -39,18 +39,20 @@ para el flujo de esta guía.
 ## Fixtures que usa el recorrido
 
 Tras un `migrate:fresh --seed` las reservas se identifican por QR. Los `id`
-numéricos suelen ser 1 a 4 en un clon limpio; si dudan, confírmenlos:
+numéricos suelen ser 1 a 6 en un clon limpio; si dudan, confírmenlos:
 
 ```text
 php artisan tinker --execute "App\Models\Reserva::query()->get(['id','qr_codigo','estado'])->each(fn ($r) => print($r->id.' '.$r->qr_codigo.' '.$r->estado->value.PHP_EOL));"
 ```
 
-| QR                      | Estado inicial | Vehículo  | Uso en la demo                                      | Ruta típica (id fresco)  |
-| ----------------------- | -------------- | --------- | --------------------------------------------------- | ------------------------ |
-| `QR-RESERVA-CONFIRMADA` | confirmada     | `ABC-123` | Recorrido principal: entrega → devolución → pago    | `/reservas/1/entrega`    |
-| `QR-ALQUILER-ENTREGADO` | entregada      | `DEF-456` | Atajo: entrar directo a devolución con cargos extra | `/reservas/2/devolucion` |
-| `QR-DEVOLUCION-FACTURA` | devuelta       | `GHI-789` | Atajo: factura pendiente `FAC-DEVOLUCION-PENDIENTE` | `/facturas/1`            |
-| `QR-PAGO-RECHAZADO`     | facturada      | `ABC-123` | Atajo: reintento de pago tras un rechazo            | `/reservas/4/pago`       |
+| QR                      | Estado inicial | Vehículo  | Uso en la demo                                      | Ruta típica (id fresco)     |
+| ----------------------- | -------------- | --------- | --------------------------------------------------- | --------------------------- |
+| `QR-RESERVA-CONFIRMADA` | confirmada     | `ABC-123` | Entregable hoy (fechas relativas a now() Bogota)    | `/reservas/{id}/entrega`    |
+| `QR-RESERVA-FUTURA`     | confirmada     | `GHI-789` | Bloqueada: inicia pasado mañana                     | `/entregas`                 |
+| `QR-RESERVA-VENCIDA`    | confirmada     | `ABC-123` | Bloqueada: ventana ya cerrada                       | `/entregas`                 |
+| `QR-ALQUILER-ENTREGADO` | entregada      | `DEF-456` | Atajo: devolución con cargos. Fechas fijas feb-2026 | `/reservas/{id}/devolucion` |
+| `QR-DEVOLUCION-FACTURA` | devuelta       | `GHI-789` | Atajo: factura pendiente `FAC-DEVOLUCION-PENDIENTE` | `/facturas/{id}`            |
+| `QR-PAGO-RECHAZADO`     | facturada      | `ABC-123` | Atajo: reintento de pago tras un rechazo            | `/reservas/{id}/pago`       |
 
 ## Qué está simulado
 
@@ -149,9 +151,13 @@ efectivo (30 % de la renta).
 
 ### 6. Entrega
 
-Con sesión de coordinador, en el acta:
+Con sesión de coordinador, en `/entregas` busquen `QR-RESERVA-CONFIRMADA`
+(fechas relativas a hoy en America/Bogota). `QR-RESERVA-FUTURA` y
+`QR-RESERVA-VENCIDA` muestran el botón deshabilitado.
 
-1. Fecha y hora: `2026-02-01 09:00`.
+En el acta de la reserva entregable hoy:
+
+1. Fecha y hora: la del día (prellenada).
 2. Kilometraje de salida: `10000`.
 3. Combustible: **Lleno**.
 4. Marquen documentos y llantas.
@@ -159,9 +165,10 @@ Con sesión de coordinador, en el acta:
 6. Acepten el contrato.
 7. Confirmen.
 
-Resultado esperado: acta, contrato `CTR-00000{id}` y anticipo en efectivo.
-La reserva pasa a **entregada** y el vehículo a **alquilado**. La pantalla de
-detalle muestra el resumen de la reserva; continúen al paso 7.
+Resultado esperado: acta `ACT-{id}`, contrato `CTR-00000{id}` y anticipo en
+efectivo. La reserva pasa a **entregada** y el vehículo a **alquilado**. La
+pantalla de éxito muestra el número de acta y el enlace «Ver acta de
+entrega». El envío por correo (RF-012) no forma parte de este MVP.
 
 ### 7. Devolución y costos
 

@@ -8,7 +8,13 @@ use Database\Factories\ActaDevolucionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property array<string, mixed>|null $checklist
+ * @property Carbon|null $devuelto_at
+ * @property string|null $observaciones
+ */
 final class ActaDevolucion extends Model
 {
     /** @use HasFactory<ActaDevolucionFactory> */

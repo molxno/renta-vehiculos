@@ -7,7 +7,6 @@ use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Enums\VehiculoEstado;
 use App\Models\Factura;
-use App\Models\LicenciaConduccion;
 use App\Models\Reserva;
 use App\Models\User;
 use App\Models\Vehiculo;
@@ -28,7 +27,7 @@ function mvpInertiaHeaders(): array
 test('seeded MVP exposes the complete smoke flow', function () {
     $this->seed();
 
-    $reservation = Reserva::where('estado', ReservaEstado::Confirmada)->firstOrFail();
+    $reservation = Reserva::where('qr_codigo', 'QR-RESERVA-CONFIRMADA')->firstOrFail();
     $invoice = Factura::query()->firstOrFail();
     $headers = mvpInertiaHeaders();
 
@@ -90,16 +89,13 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
     $headers = mvpInertiaHeaders();
 
     $this->from(route('register'))
-        ->post(route('register.store'), [
+        ->post(route('register.store'), datosRegistroCliente([
             'name' => 'Cliente Humo',
             'email' => 'cliente.humo@renta.test',
-            'tipo_documento' => 'CC',
             'numero_documento' => '1099000111',
             'telefono' => '3001112233',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ])
-        ->assertRedirect(route('home'));
+        ]))
+        ->assertRedirect(route('reservas.index'));
 
     $cliente = User::query()->where('email', 'cliente.humo@renta.test')->firstOrFail();
     $this->assertAuthenticatedAs($cliente);
@@ -113,15 +109,9 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
             'email' => 'cliente.humo@renta.test',
             'password' => 'password',
         ])
-        ->assertRedirect(route('home'));
+        ->assertRedirect(route('reservas.index'));
 
     $this->assertAuthenticatedAs($cliente);
-
-    LicenciaConduccion::factory()->create([
-        'user_id' => $cliente->id,
-        'numero' => 'LIC-HUMO-001',
-        'fecha_vencimiento' => '2028-12-31',
-    ]);
 
     $catalogo = $this->withHeaders($headers)
         ->get(route('catalogo', [
@@ -168,6 +158,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         ->assertJsonPath('props.reservation.totalCents', 53550000);
 
     $this->actingAs(User::query()->where('email', 'coordinador@renta.test')->sole());
+    $this->travelTo('2026-12-01 10:00:00');
 
     $this->post(route('entregas.store', $reserva), [
         'entregado_at' => '2026-12-01 09:00:00',
@@ -179,7 +170,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         ],
         'observaciones' => 'Entrega de humo',
         'aceptacion' => '1',
-    ])->assertRedirectToRoute('reservas.show', $reserva);
+    ])->assertRedirectToRoute('entregas.show', $reserva);
 
     $reserva->refresh()->load(['vehiculo', 'actaEntrega', 'contrato']);
     expect($reserva->estado)->toBe(ReservaEstado::Entregada)
@@ -194,7 +185,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
             'combustible' => 'lleno',
         ],
         'observaciones' => 'Inspección de humo sin novedades',
-    ])->assertRedirectToRoute('reservas.show', $reserva);
+    ])->assertRedirectToRoute('devoluciones.show', $reserva);
 
     $reserva->refresh();
     $factura = $reserva->factura()->sole();
@@ -211,7 +202,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
         'metodo' => MetodoPago::Tarjeta->value,
         'monto_centavos' => $factura->total_centavos,
         'numero_tarjeta' => '4111111111111111',
-    ])->assertRedirectToRoute('reservas.show', $reserva);
+    ])->assertRedirectToRoute('pagos.show', $reserva);
 
     $reserva->refresh();
     $factura->refresh();

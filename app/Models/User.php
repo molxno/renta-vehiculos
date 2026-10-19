@@ -73,4 +73,12 @@ final class User extends Authenticatable
     {
         return $this->hasMany(Reserva::class);
     }
+
+    public function necesitaRegistrarLicencia(): bool
+    {
+        $this->loadMissing('licenciaConduccion');
+        $licencia = $this->licenciaConduccion;
+
+        return ! $licencia instanceof LicenciaConduccion || ! $licencia->estaVigente();
+    }
 }

@@ -18,6 +18,15 @@ export type ReservationFormProps = {
     };
     trm: string | null;
     quote: ReservationQuote | null;
+    rentalNotes: string[];
+    rentalDisclaimer: string;
+};
+
+export type ReservationTimelineItem = {
+    key: string;
+    label: string;
+    at: string | null;
+    done: boolean;
 };
 
 export type ReservationReceipt = {

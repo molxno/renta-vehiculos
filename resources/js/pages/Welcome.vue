@@ -14,6 +14,7 @@ import type { FeaturedVehicle, HomeSearch } from '@/types';
 
 defineProps<{
     featuredVehicles: FeaturedVehicle[];
+    vehiclesAvailableCount: number;
     search: HomeSearch;
 }>();
 </script>
@@ -22,7 +23,10 @@ defineProps<{
     <StorefrontLayout>
         <Head title="RENT-GO" />
         <!-- TODO: REEMPLAZAR MOCK CON PROPS DINÁMICAS DEL BACKEND CUANDO EL CATÁLOGOS/RESERVAS ESTÉ LISTO -->
-        <StorefrontHero :search="search" />
+        <StorefrontHero
+            :search="search"
+            :vehicles-available-count="vehiclesAvailableCount"
+        />
         <StorefrontFleet />
         <StorefrontCategories />
         <StorefrontQuality />

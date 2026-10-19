@@ -1,36 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import RentGoLogo from '@/components/storefront/RentGoLogo.vue';
 import { login, logout } from '@/routes';
-import { index as reservasIndex } from '@/actions/App/Http/Controllers/ReservaController';
-import { edit as editarTrm } from '@/actions/App/Http/Controllers/TrmController';
-import Button from '@/components/ui/Button.vue';
-import type { UserRole } from '@/types';
-
-const props = withDefaults(
-    defineProps<{
-        role?: UserRole;
-    }>(),
-    { role: 'cliente' },
-);
 
 const page = usePage();
 const authUser = computed(() => page.props.auth?.user ?? null);
-const currentRole = computed(() => authUser.value?.role ?? props.role);
-
-const navigation = {
-    cliente: ['Mis reservas', 'Facturas', 'Pagos'],
-    coordinador: ['Reservas', 'Entregas', 'Devoluciones'],
-    cajero: ['Facturas', 'Pagos', 'Cierres de caja'],
-    administrador: ['Dashboard', 'Tasa de cambio', 'Usuarios', 'Reportes'],
-    gerente: ['Dashboard', 'Reportes', 'Indicadores'],
-} as const;
-
-const navigationHrefs: Record<string, string> = {
-    'Mis reservas': reservasIndex.url(),
-    Reservas: reservasIndex.url(),
-    'Tasa de cambio': editarTrm.url(),
-};
+const navigation = computed(() => page.props.navigation ?? []);
+const landingHref = computed(() => page.props.landingHref ?? '/');
+const flashError = computed(() => page.props.flash?.error ?? null);
+const flashSuccess = computed(() => page.props.flash?.success ?? null);
 const loginUrl = login.url();
 const logoutUrl = logout.url();
 </script>
@@ -39,36 +18,56 @@ const logoutUrl = logout.url();
     <div
         class="flex min-h-screen flex-col bg-brand-navy text-slate-800 antialiased"
     >
-        <header class="border-b border-slate-200 bg-white">
+        <header class="sticky top-0 z-50 bg-brand-navy text-white">
             <div
-                class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4"
+                class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6"
             >
-                <Link
-                    href="/"
-                    class="text-lg font-bold tracking-tight text-brand-ink"
-                >
-                    Renta Vehículos
+                <Link :href="landingHref" class="inline-flex items-center">
+                    <RentGoLogo />
                 </Link>
                 <nav class="hidden items-center gap-5 md:flex">
                     <Link
-                        v-for="item in navigation[currentRole]"
-                        :key="item"
-                        :href="navigationHrefs[item] ?? '#'"
-                        class="text-sm font-medium text-slate-600 hover:text-brand-ink"
+                        v-for="item in navigation"
+                        :key="item.label"
+                        :href="item.href"
+                        class="text-sm font-medium text-white/80 hover:text-brand-teal"
                     >
-                        {{ item }}
+                        {{ item.label }}
                     </Link>
                 </nav>
-                <Link v-if="authUser" :href="logoutUrl" method="post">
-                    <Button variant="secondary">Cerrar sesión</Button>
+                <Link
+                    v-if="authUser"
+                    :href="logoutUrl"
+                    method="post"
+                    class="rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
+                >
+                    Cerrar sesión
                 </Link>
-                <Link v-else :href="loginUrl">
-                    <Button variant="secondary">Iniciar sesión</Button>
+                <Link
+                    v-else
+                    :href="loginUrl"
+                    class="rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
+                >
+                    Iniciar sesión
                 </Link>
             </div>
         </header>
         <main class="w-full flex-1 bg-slate-50">
             <div class="mx-auto max-w-7xl px-6 py-8">
+                <div
+                    v-if="flashError"
+                    class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                    role="alert"
+                >
+                    {{ flashError }}
+                </div>
+                <div
+                    v-if="flashSuccess"
+                    class="mb-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900"
+                    role="status"
+                >
+                    {{ flashSuccess }}
+                </div>
                 <slot />
             </div>
         </main>

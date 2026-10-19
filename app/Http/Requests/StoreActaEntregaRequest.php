@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Actions\Entregas\EvaluarVentanaDeEntrega;
 use App\Enums\NivelCombustible;
 use App\Models\LicenciaConduccion;
 use App\Models\Reserva;
@@ -67,6 +68,12 @@ final class StoreActaEntregaRequest extends FormRequest
                 }
 
                 $this->validarLicencia($reserva, $validator);
+
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                app(EvaluarVentanaDeEntrega::class)->asegurar($reserva);
             },
         ];
     }
@@ -117,15 +124,21 @@ final class StoreActaEntregaRequest extends FormRequest
         $licencia = $reserva->user->licenciaConduccion;
 
         if (! $licencia instanceof LicenciaConduccion) {
-            $validator->errors()->add('licencia', 'La licencia de conducción no está registrada.');
+            $validator->errors()->add('licencia', 'La licencia de conducción no está registrada. El cliente debe registrarla en su cuenta.');
 
             return;
         }
 
-        if ($licencia->estaVigente()) {
+        if (! $licencia->estaVigente()) {
+            $validator->errors()->add('licencia', 'La licencia de conducción está vencida. El cliente debe actualizarla en su cuenta.');
+
             return;
         }
 
-        $validator->errors()->add('licencia', 'La licencia de conducción está vencida.');
+        if ($licencia->categoriaValida()) {
+            return;
+        }
+
+        $validator->errors()->add('licencia', 'La categoría de la licencia no es válida para entregar el vehículo.');
     }
 }

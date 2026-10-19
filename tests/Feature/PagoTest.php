@@ -4,6 +4,7 @@ use App\Enums\FacturaEstado;
 use App\Enums\MetodoPago;
 use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
+use App\Enums\UsuarioRol;
 use App\Models\Factura;
 use App\Models\Pago;
 use App\Models\Reserva;
@@ -35,7 +36,7 @@ function inertiaPagoHeaders(): array
 
 describe('registro de pago', function () {
     beforeEach(function (): void {
-        autenticarEmpleado();
+        autenticarEmpleado(UsuarioRol::Cajero);
     });
 
     it('renders the payment page with the pending invoice total', function () {
@@ -46,7 +47,10 @@ describe('registro de pago', function () {
             ->assertOk()
             ->assertJsonPath('component', 'Pagos/Create')
             ->assertJsonPath('props.amountCents', $invoice->total_centavos)
-            ->assertJsonPath('props.currency', 'COP');
+            ->assertJsonPath('props.currency', 'COP')
+            ->assertJsonPath('props.invoice.numero', $invoice->numero)
+            ->assertJsonPath('props.invoice.estado', FacturaEstado::Pendiente->value)
+            ->assertJsonPath('props.lastPayment', null);
     });
 
     it('authorizes a card that the fake gateway accepts and marks the invoice paid', function () {
@@ -58,7 +62,7 @@ describe('registro de pago', function () {
                 'monto_centavos' => $invoice->total_centavos,
                 'numero_tarjeta' => '4111111111111111',
             ])
-            ->assertRedirectToRoute('reservas.show', $reservation);
+            ->assertRedirectToRoute('pagos.show', $reservation);
 
         $payment = Pago::query()->where('reserva_id', $reservation->id)->sole();
 
@@ -66,6 +70,15 @@ describe('registro de pago', function () {
             ->and($payment->referencia)->toBe('FAKE-PAY-'.$reservation->id)
             ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pagada)
             ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Pagada);
+
+        $this->withHeaders(inertiaPagoHeaders())
+            ->get(route('pagos.show', $reservation))
+            ->assertOk()
+            ->assertJsonPath('component', 'Pagos/Show')
+            ->assertJsonPath('props.reservation.status', ReservaEstado::Pagada->value)
+            ->assertJsonPath('props.invoice.estado', FacturaEstado::Pagada->value)
+            ->assertJsonPath('props.payment.referencia', 'FAKE-PAY-'.$reservation->id)
+            ->assertJsonPath('props.payment.metodo', MetodoPago::Tarjeta->value);
     });
 
     it('rejects a card ending in 0000 and keeps the invoice pending', function () {
@@ -88,6 +101,12 @@ describe('registro de pago', function () {
             ->and($payment->referencia)->toBeNull()
             ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pendiente)
             ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Facturada);
+
+        $this->withHeaders(inertiaPagoHeaders())
+            ->get(route('pagos.create', $reservation))
+            ->assertOk()
+            ->assertJsonPath('props.lastPayment.estado', PagoEstado::Rechazado->value)
+            ->assertJsonPath('props.invoice.estado', FacturaEstado::Pendiente->value);
     });
 
     it('retries after a rejected payment and then approves', function () {
@@ -101,7 +120,7 @@ describe('registro de pago', function () {
                 'monto_centavos' => $invoice->total_centavos,
                 'numero_tarjeta' => '5555555555554444',
             ])
-            ->assertRedirectToRoute('reservas.show', $reservation);
+            ->assertRedirectToRoute('pagos.show', $reservation);
 
         expect(Pago::query()->where('reserva_id', $reservation->id)->count())->toBe(2)
             ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pagada)
@@ -115,10 +134,26 @@ describe('registro de pago', function () {
         $this->post(route('pagos.store', $reservation), [
             'metodo' => MetodoPago::Efectivo->value,
             'monto_centavos' => $invoice->total_centavos,
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('pagos.show', $reservation);
 
         expect(Pago::query()->where('reserva_id', $reservation->id)->sole()->estado)->toBe(PagoEstado::Aprobado)
             ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pagada);
+    });
+
+    it('approves a bank transfer without a card number', function () {
+        [$reservation, $invoice] = facturaPendiente();
+
+        $this->post(route('pagos.store', $reservation), [
+            'metodo' => MetodoPago::Transferencia->value,
+            'monto_centavos' => $invoice->total_centavos,
+        ])->assertRedirectToRoute('pagos.show', $reservation);
+
+        $payment = Pago::query()->where('reserva_id', $reservation->id)->sole();
+
+        expect($payment->estado)->toBe(PagoEstado::Aprobado)
+            ->and($payment->referencia)->toBe('FAKE-TRANSFERENCIA-'.$reservation->id)
+            ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pagada)
+            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Pagada);
     });
 
     it('rejects a payment when the reservation is not invoiced', function () {
@@ -179,7 +214,7 @@ describe('registro de pago', function () {
         $this->post(route('pagos.store', $reservation), [
             'metodo' => MetodoPago::Efectivo->value,
             'monto_centavos' => $invoice->total_centavos,
-        ])->assertRedirectToRoute('reservas.show', $reservation);
+        ])->assertRedirectToRoute('pagos.show', $reservation);
 
         $this->from(route('pagos.create', $reservation))
             ->post(route('pagos.store', $reservation), [
