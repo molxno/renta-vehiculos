@@ -124,13 +124,13 @@ final class StoreActaEntregaRequest extends FormRequest
         $licencia = $reserva->user->licenciaConduccion;
 
         if (! $licencia instanceof LicenciaConduccion) {
-            $validator->errors()->add('licencia', 'La licencia de conducción no está registrada.');
+            $validator->errors()->add('licencia', 'La licencia de conducción no está registrada. El cliente debe registrarla en su cuenta.');
 
             return;
         }
 
         if (! $licencia->estaVigente()) {
-            $validator->errors()->add('licencia', 'La licencia de conducción está vencida.');
+            $validator->errors()->add('licencia', 'La licencia de conducción está vencida. El cliente debe actualizarla en su cuenta.');
 
             return;
         }

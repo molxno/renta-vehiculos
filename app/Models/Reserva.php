@@ -171,11 +171,11 @@ final class Reserva extends Model
         $licencia = $this->user->licenciaConduccion;
 
         if (! $licencia instanceof LicenciaConduccion) {
-            return 'La licencia de conducción no está registrada.';
+            return 'La licencia de conducción no está registrada. El cliente debe registrarla en su cuenta.';
         }
 
         if (! $licencia->estaVigente()) {
-            return 'La licencia de conducción está vencida.';
+            return 'La licencia de conducción está vencida. El cliente debe actualizarla en su cuenta.';
         }
 
         if (! $licencia->categoriaValida()) {

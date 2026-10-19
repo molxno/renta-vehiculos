@@ -12,6 +12,7 @@ use App\Contracts\TarifaService;
 use App\Enums\FacturaEstado;
 use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
+use App\Enums\UsuarioRol;
 use App\Exceptions\TransicionEstadoInvalida;
 use App\Http\Requests\ConfirmarReservaRequest;
 use App\Http\Requests\PrepararReservaRequest;
@@ -39,6 +40,8 @@ final class ReservaController extends Controller
         return inertia('Reservas/Index', [
             'reservations' => $listarReservas->handle($usuario),
             'filters' => ['page' => 1],
+            'avisoLicencia' => $this->avisoLicenciaPara($usuario),
+            'cuentaUrl' => route('cuenta.show'),
         ]);
     }
 
@@ -120,9 +123,10 @@ final class ReservaController extends Controller
         return to_route('reservas.show', $reserva);
     }
 
-    public function show(Reserva $reserva): Response
+    public function show(Request $request, Reserva $reserva): Response
     {
         $reserva->loadMissing(['vehiculo', 'actaEntrega', 'factura', 'pagos']);
+        $usuario = $request->user();
 
         return inertia('Reservas/Show', [
             'reservation' => [
@@ -139,6 +143,10 @@ final class ReservaController extends Controller
             ],
             'timeline' => $this->lineaDeTiempo($reserva),
             'actaUrl' => $reserva->actaEntrega ? route('entregas.acta', $reserva) : null,
+            'avisoLicencia' => $usuario instanceof User && $usuario->id === $reserva->user_id
+                ? $this->avisoLicenciaPara($usuario)
+                : null,
+            'cuentaUrl' => route('cuenta.show'),
         ]);
     }
 
@@ -170,6 +178,15 @@ final class ReservaController extends Controller
         }
 
         return to_route('reservas.show', $reserva);
+    }
+
+    private function avisoLicenciaPara(User $usuario): ?string
+    {
+        if ($usuario->rol !== UsuarioRol::Cliente || ! $usuario->necesitaRegistrarLicencia()) {
+            return null;
+        }
+
+        return 'Registra tu licencia para poder recibir tu vehículo';
     }
 
     /**

@@ -78,7 +78,7 @@ describe('registro de entrega', function () {
                 'aceptacion' => '1',
             ])
             ->assertRedirectToRoute('entregas.create', $reservation)
-            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción no está registrada.']);
+            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción no está registrada. El cliente debe registrarla en su cuenta.']);
 
         expect(ActaEntrega::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse()
             ->and(Contrato::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse()
@@ -97,7 +97,7 @@ describe('registro de entrega', function () {
                 'aceptacion' => '1',
             ])
             ->assertRedirectToRoute('entregas.create', $reservation)
-            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción está vencida.']);
+            ->assertSessionHasErrors(['licencia' => 'La licencia de conducción está vencida. El cliente debe actualizarla en su cuenta.']);
 
         expect(ActaEntrega::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse()
             ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Confirmada);
@@ -191,7 +191,7 @@ describe('registro de entrega', function () {
             ->assertJsonPath('props.currency', 'COP')
             ->assertJsonPath('props.licencia.numero', 'LIC-VENCIDA')
             ->assertJsonPath('props.licencia.vigente', false)
-            ->assertJsonPath('props.bloqueo', 'La licencia de conducción está vencida.')
+            ->assertJsonPath('props.bloqueo', 'La licencia de conducción está vencida. El cliente debe actualizarla en su cuenta.')
             ->assertJsonPath('props.nivelesCombustible.4.value', 'lleno');
     });
 
@@ -220,7 +220,7 @@ describe('registro de entrega', function () {
             ->get(route('entregas.create', $reservation))
             ->assertOk()
             ->assertJsonPath('props.licencia', null)
-            ->assertJsonPath('props.bloqueo', 'La licencia de conducción no está registrada.');
+            ->assertJsonPath('props.bloqueo', 'La licencia de conducción no está registrada. El cliente debe registrarla en su cuenta.');
     });
 
     it('blocks delivery when the reservation is not confirmed', function () {

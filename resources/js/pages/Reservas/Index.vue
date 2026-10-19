@@ -11,6 +11,8 @@ import type { ReservationListItem } from '@/types';
 defineProps<{
     reservations: ReservationListItem[];
     filters: { page: number };
+    avisoLicencia: string | null;
+    cuentaUrl: string;
 }>();
 
 const statusLabels: Record<string, string> = {
@@ -57,6 +59,19 @@ function estado(status: string): string {
                     Consulta el estado de cada reserva y abre el detalle para
                     continuar el flujo.
                 </p>
+                <div
+                    v-if="avisoLicencia"
+                    class="mt-4 max-w-2xl rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"
+                    role="status"
+                >
+                    <p class="font-semibold">{{ avisoLicencia }}</p>
+                    <Link
+                        :href="cuentaUrl"
+                        class="mt-2 inline-flex font-semibold text-brand-teal hover:text-brand-teal-dark"
+                    >
+                        Ir a Mi cuenta
+                    </Link>
+                </div>
             </div>
 
             <Card>
