@@ -36,7 +36,10 @@ final class SesionController extends Controller
         $request->session()->regenerate();
 
         $user = $request->user();
-        assert($user instanceof User);
+
+        if (! $user instanceof User) {
+            abort(403);
+        }
 
         return redirect()->to($aterrizajePorRol->urlTrasAutenticacion($user, $request));
     }
