@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { index as devolucionesIndex } from '@/actions/App/Http/Controllers/DevolucionController';
 import { index as entregasIndex } from '@/actions/App/Http/Controllers/EntregaController';
+import { index as pagosIndex } from '@/actions/App/Http/Controllers/PagoController';
 import { index as reservasIndex } from '@/actions/App/Http/Controllers/ReservaController';
 import { edit as editarTrm } from '@/actions/App/Http/Controllers/TrmController';
 import { login, logout } from '@/routes';
@@ -28,19 +29,24 @@ const navigation = {
         'Tasa de cambio',
         'Entregas',
         'Devoluciones',
+        'Pagos',
         'Usuarios',
         'Reportes',
     ],
     gerente: ['Dashboard', 'Reportes', 'Indicadores'],
 } as const;
 
-const navigationHrefs: Record<string, string> = {
+const navigationHrefs = computed<Record<string, string>>(() => ({
     'Mis reservas': reservasIndex.url(),
     Reservas: reservasIndex.url(),
     Entregas: entregasIndex.url(),
     Devoluciones: devolucionesIndex.url(),
+    Pagos:
+        currentRole.value === 'cajero' || currentRole.value === 'administrador'
+            ? pagosIndex.url()
+            : '#',
     'Tasa de cambio': editarTrm.url(),
-};
+}));
 const loginUrl = login.url();
 const logoutUrl = logout.url();
 </script>
