@@ -218,7 +218,7 @@ describe('formulario, vista previa y éxito de devolución', function () {
             ->assertJsonPath('props.puedeCobrar', false);
     });
 
-    it('shows the collect payment link only to cashiers and administrators', function (UsuarioRol $rol) {
+    it('shows the collect payment link to an administrator', function () {
         $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Facturada]);
         ActaDevolucion::factory()->create(['reserva_id' => $reservation->id]);
         Factura::factory()->create([
@@ -226,7 +226,7 @@ describe('formulario, vista previa y éxito de devolución', function () {
             'numero' => 'FAC-COBRO-DEMO',
         ]);
 
-        autenticarEmpleado($rol);
+        autenticarEmpleado(UsuarioRol::Administrador);
 
         $this->withHeaders(cabecerasInertiaDevolucion())
             ->get(route('devoluciones.show', $reservation))
@@ -234,10 +234,18 @@ describe('formulario, vista previa y éxito de devolución', function () {
             ->assertJsonPath('props.factura.numero', 'FAC-COBRO-DEMO')
             ->assertJsonPath('props.pagoUrl', route('pagos.create', $reservation))
             ->assertJsonPath('props.puedeCobrar', true);
-    })->with([
-        'cajero' => UsuarioRol::Cajero,
-        'administrador' => UsuarioRol::Administrador,
-    ]);
+    });
+
+    it('forbids a cashier from opening return pages', function () {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Entregada]);
+
+        autenticarEmpleado(UsuarioRol::Cajero);
+
+        $this->get(route('devoluciones.index'))->assertForbidden();
+        $this->get(route('devoluciones.create', $reservation))->assertForbidden();
+        $this->get(route('devoluciones.show', $reservation))->assertForbidden();
+        $this->post(route('devoluciones.store', $reservation), [])->assertForbidden();
+    });
 
     it('shows empty acta details when the return checklist has no values', function () {
         $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Facturada]);

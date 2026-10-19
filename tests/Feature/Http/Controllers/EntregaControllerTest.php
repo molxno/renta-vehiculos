@@ -221,4 +221,15 @@ describe('formulario y éxito de entrega', function () {
             ->get(route('entregas.show', $reservation))
             ->assertForbidden();
     });
+
+    it('forbids a cashier from opening delivery pages', function () {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Confirmada]);
+
+        autenticarEmpleado(UsuarioRol::Cajero);
+
+        $this->get(route('entregas.index'))->assertForbidden();
+        $this->get(route('entregas.create', $reservation))->assertForbidden();
+        $this->get(route('entregas.show', $reservation))->assertForbidden();
+        $this->post(route('entregas.store', $reservation), [])->assertForbidden();
+    });
 });

@@ -40,7 +40,7 @@ it('forbids a client from opening operational employee routes', function (string
     'facturas' => fn (): array => ['facturas.show', ['factura' => Factura::factory()->create()]],
 ]);
 
-it('allows an employee to open operational routes', function (UsuarioRol $rol) {
+it('allows a coordinator or administrator to open deliveries and returns', function (UsuarioRol $rol) {
     $reservation = Reserva::factory()->create();
     $invoice = Factura::factory()->create();
 
@@ -53,9 +53,23 @@ it('allows an employee to open operational routes', function (UsuarioRol $rol) {
     $this->get(route('facturas.show', $invoice))->assertOk();
 })->with([
     'coordinador' => UsuarioRol::Coordinador,
-    'cajero' => UsuarioRol::Cajero,
     'administrador' => UsuarioRol::Administrador,
 ]);
+
+it('forbids a cashier from opening deliveries and returns', function () {
+    $reservation = Reserva::factory()->create();
+
+    autenticarEmpleado(UsuarioRol::Cajero);
+
+    $this->get(route('entregas.index'))->assertForbidden();
+    $this->get(route('entregas.create', $reservation))->assertForbidden();
+    $this->get(route('entregas.show', $reservation))->assertForbidden();
+    $this->post(route('entregas.store', $reservation), [])->assertForbidden();
+    $this->get(route('devoluciones.index'))->assertForbidden();
+    $this->get(route('devoluciones.create', $reservation))->assertForbidden();
+    $this->get(route('devoluciones.show', $reservation))->assertForbidden();
+    $this->post(route('devoluciones.store', $reservation), [])->assertForbidden();
+});
 
 it('allows cashiers and administrators to collect payment', function (UsuarioRol $rol) {
     $reservation = Reserva::factory()->create();

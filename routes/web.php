@@ -39,7 +39,7 @@ Route::middleware(['auth', 'rol:administrador'])
         Route::put('/trm', [TrmController::class, 'update'])->name('trm.update');
     });
 
-Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(function (): void {
+Route::middleware(['auth', 'rol:coordinador,administrador'])->group(function (): void {
     Route::get('/entregas', [EntregaController::class, 'index'])->name('entregas.index');
     Route::get('/reservas/{reserva}/entrega', [EntregaController::class, 'create'])->name('entregas.create');
     Route::post('/reservas/{reserva}/entrega', [EntregaController::class, 'store'])->name('entregas.store');
@@ -48,6 +48,9 @@ Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(funct
     Route::get('/reservas/{reserva}/devolucion', [DevolucionController::class, 'create'])->name('devoluciones.create');
     Route::post('/reservas/{reserva}/devolucion', [DevolucionController::class, 'store'])->name('devoluciones.store');
     Route::get('/reservas/{reserva}/devolucion/exito', [DevolucionController::class, 'show'])->name('devoluciones.show');
+});
+
+Route::middleware(['auth', 'rol:coordinador,cajero,administrador'])->group(function (): void {
     Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
 });
 
