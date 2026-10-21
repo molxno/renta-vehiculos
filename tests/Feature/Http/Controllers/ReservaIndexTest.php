@@ -15,6 +15,22 @@ it('forbids listing reservations when the request has no authenticated user', fu
         ->toThrow(HttpException::class);
 });
 
+it('exposes the empty catalog call to action when the client has no reservations', function () {
+    $cliente = User::factory()->cliente()->create();
+
+    $this->actingAs($cliente)
+        ->withHeaders([
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => hash_file('xxh128', public_path('build/manifest.json')),
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])
+        ->get(route('reservas.index'))
+        ->assertOk()
+        ->assertJsonPath('component', 'Reservas/Index')
+        ->assertJsonPath('props.reservations', [])
+        ->assertJsonPath('props.catalogoUrl', route('catalogo'));
+});
+
 it('lists only the authenticated client reservations', function () {
     $cliente = User::factory()->cliente()->create();
     $otro = User::factory()->cliente()->create();

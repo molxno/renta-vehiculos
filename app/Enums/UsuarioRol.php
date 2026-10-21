@@ -15,10 +15,10 @@ enum UsuarioRol: string
     public function rutaAterrizaje(): string
     {
         return match ($this) {
-            self::Cliente, self::Administrador => 'reservas.index',
+            self::Cliente, self::Gerente => 'home',
+            self::Administrador => 'reservas.index',
             self::Coordinador => 'entregas.index',
             self::Cajero => 'pagos.index',
-            self::Gerente => 'home',
         };
     }
 
@@ -30,7 +30,31 @@ enum UsuarioRol: string
     /**
      * @return list<array{label: string, href: string}>
      */
+    public static function enlacesPublicos(): array
+    {
+        return [
+            ['label' => 'Inicio', 'href' => route('home')],
+            ['label' => 'Catálogo', 'href' => route('catalogo')],
+            ['label' => 'Cómo funciona', 'href' => route('home').'#como-funciona'],
+            ['label' => 'Contacto', 'href' => route('home').'#contacto'],
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, href: string}>
+     */
     public function enlacesNavegacion(): array
+    {
+        return [
+            ...self::enlacesPublicos(),
+            ...$this->enlacesDeRol(),
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, href: string}>
+     */
+    private function enlacesDeRol(): array
     {
         return match ($this) {
             self::Cliente => [
