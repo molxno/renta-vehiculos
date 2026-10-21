@@ -13,7 +13,7 @@ describe('registro con licencia', function () {
     it('creates the client license and flashes the created account message', function () {
         $this->from(route('register'))
             ->post(route('register.store'), datosRegistroCliente())
-            ->assertRedirect(route('reservas.index'))
+            ->assertRedirect(route('home'))
             ->assertSessionHas('success', 'Cuenta creada');
 
         $user = User::query()->where('email', 'ana.nueva@renta.test')->firstOrFail();
@@ -114,11 +114,18 @@ describe('aviso de licencia al cliente', function () {
 
 describe('navegacion y fechas del cliente', function () {
     it('includes mis reservas and mi cuenta in the public header for clients', function () {
+        $cliente = User::factory()->cliente()->create();
         $header = (string) file_get_contents(resource_path('js/components/storefront/StorefrontHeader.vue'));
 
-        expect($header)->toContain('Mis reservas')
-            ->and($header)->toContain('Mi cuenta')
-            ->and($header)->toContain("authUser.value?.role === 'cliente'")
+        $this->actingAs($cliente)
+            ->withHeaders(cabecerasInertia())
+            ->get(route('home'))
+            ->assertOk()
+            ->assertJsonFragment(['label' => 'Mis reservas', 'href' => route('reservas.index')])
+            ->assertJsonFragment(['label' => 'Mi cuenta', 'href' => route('cuenta.show')]);
+
+        expect($header)->toContain('page.props.navigation')
+            ->and($header)->not->toContain("authUser.value?.role === 'cliente'")
             ->and($header)->toContain('Cerrar sesión');
     });
 

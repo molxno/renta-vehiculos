@@ -40,7 +40,7 @@ describe('inicio de sesión', function () {
         $this->assertAuthenticatedAs($user);
         expect($user->rol)->toBe($rol);
     })->with([
-        'cliente' => ['cliente@renta.test', UsuarioRol::Cliente, 'reservas.index'],
+        'cliente' => ['cliente@renta.test', UsuarioRol::Cliente, 'home'],
         'coordinador' => ['coordinador@renta.test', UsuarioRol::Coordinador, 'entregas.index'],
         'cajero' => ['cajero@renta.test', UsuarioRol::Cajero, 'pagos.index'],
         'administrador' => ['administrador@renta.test', UsuarioRol::Administrador, 'reservas.index'],
@@ -54,7 +54,7 @@ describe('inicio de sesión', function () {
             ->get(route($rutaAterrizaje))
             ->assertOk();
     })->with([
-        'cliente' => [UsuarioRol::Cliente, 'reservas.index'],
+        'cliente' => [UsuarioRol::Cliente, 'home'],
         'coordinador' => [UsuarioRol::Coordinador, 'entregas.index'],
         'cajero' => [UsuarioRol::Cajero, 'pagos.index'],
         'administrador' => [UsuarioRol::Administrador, 'reservas.index'],
@@ -194,7 +194,7 @@ describe('registro mínimo', function () {
             ->post(route('register.store'), datosRegistroCliente([
                 'rol' => UsuarioRol::Administrador->value,
             ]))
-            ->assertRedirect(route('reservas.index'))
+            ->assertRedirect(route('home'))
             ->assertSessionHas('success', 'Cuenta creada');
 
         $user = User::query()->where('email', 'ana.nueva@renta.test')->firstOrFail();
@@ -252,7 +252,7 @@ describe('registro mínimo', function () {
             ->get($path)
             ->assertRedirect(route($rutaAterrizaje));
     })->with([
-        'cliente en iniciar sesión' => ['/iniciar-sesion', UsuarioRol::Cliente, 'reservas.index'],
+        'cliente en iniciar sesión' => ['/iniciar-sesion', UsuarioRol::Cliente, 'home'],
         'coordinador en alias login' => ['/login', UsuarioRol::Coordinador, 'entregas.index'],
         'cajero en registro' => ['/registro', UsuarioRol::Cajero, 'pagos.index'],
         'administrador en alias register' => ['/register', UsuarioRol::Administrador, 'reservas.index'],

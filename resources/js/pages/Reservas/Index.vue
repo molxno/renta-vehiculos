@@ -13,6 +13,7 @@ defineProps<{
     filters: { page: number };
     avisoLicencia: string | null;
     cuentaUrl: string;
+    catalogoUrl: string;
 }>();
 
 const statusLabels: Record<string, string> = {
@@ -75,12 +76,20 @@ function estado(status: string): string {
             </div>
 
             <Card>
-                <p
+                <div
                     v-if="reservations.length === 0"
-                    class="text-sm text-slate-600"
+                    class="flex flex-col items-start gap-4"
                 >
-                    Aún no hay reservas para mostrar.
-                </p>
+                    <p class="text-sm text-slate-600">
+                        Aún no hay reservas para mostrar.
+                    </p>
+                    <Link
+                        :href="catalogoUrl"
+                        class="rounded-lg bg-brand-teal px-4 py-2 text-sm font-semibold text-white hover:bg-brand-teal-dark"
+                    >
+                        Explorar catálogo
+                    </Link>
+                </div>
                 <Table
                     v-else
                     :headers="[

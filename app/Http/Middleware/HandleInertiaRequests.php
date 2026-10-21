@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Enums\UsuarioRol;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -69,7 +70,7 @@ final class HandleInertiaRequests extends Middleware
     private function navigationFor(?User $user): array
     {
         if (! $user instanceof User) {
-            return [];
+            return UsuarioRol::enlacesPublicos();
         }
 
         return $user->rol->enlacesNavegacion();
