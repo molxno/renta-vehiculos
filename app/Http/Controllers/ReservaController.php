@@ -42,6 +42,7 @@ final class ReservaController extends Controller
             'filters' => ['page' => 1],
             'avisoLicencia' => $this->avisoLicenciaPara($usuario),
             'cuentaUrl' => route('cuenta.show'),
+            'catalogoUrl' => route('catalogo'),
         ]);
     }
 

@@ -95,7 +95,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
             'numero_documento' => '1099000111',
             'telefono' => '3001112233',
         ]))
-        ->assertRedirect(route('reservas.index'));
+        ->assertRedirect(route('home'));
 
     $cliente = User::query()->where('email', 'cliente.humo@renta.test')->firstOrFail();
     $this->assertAuthenticatedAs($cliente);
@@ -109,7 +109,7 @@ test('completes the MVP HTTP smoke flow from register to invoice', function () {
             'email' => 'cliente.humo@renta.test',
             'password' => 'password',
         ])
-        ->assertRedirect(route('reservas.index'));
+        ->assertRedirect(route('home'));
 
     $this->assertAuthenticatedAs($cliente);
 

@@ -14,7 +14,7 @@ it('returns the landing url for each role', function (UsuarioRol $rol, string $r
 
     expect((new AterrizajePorRol)->urlPara($user))->toBe(route($ruta));
 })->with([
-    'cliente' => [UsuarioRol::Cliente, 'reservas.index'],
+    'cliente' => [UsuarioRol::Cliente, 'home'],
     'coordinador' => [UsuarioRol::Coordinador, 'entregas.index'],
     'cajero' => [UsuarioRol::Cajero, 'pagos.index'],
     'administrador' => [UsuarioRol::Administrador, 'reservas.index'],
