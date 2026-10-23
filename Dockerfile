@@ -11,7 +11,7 @@ RUN composer install \
     --optimize-autoloader \
     --no-scripts
 
-FROM node:24-bookworm-slim AS node
+FROM node:25-bookworm-slim AS node
 
 FROM dunglas/frankenphp:php8.5-bookworm AS frontend
 
