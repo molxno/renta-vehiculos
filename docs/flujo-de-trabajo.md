@@ -99,14 +99,14 @@ el ticket a **En revisión**. No cambies otros estados durante este paso.
 
 ## 10. Revisión
 
-El code owner aprueba y hace merge con **squash**. El agente no mergea.
+El code owner aprueba y hace merge con **merge commit**. El agente no mergea.
 Atiende los comentarios con commits nuevos en la misma rama.
 
 ## 11. Promoción a QA
 
 Con el PR integrado en `dev` y el CI de `dev` verde, abre o actualiza un único
 PR `dev -> qa`, titulado `Promoción a QA: SCRUM-N[, SCRUM-M]`. Ese PR usa
-**merge commit**, no squash. Después del merge a `qa` y del CI verde, pasa el
+**merge commit**. Después del merge a `qa` y del CI verde, pasa el
 ticket a **Finalizado** y añade un comentario con la evidencia.
 
 ## 12. Promoción a main

@@ -5,7 +5,7 @@
 - `feature/SCRUM-N-descripcion-corta`: nace desde `dev` y contiene una sola
   tarea. Usa `fix/` para correcciones y `chore/` para tareas técnicas.
 - `dev`: integración de trabajo revisado. Los code owners mergean PR con
-  **squash**.
+  **merge commit**.
 - `qa`: validación integrada. La promoción `dev -> qa` usa **merge commit**.
 - `main`: producción. La promoción `qa -> main` usa **merge commit** y solo la
   realiza Santiago a petición suya.

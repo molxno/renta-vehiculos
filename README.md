@@ -272,7 +272,7 @@ Los controladores no contienen reglas de negocio.
 2. Trabaja en `feature/SCRUM-N-descripcion-corta` desde `dev`; una historia por PR.
 3. Implementa con las capas de [docs/estandar-codigo.md](docs/estandar-codigo.md) y textos de dominio en español.
 4. Ejecuta `composer ci:check` y `composer test:coverage` cuando haya driver local.
-5. Abre un único PR hacia `dev`; el code owner hace squash y el agente no hace merge.
+5. Abre un único PR hacia `dev`; el code owner hace merge commit y el agente no hace merge.
 
 Antes de integrar, la rama debe tener verdes estos checks:
 
