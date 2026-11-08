@@ -131,7 +131,10 @@ Cierre
 ## Si algo falla
 
 - **CI rojo:** lee la primera causa, corrige con un commit nuevo y repite los
-  checks obligatorios. Tras dos fallos iguales, detente y reporta.
+  checks obligatorios. Tras dos fallos iguales, detente y reporta. Si el job
+  ni arranca porque la cuenta de GitHub está bloqueada por facturación, no
+  es un fallo de código: usa `composer ci:check` local y no dispares runners
+  alojados.
 - **Conflicto:** no fuerces la historia; actualiza desde la rama destino,
   resuelve de forma explícita, ejecuta las validaciones y documenta el cambio.
 - **MCP caído:** no inventes respuestas. Usa información local verificable,

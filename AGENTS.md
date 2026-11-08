@@ -98,6 +98,16 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
 - Activate the `deploying-to-cloud` skill whenever deploying to Laravel Cloud, configuring Cloud environments or resources, using the Cloud CLI, or troubleshooting Cloud deployments.
 
+=== tests rules ===
+
+# Test Enforcement
+
+- Add or update tests for behavior and logic changes when a test provides meaningful regression coverage.
+- Pure copy, styling, and layout-only changes do not require new or updated tests.
+- When test coverage applies, run the affected tests and ensure they pass.
+- Test the changed behavior and its important failure modes, but do not add tests beyond them.
+- Read the `testing-best-practices` skill before writing tests.
+
 === inertia-laravel/core rules ===
 
 # Inertia
@@ -174,7 +184,6 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 - Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
 - Rerun a test after each change to it.
 - Run `vendor/bin/pest` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
-- After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
 
 === inertia-vue/core rules ===
 
@@ -187,7 +196,7 @@ Vue components must have a single root element.
 
 # Guía única para agentes
 
-Este repositorio es un monolito Laravel 13.35.0 + Inertia.js 3.5.1 + Vue 3.8.0,
+Este repositorio es un monolito Laravel 13.40.0 + Inertia.js 3.7.0 + Vue 3.5.45,
 con dominio y textos de negocio en español. Las reglas detalladas están en:
 
 - [Flujo de trabajo](docs/flujo-de-trabajo.md)
