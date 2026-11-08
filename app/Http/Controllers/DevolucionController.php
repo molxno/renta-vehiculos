@@ -158,12 +158,12 @@ final class DevolucionController extends Controller
         $normalizados = [];
 
         foreach ($danos as $dano) {
-            if (! is_array($dano)) {
+            if (! is_array($dano) || ! array_key_exists('descripcion', $dano) || ! array_key_exists('monto_centavos', $dano)) {
                 continue;
             }
 
-            $descripcion = trim((string) ($dano['descripcion'] ?? ''));
-            $monto = $dano['monto_centavos'] ?? 0;
+            $descripcion = trim((string) $dano['descripcion']);
+            $monto = $dano['monto_centavos'];
 
             if ($descripcion === '' && (int) $monto === 0) {
                 continue;

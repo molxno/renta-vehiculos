@@ -137,6 +137,55 @@ describe('formulario, vista previa y éxito de devolución', function () {
             ->assertJsonPath('props.cobro.total_centavos', 202300000);
     });
 
+    it('keeps a paired indexed damage query as a single preview line', function () {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Entregada]);
+
+        autenticarEmpleado();
+
+        $consulta = http_build_query([
+            'danos' => [
+                ['descripcion' => 'X', 'monto_centavos' => 5000000],
+            ],
+        ]);
+
+        $response = $this->withHeaders(cabecerasInertiaDevolucion())
+            ->get(route('devoluciones.create', $reservation).'?'.$consulta)
+            ->assertOk();
+
+        $lineasDano = collect($response->json('props.cobro.desglose'))
+            ->filter(fn (array $linea): bool => str_starts_with($linea['concepto'], 'Daño:'))
+            ->values()
+            ->all();
+
+        expect($consulta)->toContain('danos%5B0%5D%5Bdescripcion%5D=X')
+            ->and($consulta)->toContain('danos%5B0%5D%5Bmonto_centavos%5D=5000000')
+            ->and($response->json('props.filters.danos'))->toBe([
+                ['descripcion' => 'X', 'monto_centavos' => 5000000],
+            ])
+            ->and($lineasDano)->toBe([
+                ['concepto' => 'Daño: X', 'monto_centavos' => 5000000],
+            ]);
+    });
+
+    it('does not invent preview rows from unpaired damage query fragments', function () {
+        $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Entregada]);
+
+        autenticarEmpleado();
+
+        $this->withHeaders(cabecerasInertiaDevolucion())
+            ->get(route('devoluciones.create', [
+                'reserva' => $reservation,
+                'danos' => [
+                    ['descripcion' => 'X'],
+                    ['monto_centavos' => 5000000],
+                ],
+            ]))
+            ->assertOk()
+            ->assertJsonPath('props.filters.danos', [])
+            ->assertJsonMissing(['concepto' => 'Daño: X'])
+            ->assertJsonMissing(['concepto' => 'Daño: ']);
+    });
+
     it('ignores a non array damage payload in the cost preview', function () {
         $reservation = Reserva::factory()->create(['estado' => ReservaEstado::Entregada]);
 
