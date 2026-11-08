@@ -96,7 +96,11 @@ documenta; serán registradas con controladores placeholder en PR3a.
 
 ```ts
 export type UserRole =
-    'cliente' | 'coordinador' | 'cajero' | 'administrador' | 'gerente';
+    | 'cliente'
+    | 'coordinador'
+    | 'cajero'
+    | 'administrador'
+    | 'gerente';
 
 export interface AuthUser {
     id: number;

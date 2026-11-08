@@ -31,5 +31,5 @@ if php -m | grep -Eiq '^(pcov|xdebug)$'; then
         cmd.exe //c composer.bat test:coverage
     fi
 else
-    echo "Cobertura omitida: no se detectó PCOV ni Xdebug; se medirá en CI."
+    echo "Cobertura omitida: no se detectó PCOV ni Xdebug; se medirá cuando haya driver."
 fi

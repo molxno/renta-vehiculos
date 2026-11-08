@@ -2,9 +2,9 @@
 
 ## Versiones y lenguaje
 
-El estado instalado y verificado del proyecto es PHP 8.5.0, Laravel 13.35.0,
-Laravel Boost 2.10.3, Pest 5.3.1, Inertia Laravel 3.5.1, Inertia Vue 3.8.0 y
-Vue 3.5.43. Usa las APIs compatibles con esas versiones y consulta Laravel
+El estado instalado y verificado del proyecto es PHP 8.5.0, Laravel 13.40.0,
+Laravel Boost 2.10.4, Pest 5.3.5, Inertia Laravel 3.7.0, Inertia Vue 3.11.0 y
+Vue 3.5.45. Usa las APIs compatibles con esas versiones y consulta Laravel
 Boost antes de depender de una API versionada. No uses APIs deprecadas.
 
 Todo archivo PHP debe comenzar con `declare(strict_types=1);`. Declara tipos en
