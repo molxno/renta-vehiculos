@@ -1,12 +1,10 @@
 name: CI
 
+# GitHub-hosted runners stay off while the account is billing-locked.
+# The merge gate is `.githooks/pre-push` -> `composer ci:check`.
+# Restore `push` and `pull_request` when Actions is unlocked.
 on:
-  push:
-    branches:
-      - dev
-      - qa
-      - main
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read

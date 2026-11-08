@@ -27,19 +27,27 @@ configuración de GitHub.
 
 ## Checks obligatorios por rama
 
-| Rama                    | Checks obligatorios                                                                                                     |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `feature/*` hacia `dev` | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
-| `dev`                   | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
-| `qa`                    | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
-| `main`                  | `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` |
+La puerta de calidad vigente es el hook `.githooks/pre-push`, que ejecuta
+`composer ci:check` en la máquina que hace push. GitHub Actions quedó en
+`workflow_dispatch` porque la cuenta de GitHub está bloqueada por facturación
+y los runners alojados no arrancan. Eso no es un fallo de código. Cuando
+Actions vuelva a estar disponible, se restauran los disparos `push` y
+`pull_request` en `.github/workflows/` y, si el check ya es estable, se
+vuelven a exigir en el ruleset.
+
+| Rama                    | Checks obligatorios                                                                                                                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `feature/*` hacia `dev` | `composer ci:check` (hook local). GitHub: `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` cuando Actions esté desbloqueado |
+| `dev`                   | Igual que `feature/*` hacia `dev`                                                                                                                                                                  |
+| `qa`                    | Igual que `feature/*` hacia `dev`                                                                                                                                                                  |
+| `main`                  | Igual que `feature/*` hacia `dev`                                                                                                                                                                  |
 
 ## Cobertura
 
-El job **Pruebas y cobertura** ejecuta `vendor/bin/pest --coverage` en CI con
-PCOV y publica el porcentaje por archivo en los logs. El hook local ejecuta
-`composer test:coverage` solo cuando detecta PCOV o Xdebug; sin driver muestra
-un aviso y no bloquea. La medición canónica se hace en CI.
+El hook local ejecuta `composer test:coverage` solo cuando detecta PCOV o
+Xdebug; sin driver muestra un aviso y no bloquea. La medición canónica es
+`vendor/bin/pest --coverage --min=100` con PCOV, en local o en GitHub Actions
+cuando los runners vuelvan a estar disponibles.
 El umbral actual es **100 %**: la tercera medición alcanzó 100 % en todos
 los archivos incluidos, por lo que `composer test:coverage` conserva
 `--min=100`. Las iteraciones anteriores alcanzaron 56.6 % y 96.8 %; se
