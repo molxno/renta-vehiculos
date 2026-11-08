@@ -122,7 +122,7 @@ function actualizarCosto(): void {
             combustible: form.checklist.combustible,
             danos: danosParaEnvio(),
         },
-        { preserveScroll: true },
+        { preserveScroll: true, queryStringArrayFormat: 'indices' },
     );
 }
 
