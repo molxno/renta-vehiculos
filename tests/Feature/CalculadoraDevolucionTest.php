@@ -1,12 +1,14 @@
 <?php
 
 use App\Contracts\CalculadoraDevolucion;
+use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Fakes\FakeCalculadoraDevolucion;
 use App\Models\ActaEntrega;
 use App\Models\Contrato;
 use App\Models\Dano;
 use App\Models\Multa;
+use App\Models\Pago;
 use App\Models\Reserva;
 use App\Services\CalculadoraDevolucionEstandar;
 use Illuminate\Support\Carbon;
@@ -61,6 +63,45 @@ describe('calculadora de devolución', function () {
             'desglose' => [
                 ['concepto' => 'Renta base', 'monto_centavos' => 66000000],
             ],
+            'anticipos' => [],
+            'anticipos_centavos' => 0,
+            'saldo_centavos' => 78540000,
+        ]);
+    });
+
+    it('uses the stored net rent, applies VAT once and subtracts the delivery advance', function () {
+        $reserva = reservaEntregada();
+        $reserva->update([
+            'total_centavos' => 78540000,
+            'renta_neta_centavos' => 66000000,
+        ]);
+        Pago::factory()->create([
+            'reserva_id' => $reserva->id,
+            'estado' => PagoEstado::Aprobado,
+            'monto_centavos' => 23562000,
+            'referencia' => sprintf('ANT-%06d', $reserva->id),
+        ]);
+
+        $cobro = app(CalculadoraDevolucion::class)->calcular(
+            $reserva->id,
+            Carbon::parse('2026-02-08 09:00:00'),
+            ['kilometraje' => 10300, 'combustible' => 'lleno'],
+        );
+
+        expect($cobro)->toBe([
+            'cargos_centavos' => 0,
+            'subtotal_centavos' => 66000000,
+            'impuestos_centavos' => 12540000,
+            'total_centavos' => 78540000,
+            'desglose' => [
+                ['concepto' => 'Renta base', 'monto_centavos' => 66000000],
+            ],
+            'anticipos' => [[
+                'referencia' => sprintf('ANT-%06d', $reserva->id),
+                'monto_centavos' => 23562000,
+            ]],
+            'anticipos_centavos' => 23562000,
+            'saldo_centavos' => 54978000,
         ]);
     });
 
@@ -194,6 +235,20 @@ describe('calculadora de devolución', function () {
             ->and($cobro['desglose'])->toBe([
                 ['concepto' => 'Renta base', 'monto_centavos' => 66000000],
             ]);
+    });
+
+    it('applies the shared VAT configuration once over the net subtotal', function () {
+        config(['devolucion.iva_porcentaje' => 10]);
+        $reserva = reservaEntregada();
+
+        $cobro = app(CalculadoraDevolucion::class)->calcular(
+            $reserva->id,
+            Carbon::parse('2026-02-08 09:00:00'),
+            ['kilometraje' => 10300, 'combustible' => 'lleno'],
+        );
+
+        expect($cobro['impuestos_centavos'])->toBe(6600000)
+            ->and($cobro['total_centavos'])->toBe(72600000);
     });
 
     it('includes registered damages and fines in the final cost', function () {

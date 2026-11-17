@@ -19,7 +19,8 @@ test('database seeder loads the catalog and flow fixtures', function () {
         ->and(Vehiculo::count())->toBe(3)
         ->and(Reserva::count())->toBe(6)
         ->and(Factura::count())->toBe(2)
-        ->and(Pago::count())->toBe(1);
+        ->and(Pago::count())->toBe(4)
+        ->and(Pago::query()->where('estado', PagoEstado::Aprobado)->where('referencia', 'like', 'ANT-%')->count())->toBe(3);
 
     expect(Reserva::where('estado', ReservaEstado::Confirmada)->exists())->toBeTrue()
         ->and(Reserva::where('estado', ReservaEstado::Entregada)->exists())->toBeTrue()

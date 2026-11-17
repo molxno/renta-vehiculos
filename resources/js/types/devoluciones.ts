@@ -17,12 +17,20 @@ export type DevolucionCobroLinea = {
     monto_centavos: number;
 };
 
+export type AnticipoLiquidacion = {
+    referencia: string;
+    monto_centavos: number;
+};
+
 export type DevolucionCobro = {
     cargos_centavos: number;
     subtotal_centavos: number;
     impuestos_centavos: number;
     total_centavos: number;
     desglose: DevolucionCobroLinea[];
+    anticipos: AnticipoLiquidacion[];
+    anticipos_centavos: number;
+    saldo_centavos: number;
 };
 
 export type DevolucionDano = {

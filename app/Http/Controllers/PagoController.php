@@ -52,8 +52,10 @@ final class PagoController extends Controller
                 'placa' => $reserva->vehiculo->placa,
             ],
             'qrCodigo' => $reserva->qr_codigo,
-            'invoice' => $this->invoiceProps($factura),
-            'amountCents' => $factura instanceof Factura ? $factura->total_centavos : 0,
+            'invoice' => $this->invoiceProps($factura, $reserva),
+            'amountCents' => $factura instanceof Factura
+                ? $reserva->saldoAPagarCentavos($factura->total_centavos)
+                : 0,
             'currency' => $factura instanceof Factura ? $factura->moneda : $reserva->moneda,
             'methods' => array_map(
                 fn (MetodoPago $metodo): array => [
@@ -118,7 +120,7 @@ final class PagoController extends Controller
                 'qrCode' => $reserva->qr_codigo,
                 'currency' => $factura->moneda,
             ],
-            'invoice' => $this->invoiceProps($factura),
+            'invoice' => $this->invoiceProps($factura, $reserva),
             'payment' => $this->paymentProps($pagoAprobado),
             'facturaUrl' => route('facturas.show', $factura),
         ]);
@@ -131,10 +133,13 @@ final class PagoController extends Controller
      *     subtotalCents: int,
      *     taxCents: int,
      *     totalCents: int,
-     *     desglose: array<int, array{concepto: string, monto_centavos: int}>
+     *     desglose: array<int, array{concepto: string, monto_centavos: int}>,
+     *     anticipos: list<array{referencia: string, monto_centavos: int}>,
+     *     anticiposCents: int,
+     *     saldoCents: int
      * }|null
      */
-    private function invoiceProps(?Factura $factura): ?array
+    private function invoiceProps(?Factura $factura, Reserva $reserva): ?array
     {
         if (! $factura instanceof Factura) {
             return null;
@@ -147,6 +152,7 @@ final class PagoController extends Controller
             'taxCents' => $factura->impuestos_centavos,
             'totalCents' => $factura->total_centavos,
             'desglose' => $factura->desglose,
+            ...$reserva->liquidacionInertia($factura->total_centavos),
         ];
     }
 

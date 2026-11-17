@@ -31,7 +31,7 @@ final class RetrasoCargoStrategy implements CargoDevolucionStrategy
         $segundos = (int) $fin->diffInSeconds($devuelto);
         $diasRetraso = max(1, (int) ceil($segundos / 86400));
         $diasReserva = max(1, (int) $inicio->diffInDays($fin));
-        $tarifaDiaria = intdiv($reserva->total_centavos, $diasReserva);
+        $tarifaDiaria = intdiv($reserva->rentaNetaCentavos(), $diasReserva);
         $monto = $tarifaDiaria + max(0, $diasRetraso - 1) * 2 * $tarifaDiaria;
 
         return [[

@@ -3,9 +3,12 @@
 namespace Database\Seeders;
 
 use App\Enums\FacturaEstado;
+use App\Enums\MetodoPago;
+use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Models\ActaDevolucion;
 use App\Models\Factura;
+use App\Models\Pago;
 use App\Models\Reserva;
 use App\Models\User;
 use App\Models\Vehiculo;
@@ -25,8 +28,20 @@ class DevolucionFacturadaSeeder extends Seeder
                 'estado' => ReservaEstado::Devuelta,
                 'inicio' => '2026-02-10 09:00:00',
                 'fin' => '2026-02-13 09:00:00',
-                'total_centavos' => 45000000,
+                'total_centavos' => 53550000,
+                'renta_neta_centavos' => 45000000,
                 'moneda' => 'COP',
+            ],
+        );
+
+        Pago::updateOrCreate(
+            ['referencia' => sprintf('ANT-%06d', $reserva->id)],
+            [
+                'reserva_id' => $reserva->id,
+                'estado' => PagoEstado::Aprobado,
+                'metodo' => MetodoPago::Efectivo,
+                'monto_centavos' => $reserva->anticipoCentavos(),
+                'mensaje' => 'Anticipo de entrega',
             ],
         );
 

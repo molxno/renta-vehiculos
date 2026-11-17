@@ -25,6 +25,7 @@ final class RegistrarPago
         ?string $numeroTarjeta,
     ): Pago {
         $pago = DB::transaction(function () use ($reserva, $metodo, $montoCentavos, $numeroTarjeta): Pago {
+            $reserva->load(['factura', 'pagos']);
             $factura = $reserva->factura;
 
             if ($factura === null || $factura->estado !== FacturaEstado::Pendiente) {
@@ -39,9 +40,11 @@ final class RegistrarPago
                 ]);
             }
 
-            if ($montoCentavos !== $factura->total_centavos) {
+            $saldoCentavos = $reserva->saldoAPagarCentavos($factura->total_centavos);
+
+            if ($montoCentavos !== $saldoCentavos) {
                 throw ValidationException::withMessages([
-                    'monto_centavos' => 'El monto no coincide con el total de la factura.',
+                    'monto_centavos' => 'El monto no coincide con el saldo a pagar.',
                 ]);
             }
 
@@ -63,8 +66,12 @@ final class RegistrarPago
             ]);
 
             if ($resultado['aprobado']) {
-                $factura->update(['estado' => FacturaEstado::Pagada]);
-                $reserva->pagar();
+                $reserva->unsetRelation('pagos');
+
+                if ($reserva->saldoAPagarCentavos($factura->total_centavos) === 0) {
+                    $factura->update(['estado' => FacturaEstado::Pagada]);
+                    $reserva->pagar();
+                }
             }
 
             return $pago;

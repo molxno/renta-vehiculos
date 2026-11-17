@@ -44,6 +44,7 @@ describe('creación de reservas', function () {
             'inicio' => '2026-11-10 09:00:00',
             'fin' => '2026-11-12 09:00:00',
             'total_centavos' => 35700000,
+            'renta_neta_centavos' => 30000000,
             'moneda' => 'COP',
             'qr_codigo' => null,
         ]);
@@ -74,7 +75,8 @@ describe('creación de reservas', function () {
         $this->assertDatabaseHas('reservas', [
             'id' => $reserva->id,
             'convenio_id' => $convenio->id,
-            'total_centavos' => 32700000,
+            'total_centavos' => 32130000,
+            'renta_neta_centavos' => 27000000,
             'estado' => 'pendiente',
         ]);
     });
@@ -106,6 +108,7 @@ describe('creación de reservas', function () {
         $respuesta->assertRedirectToRoute('reservas.show', $reserva);
 
         expect($reserva->total_centavos)->toBe(8499)
+            ->and($reserva->renta_neta_centavos)->toBe(7142)
             ->and($reserva->moneda)->toBe('USD');
     });
 

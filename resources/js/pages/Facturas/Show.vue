@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
+import LiquidacionCierre from '@/components/LiquidacionCierre.vue';
 import Table from '@/components/ui/Table.vue';
 
 const props = defineProps<{
@@ -19,6 +20,11 @@ const props = defineProps<{
             concepto: string;
             monto_centavos: number;
         }>;
+        anticipos: Array<{
+            referencia: string;
+            monto_centavos: number;
+        }>;
+        saldoCents: number;
     };
 }>();
 
@@ -88,6 +94,12 @@ function pesos(centavos: number): string {
                             {{ pesos(invoice.totalCents) }}
                         </td>
                     </tr>
+                    <LiquidacionCierre
+                        :anticipos="invoice.anticipos"
+                        :saldo-centavos="invoice.saldoCents"
+                        :pesos="pesos"
+                        cell-class="text-brand-ink"
+                    />
                 </Table>
             </Card>
         </div>

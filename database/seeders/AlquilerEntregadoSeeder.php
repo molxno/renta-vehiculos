@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\MetodoPago;
+use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Models\ActaEntrega;
 use App\Models\Contrato;
+use App\Models\Pago;
 use App\Models\Reserva;
 use App\Models\User;
 use App\Models\Vehiculo;
@@ -24,8 +27,20 @@ class AlquilerEntregadoSeeder extends Seeder
                 'estado' => ReservaEstado::Entregada,
                 'inicio' => '2026-02-05 09:00:00',
                 'fin' => '2026-02-08 09:00:00',
-                'total_centavos' => 66000000,
+                'total_centavos' => 78540000,
+                'renta_neta_centavos' => 66000000,
                 'moneda' => 'COP',
+            ],
+        );
+
+        Pago::updateOrCreate(
+            ['referencia' => sprintf('ANT-%06d', $reserva->id)],
+            [
+                'reserva_id' => $reserva->id,
+                'estado' => PagoEstado::Aprobado,
+                'metodo' => MetodoPago::Efectivo,
+                'monto_centavos' => $reserva->anticipoCentavos(),
+                'mensaje' => 'Anticipo de entrega',
             ],
         );
 

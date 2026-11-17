@@ -11,6 +11,8 @@ final class FacturaController extends Controller
 {
     public function show(Factura $factura): Response
     {
+        $factura->load('reserva.pagos');
+
         return inertia('Facturas/Show', [
             'invoice' => [
                 'id' => $factura->id,
@@ -22,6 +24,7 @@ final class FacturaController extends Controller
                 'numero' => $factura->numero,
                 'subtotalCents' => $factura->subtotal_centavos,
                 'taxCents' => $factura->impuestos_centavos,
+                ...$factura->reserva->liquidacionInertia($factura->total_centavos),
             ],
         ]);
     }

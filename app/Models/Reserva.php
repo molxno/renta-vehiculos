@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Contracts\ReservaState;
+use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\States\Reserva\CanceladaState;
 use App\States\Reserva\ConfirmadaState;
@@ -19,12 +20,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * @property ReservaEstado $estado
  * @property Carbon $inicio
  * @property Carbon $fin
  * @property int $total_centavos
+ * @property int|null $renta_neta_centavos
  * @property string $moneda
  * @property string|null $qr_codigo
  * @property User $user
@@ -39,7 +42,7 @@ final class Reserva extends Model
 
     protected $fillable = [
         'user_id', 'vehiculo_id', 'convenio_id', 'estado', 'inicio', 'fin',
-        'total_centavos', 'moneda', 'qr_codigo',
+        'total_centavos', 'renta_neta_centavos', 'moneda', 'qr_codigo',
     ];
 
     protected function casts(): array
@@ -49,6 +52,7 @@ final class Reserva extends Model
             'inicio' => 'datetime',
             'fin' => 'datetime',
             'total_centavos' => 'integer',
+            'renta_neta_centavos' => 'integer',
         ];
     }
 
@@ -162,6 +166,80 @@ final class Reserva extends Model
     public function anticipoCentavos(): int
     {
         return intdiv($this->total_centavos * (int) config('entrega.anticipo_porcentaje'), 100);
+    }
+
+    public function rentaNetaCentavos(): int
+    {
+        return $this->renta_neta_centavos ?? $this->total_centavos;
+    }
+
+    /**
+     * @return Collection<int, Pago>
+     */
+    public function anticiposAprobados(): Collection
+    {
+        $this->loadMissing('pagos');
+
+        return $this->pagos
+            ->filter(fn (Pago $pago): bool => $pago->estado === PagoEstado::Aprobado
+                && is_string($pago->referencia)
+                && str_starts_with($pago->referencia, 'ANT-'))
+            ->values();
+    }
+
+    public function montoPagosAprobadosCentavos(): int
+    {
+        $this->loadMissing('pagos');
+
+        return (int) $this->pagos
+            ->filter(fn (Pago $pago): bool => $pago->estado === PagoEstado::Aprobado)
+            ->sum('monto_centavos');
+    }
+
+    public function saldoAPagarCentavos(int $totalFacturaCentavos): int
+    {
+        return max(0, $totalFacturaCentavos - $this->montoPagosAprobadosCentavos());
+    }
+
+    /**
+     * @return array{
+     *     anticipos: list<array{referencia: string, monto_centavos: int}>,
+     *     anticipos_centavos: int,
+     *     saldo_centavos: int
+     * }
+     */
+    public function resumenAnticiposYSaldo(int $totalCentavos): array
+    {
+        $anticipos = array_values($this->anticiposAprobados()
+            ->map(fn (Pago $pago): array => [
+                'referencia' => (string) $pago->referencia,
+                'monto_centavos' => $pago->monto_centavos,
+            ])
+            ->all());
+
+        return [
+            'anticipos' => $anticipos,
+            'anticipos_centavos' => (int) array_sum(array_column($anticipos, 'monto_centavos')),
+            'saldo_centavos' => $this->saldoAPagarCentavos($totalCentavos),
+        ];
+    }
+
+    /**
+     * @return array{
+     *     anticipos: list<array{referencia: string, monto_centavos: int}>,
+     *     anticiposCents: int,
+     *     saldoCents: int
+     * }
+     */
+    public function liquidacionInertia(int $totalCentavos): array
+    {
+        $resumen = $this->resumenAnticiposYSaldo($totalCentavos);
+
+        return [
+            'anticipos' => $resumen['anticipos'],
+            'anticiposCents' => $resumen['anticipos_centavos'],
+            'saldoCents' => $resumen['saldo_centavos'],
+        ];
     }
 
     public function mensajeBloqueoEntrega(): ?string

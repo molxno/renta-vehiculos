@@ -15,8 +15,6 @@ use Illuminate\Validation\ValidationException;
 
 final class TarifaServiceEstandar implements TarifaService
 {
-    private const int IMPUESTO_PORCENTAJE = 19;
-
     public function __construct(private ConvertidorTrm $convertidor) {}
 
     public function cotizar(
@@ -77,8 +75,9 @@ final class TarifaServiceEstandar implements TarifaService
         }
 
         $descuentoCentavos = intdiv(($subtotalCentavos * $descuentoPorcentaje) + 50, 100);
-        $impuestosCentavos = intdiv(($subtotalCentavos * self::IMPUESTO_PORCENTAJE) + 50, 100);
-        $totalCentavos = $subtotalCentavos - $descuentoCentavos + $impuestosCentavos;
+        $rentaNetaCentavos = $subtotalCentavos - $descuentoCentavos;
+        $impuestosCentavos = Iva::de($rentaNetaCentavos);
+        $totalCentavos = $rentaNetaCentavos + $impuestosCentavos;
 
         if ($moneda === 'USD') {
             $trm = Trm::query()->vigente()->first();
