@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Pagos;
 
-use App\Contracts\PasarelaPago;
 use App\Enums\FacturaEstado;
 use App\Enums\MetodoPago;
 use App\Enums\PagoEstado;
 use App\Models\Pago;
 use App\Models\Reserva;
+use App\Services\Pagos\FabricaProcesadorPago;
 use App\States\Reserva\FacturadaState;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final class RegistrarPago
 {
-    public function __construct(private PasarelaPago $pasarela) {}
+    public function __construct(private FabricaProcesadorPago $fabrica) {}
 
     public function handle(
         Reserva $reserva,
@@ -48,24 +48,19 @@ final class RegistrarPago
                 ]);
             }
 
-            $resultado = $metodo === MetodoPago::Tarjeta
-                ? $this->pasarela->autorizar($reserva->id, $montoCentavos, (string) $numeroTarjeta)
-                : [
-                    'aprobado' => true,
-                    'referencia' => 'FAKE-'.strtoupper($metodo->value).'-'.$reserva->id,
-                    'mensaje' => 'Pago autorizado',
-                    'codigo' => '00',
-                ];
+            $resultado = $this->fabrica
+                ->crear($metodo)
+                ->procesar($reserva, $montoCentavos, $numeroTarjeta);
 
             $pago = $reserva->pagos()->create([
-                'estado' => $resultado['aprobado'] ? PagoEstado::Aprobado : PagoEstado::Rechazado,
+                'estado' => $resultado->aprobado ? PagoEstado::Aprobado : PagoEstado::Rechazado,
                 'metodo' => $metodo,
                 'monto_centavos' => $montoCentavos,
-                'referencia' => $resultado['referencia'],
-                'mensaje' => $resultado['mensaje'],
+                'referencia' => $resultado->referencia,
+                'mensaje' => $resultado->mensaje,
             ]);
 
-            if ($resultado['aprobado']) {
+            if ($resultado->aprobado) {
                 $reserva->unsetRelation('pagos');
 
                 if ($reserva->saldoAPagarCentavos($factura->total_centavos) === 0) {
