@@ -1,3 +1,5 @@
+import type { AnticipoLiquidacion } from './devoluciones';
+
 export type PagoListItem = {
     reservationId: number;
     invoiceNumber: string;
@@ -23,6 +25,9 @@ export type PagoFactura = {
     taxCents: number;
     totalCents: number;
     desglose: PagoFacturaLinea[];
+    anticipos: AnticipoLiquidacion[];
+    anticiposCents: number;
+    saldoCents: number;
 };
 
 export type PagoIntento = {

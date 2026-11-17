@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\FacturaEstado;
+use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
 use App\Enums\UsuarioRol;
 use App\Models\ActaDevolucion;
 use App\Models\ActaEntrega;
 use App\Models\Factura;
+use App\Models\Pago;
 use App\Models\Reserva;
 use App\Models\User;
 use Database\Seeders\AlquilerEntregadoSeeder;
@@ -134,7 +136,9 @@ describe('formulario, vista previa y éxito de devolución', function () {
             ->assertJsonPath('props.filters.danos.0.descripcion', 'Rayón en puerta')
             ->assertJsonPath('props.cobro.subtotal_centavos', 170000000)
             ->assertJsonPath('props.cobro.impuestos_centavos', 32300000)
-            ->assertJsonPath('props.cobro.total_centavos', 202300000);
+            ->assertJsonPath('props.cobro.total_centavos', 202300000)
+            ->assertJsonPath('props.cobro.anticipos_centavos', 23562000)
+            ->assertJsonPath('props.cobro.saldo_centavos', 178738000);
     });
 
     it('keeps a paired indexed damage query as a single preview line', function () {
@@ -249,6 +253,12 @@ describe('formulario, vista previa y éxito de devolución', function () {
                 ['concepto' => 'Daño: Rayón en puerta', 'monto_centavos' => 5000000],
             ],
         ]);
+        Pago::factory()->create([
+            'reserva_id' => $reservation->id,
+            'estado' => PagoEstado::Aprobado,
+            'monto_centavos' => 23562000,
+            'referencia' => sprintf('ANT-%06d', $reservation->id),
+        ]);
 
         autenticarEmpleado();
 
@@ -263,6 +273,8 @@ describe('formulario, vista previa y éxito de devolución', function () {
             ->assertJsonPath('props.acta.observaciones', 'Inspección con novedades')
             ->assertJsonPath('props.factura.numero', sprintf('FAC-%06d', $reservation->id))
             ->assertJsonPath('props.factura.totalCents', 202300000)
+            ->assertJsonPath('props.factura.saldoCents', 178738000)
+            ->assertJsonPath('props.factura.anticipos.0.referencia', sprintf('ANT-%06d', $reservation->id))
             ->assertJsonPath('props.pagoUrl', null)
             ->assertJsonPath('props.puedeCobrar', false);
     });

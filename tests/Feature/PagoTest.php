@@ -114,15 +114,17 @@ describe('registro de pago', function () {
         $reservation = Reserva::query()->where('qr_codigo', 'QR-PAGO-RECHAZADO')->sole();
         $invoice = $reservation->factura;
 
+        $saldo = $reservation->saldoAPagarCentavos($invoice->total_centavos);
+
         $this->from(route('pagos.create', $reservation))
             ->post(route('pagos.store', $reservation), [
                 'metodo' => MetodoPago::Tarjeta->value,
-                'monto_centavos' => $invoice->total_centavos,
+                'monto_centavos' => $saldo,
                 'numero_tarjeta' => '5555555555554444',
             ])
             ->assertRedirectToRoute('pagos.show', $reservation);
 
-        expect(Pago::query()->where('reserva_id', $reservation->id)->count())->toBe(2)
+        expect(Pago::query()->where('reserva_id', $reservation->id)->count())->toBe(3)
             ->and($invoice->fresh()->estado)->toBe(FacturaEstado::Pagada)
             ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Pagada)
             ->and(Pago::query()->where('reserva_id', $reservation->id)->where('estado', PagoEstado::Aprobado)->exists())->toBeTrue();
@@ -191,6 +193,56 @@ describe('registro de pago', function () {
             ]);
 
         expect(Pago::query()->where('reserva_id', $reservation->id)->exists())->toBeFalse();
+    });
+
+    it('charges the remaining balance after an approved delivery advance', function () {
+        [$reservation, $invoice] = facturaPendiente();
+        Pago::factory()->create([
+            'reserva_id' => $reservation->id,
+            'estado' => PagoEstado::Aprobado,
+            'monto_centavos' => 16065000,
+            'referencia' => sprintf('ANT-%06d', $reservation->id),
+        ]);
+        $saldo = $reservation->fresh()->saldoAPagarCentavos($invoice->total_centavos);
+
+        $this->withHeaders(inertiaPagoHeaders())
+            ->get(route('pagos.create', $reservation))
+            ->assertOk()
+            ->assertJsonPath('props.amountCents', 37485000)
+            ->assertJsonPath('props.invoice.saldoCents', 37485000)
+            ->assertJsonPath('props.invoice.anticipos.0.referencia', sprintf('ANT-%06d', $reservation->id));
+
+        $this->post(route('pagos.store', $reservation), [
+            'metodo' => MetodoPago::Efectivo->value,
+            'monto_centavos' => $saldo,
+        ])->assertRedirectToRoute('pagos.show', $reservation);
+
+        expect($invoice->fresh()->estado)->toBe(FacturaEstado::Pagada)
+            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Pagada)
+            ->and($reservation->fresh()->montoPagosAprobadosCentavos())->toBe($invoice->total_centavos);
+    });
+
+    it('rejects charging the invoice total when an advance was already collected', function () {
+        [$reservation, $invoice] = facturaPendiente();
+        Pago::factory()->create([
+            'reserva_id' => $reservation->id,
+            'estado' => PagoEstado::Aprobado,
+            'monto_centavos' => 16065000,
+            'referencia' => sprintf('ANT-%06d', $reservation->id),
+        ]);
+
+        $this->from(route('pagos.create', $reservation))
+            ->post(route('pagos.store', $reservation), [
+                'metodo' => MetodoPago::Efectivo->value,
+                'monto_centavos' => $invoice->total_centavos,
+            ])
+            ->assertRedirect(route('pagos.create', $reservation))
+            ->assertSessionHasErrors([
+                'monto_centavos' => 'El monto no coincide con el saldo a pagar.',
+            ]);
+
+        expect($invoice->fresh()->estado)->toBe(FacturaEstado::Pendiente)
+            ->and($reservation->fresh()->estado)->toBe(ReservaEstado::Facturada);
     });
 
     it('rejects an amount that does not match the invoice', function () {

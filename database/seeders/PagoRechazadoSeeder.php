@@ -27,8 +27,20 @@ class PagoRechazadoSeeder extends Seeder
                 'estado' => ReservaEstado::Facturada,
                 'inicio' => '2026-02-15 09:00:00',
                 'fin' => '2026-02-18 09:00:00',
-                'total_centavos' => 45000000,
+                'total_centavos' => 53550000,
+                'renta_neta_centavos' => 45000000,
                 'moneda' => 'COP',
+            ],
+        );
+
+        Pago::updateOrCreate(
+            ['referencia' => sprintf('ANT-%06d', $reserva->id)],
+            [
+                'reserva_id' => $reserva->id,
+                'estado' => PagoEstado::Aprobado,
+                'metodo' => MetodoPago::Efectivo,
+                'monto_centavos' => $reserva->anticipoCentavos(),
+                'mensaje' => 'Anticipo de entrega',
             ],
         );
 
@@ -51,7 +63,7 @@ class PagoRechazadoSeeder extends Seeder
                 'reserva_id' => $reserva->id,
                 'estado' => PagoEstado::Rechazado,
                 'metodo' => MetodoPago::Tarjeta,
-                'monto_centavos' => 53550000,
+                'monto_centavos' => $reserva->saldoAPagarCentavos(53550000),
                 'mensaje' => 'Fondos insuficientes',
             ],
         );

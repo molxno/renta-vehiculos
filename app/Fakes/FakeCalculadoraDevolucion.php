@@ -25,6 +25,9 @@ final class FakeCalculadoraDevolucion implements CalculadoraDevolucion
                     'monto_centavos' => 45000000,
                 ],
             ],
+            'anticipos' => [],
+            'anticipos_centavos' => 0,
+            'saldo_centavos' => 53550000,
         ];
     }
 }

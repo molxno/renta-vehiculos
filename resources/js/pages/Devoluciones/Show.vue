@@ -3,10 +3,11 @@ import { Head, Link } from '@inertiajs/vue3';
 import { index as listarDevoluciones } from '@/actions/App/Http/Controllers/DevolucionController';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
+import LiquidacionCierre from '@/components/LiquidacionCierre.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatFechaHora } from '@/lib/utils';
-import type { DevolucionCobroLinea } from '@/types';
+import type { AnticipoLiquidacion, DevolucionCobroLinea } from '@/types';
 
 const props = defineProps<{
     reservation: {
@@ -31,6 +32,8 @@ const props = defineProps<{
         taxCents: number;
         totalCents: number;
         desglose: DevolucionCobroLinea[];
+        anticipos: AnticipoLiquidacion[];
+        saldoCents: number;
     };
     pagoUrl: string | null;
     puedeCobrar: boolean;
@@ -148,6 +151,11 @@ function fecha(value: string | null): string {
                             {{ pesos(factura.totalCents) }}
                         </td>
                     </tr>
+                    <LiquidacionCierre
+                        :anticipos="factura.anticipos"
+                        :saldo-centavos="factura.saldoCents"
+                        :pesos="pesos"
+                    />
                 </Table>
 
                 <p
