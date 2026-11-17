@@ -181,7 +181,9 @@ En el acta de la reserva entregable hoy:
 Resultado esperado: acta `ACT-{id}`, contrato `CTR-00000{id}` y anticipo en
 efectivo. La reserva pasa a **entregada** y el vehículo a **alquilado**. La
 pantalla de éxito muestra el número de acta y el enlace «Ver acta de
-entrega». El envío por correo (RF-012) no forma parte de este MVP.
+entrega». Al confirmar, entregar, facturar y pagar se envía un correo al
+cliente (`MAIL_MAILER=log`: el mensaje queda en `storage/logs/laravel.log`).
+La línea de tiempo de `/reservas/{id}` lee el historial de estados.
 
 ### 7. Devolución y costos
 
