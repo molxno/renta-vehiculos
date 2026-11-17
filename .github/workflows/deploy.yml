@@ -1,12 +1,17 @@
 name: Deploy
 
-# GitHub-hosted runners stay off while the account is billing-locked.
-# Restore `push` and `pull_request` when Actions is unlocked.
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   docker:
@@ -20,5 +25,15 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build Docker image
-        run: docker build --tag renta-vehiculos:ci .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: renta-vehiculos:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
