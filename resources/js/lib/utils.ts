@@ -14,8 +14,12 @@ export function formatFechaHora(value: string | null): string {
     }
 
     return new Intl.DateTimeFormat('es-CO', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
         timeZone: APP_TIMEZONE,
     }).format(new Date(value));
 }

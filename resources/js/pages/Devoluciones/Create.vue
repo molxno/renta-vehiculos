@@ -5,7 +5,7 @@ import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { formatFecha } from '@/lib/utils';
+import { formatFecha, formatFechaHora } from '@/lib/utils';
 import type { DevolucionCobro, DevolucionDano } from '@/types';
 
 const props = defineProps<{
@@ -248,7 +248,7 @@ function enviar(): void {
                         <div>
                             <dt class="text-slate-500">Fin contractual</dt>
                             <dd class="font-medium text-brand-navy">
-                                {{ reservation.fin }}
+                                {{ formatFechaHora(reservation.fin) }}
                             </dd>
                         </div>
                     </dl>

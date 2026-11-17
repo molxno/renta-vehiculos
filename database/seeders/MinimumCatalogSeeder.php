@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Enums\UsuarioRol;
@@ -15,8 +17,17 @@ use Illuminate\Database\Seeder;
 
 class MinimumCatalogSeeder extends Seeder
 {
+    /**
+     * Hash bcrypt de `password` (cost 4). El cast hashed no lo vuelve a hashear.
+     */
+    private const string PASSWORD_HASH = '$2y$04$erDAJQf1oyYvjtvQ.yMER.0A0c69RRErkxdBsyKEVDLdcFFIfdbBW';
+
     public function run(): void
     {
+        if (User::query()->where('email', 'cliente@renta.test')->exists()) {
+            return;
+        }
+
         $users = [
             ['name' => 'Cliente Demo', 'email' => 'cliente@renta.test', 'rol' => UsuarioRol::Cliente, 'documento' => '1000000001'],
             ['name' => 'Coordinador Demo', 'email' => 'coordinador@renta.test', 'rol' => UsuarioRol::Coordinador, 'documento' => '1000000002'],
@@ -34,7 +45,7 @@ class MinimumCatalogSeeder extends Seeder
                     'numero_documento' => $data['documento'],
                     'telefono' => '3000000001',
                     'rol' => $data['rol'],
-                    'password' => 'password',
+                    'password' => self::PASSWORD_HASH,
                 ],
             );
 

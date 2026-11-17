@@ -1,40 +1,56 @@
 # Guía de demo del MVP
 
-Recorrido reproducible de RENT-GO con los seeders del repositorio. Sirve para
-ensayar la demostración pública (SCRUM-51) sobre el código integrado en `dev`.
+Recorrido reproducible de RENT-GO con los seeders del repositorio. Sirve
+para la demostración pública sobre `main` (local o Render).
 
-La URL local es la de `APP_URL` en `.env`. Con `composer dev` suele ser
-`http://localhost:8000`.
+- Local: `APP_URL` de `.env`. Con `composer dev` suele ser
+  `http://localhost:8000`.
+- Render Free: `https://<servicio>.onrender.com`. El plan duerme; el primer
+  hit tarda ~1 min. La SQLite es efímera y se resiembra al arrancar.
 
-## Preparar el entorno
+## Preparar el entorno (local)
 
 ```text
 php artisan migrate:fresh --seed
 composer dev
 ```
 
-`migrate:fresh --seed` recarga usuarios, catálogo mínimo y cuatro reservas de
-fixture. Si ya corriste una entrega o un pago sobre esos datos, vuelve a
-sembrar antes de la demo.
+Eso carga cinco usuarios demo, tres vehículos y seis reservas de fixture.
+Si ya corriste una entrega o un pago sobre esos datos, vuelve a sembrar
+antes de la demo. En Render no hace falta: cada cold start resiembra.
 
 ## Credenciales de prueba
 
-Todos los usuarios demo usan la contraseña `password`. Son datos locales, no
-credenciales de producción.
+Todos los usuarios demo usan la contraseña `password`.
 
 El dominio no tiene un rol llamado «Empleado»: el personal operativo se
 reparte en **Coordinador** (entrega y devolución) y **Cajero** (pago y
 factura).
 
-| Rol de la demo   | Rol en el sistema | Correo                     | Contraseña | Para qué se usa                                      |
-| ---------------- | ----------------- | -------------------------- | ---------- | ---------------------------------------------------- |
-| Cliente          | Cliente           | `cliente@renta.test`       | `password` | Landing, catálogo, login y titular de las reservas   |
-| Empleado (patio) | Coordinador       | `coordinador@renta.test`   | `password` | Registrar entrega y devolución                       |
-| Empleado (caja)  | Cajero            | `cajero@renta.test`        | `password` | Cobrar la factura y ver el HTML de facturación       |
-| Administrador    | Administrador     | `administrador@renta.test` | `password` | Entrar con rol de administración y recorrer el sitio |
+| Rol de la demo   | Rol en el sistema | Correo                     | Contraseña | Aterrizaje  | Para qué se usa                                  |
+| ---------------- | ----------------- | -------------------------- | ---------- | ----------- | ------------------------------------------------ |
+| Cliente          | Cliente           | `cliente@renta.test`       | `password` | `/`         | Landing, catálogo, reservas y cuenta             |
+| Empleado (patio) | Coordinador       | `coordinador@renta.test`   | `password` | `/entregas` | Registrar entrega y devolución                   |
+| Empleado (caja)  | Cajero            | `cajero@renta.test`        | `password` | `/pagos`    | Cobrar la factura y ver el HTML de facturación   |
+| Administrador    | Administrador     | `administrador@renta.test` | `password` | `/`         | Recorrer el sitio y TRM en `/administracion/trm` |
 
-También existen `gerente@renta.test` / `password` (Gerente). No hace falta
-para el flujo de esta guía.
+También existe `gerente@renta.test` / `password` (Gerente). No hace falta
+para este recorrido.
+
+Entrega, devolución, pago y factura **exigen sesión y rol**. Si pides una
+ruta operativa sin login, Laravel redirige a `/iniciar-sesion`.
+
+## Pantallas actuales
+
+| Flujo              | Rutas principales                                 | Página Vue                                       |
+| ------------------ | ------------------------------------------------- | ------------------------------------------------ |
+| Landing y catálogo | `/`, `/catalogo`                                  | `Welcome`, `Catalogo/Index`                      |
+| Registro y login   | `/registro`, `/iniciar-sesion`                    | `Auth/Register`, `Auth/Login`                    |
+| Cuenta y licencia  | `/cuenta`                                         | `Cuenta/Show`                                    |
+| Reservas           | `/reservas`, `/reservas/crear`, `/reservas/{id}`  | `Reservas/Index`, `Create`, `Show`               |
+| Entrega            | `/entregas`, `/reservas/{id}/entrega`             | `Entregas/Index`, `Create`, `Show`, `Acta`       |
+| Devolución         | `/devoluciones`, `/reservas/{id}/devolucion`      | `Devoluciones/Index`, `Create`, `Show`           |
+| Pago y factura     | `/pagos`, `/reservas/{id}/pago`, `/facturas/{id}` | `Pagos/Index`, `Create`, `Show`, `Facturas/Show` |
 
 ## Fixtures que usa el recorrido
 
@@ -57,26 +73,23 @@ php artisan tinker --execute "App\Models\Reserva::query()->get(['id','qr_codigo'
 ## Qué está simulado
 
 - **Crear reserva.** `GET /reservas/crear` y `POST /reservas` requieren un
-  cliente autenticado. El formulario cotiza mediante el servicio configurado;
-  el alta crea una reserva pendiente. Al confirmarla desde el formulario se
-  genera un QR de demostración; tarifa y generador QR usan fakes.
-- **Listado de reservas.** `/reservas` responde con el contrato de Inertia,
-  pero la página Vue `Reservas/Index` sigue pendiente.
-- **Confirmación y búsqueda QR.** Solo el cliente titular puede confirmar una
-  reserva pendiente. La ruta `/reservas/qr/{qrCodigo}` permite localizarla por
-  el código de demostración.
-- **Disponibilidad.** El catálogo y el formulario consultan
-  `DisponibilidadService`; el fake excluye vehículos fuera de servicio y
-  reservas no canceladas que se solapan, pero permite reservas consecutivas.
-- **Ubicación.** El buscador de la landing y del catálogo envía `location`,
-  pero ese valor no filtra la flota todavía.
+  cliente autenticado. El formulario cotiza; al confirmar se genera un QR
+  de demostración (gráfico ilustrativo, no escaneable).
+- **Listado de reservas.** `/reservas` renderiza `Reservas/Index`.
+- **Confirmación y búsqueda QR.** Solo el cliente titular confirma una
+  reserva pendiente. `/reservas/qr/{qrCodigo}` la localiza por el código
+  de demostración.
+- **Disponibilidad.** El catálogo excluye vehículos fuera de servicio y
+  reservas no canceladas que se solapan; permite reservas consecutivas.
+- **Ubicación.** El buscador envía `location`, pero ese valor no filtra la
+  flota.
 - **Pasarela.** Cualquier tarjeta que no termine en `0000` se aprueba.
   `4111111111110000` se rechaza y permite reintentar.
-- **OAuth.** El login visual está alineado con el diseño; Google y Facebook
-  no autentican todavía (SCRUM-56).
-- **Rutas operativas.** Entrega, devolución, pago y factura no exigen
-  sesión en las rutas. Aun así, la demo inicia sesión por rol para mostrar
-  autenticación y el cromado de cada perfil.
+- **OAuth.** Los botones de Google y Facebook están en el login y **no
+  autentican**. Usar correo y contraseña.
+- **Anticipo e IVA.** La entrega registra un anticipo en efectivo (30 %).
+  La factura de devolución no lo descuenta y puede volver a aplicar IVA
+  sobre una renta que ya lo traía. No corregir eso en vivo.
 
 ## Recorrido principal
 
@@ -107,16 +120,17 @@ Resultado: la landing pública RENT-GO, no un panel operativo.
 4. Con fechas de recogida y devolución, el listado se recarga y excluye los
    vehículos ocupados para ese período.
 5. **Reservar** lleva a `/reservas/crear` con el vehículo y las fechas
-   seleccionadas. La creación requiere una sesión de cliente; si se solicita
-   iniciar sesión, completen el paso 3 y vuelvan al catálogo.
+   seleccionadas. La creación requiere sesión de cliente; si pide login,
+   completen el paso 3 y vuelvan al catálogo.
 
 ### 3. Login
 
 1. En el encabezado, **Iniciar sesión** (`/iniciar-sesion`).
 2. Entren como cliente: `cliente@renta.test` / `password`.
-3. Deben volver a `/`. Mantengan la sesión de cliente para crear la reserva.
+3. Deben volver a `/`. Mantengan la sesión de cliente para crear la reserva
+   o listen `/reservas`.
 4. Más adelante, cierren sesión e inicien como coordinador:
-   `coordinador@renta.test` / `password`.
+   `coordinador@renta.test` / `password` (aterriza en `/entregas`).
 
 Para mostrar administración, en otro momento usen
 `administrador@renta.test` / `password`. El cromado del layout operativo
@@ -129,31 +143,30 @@ formulario, confirmen las fechas y actualicen el resumen de costos. Inicien
 sesión como cliente si aún no lo hicieron y regresen al formulario para
 confirmar la reserva.
 
-Resultado: se guarda la reserva con el total calculado por el servicio fake y
-se muestra una pantalla de confirmación con un código QR de demostración. El
-gráfico es ilustrativo; el fake no genera una imagen QR escaneable.
+Resultado: se guarda la reserva con el total calculado y se muestra una
+pantalla de confirmación con un código QR de demostración.
 
 Para continuar el recorrido operativo con los datos precargados, usen la
 reserva fixture confirmada que se describe a continuación.
 
 ### 5. Reserva fixture confirmada
 
-Abran directo la entrega de la reserva fixture confirmada:
+Con sesión de **coordinador**, abran la entrega de la reserva fixture:
 
 ```text
 /reservas/1/entrega
 ```
 
-Si el `id` no es 1, sustituyan el número que devolvió el comando de tinker
-para `QR-RESERVA-CONFIRMADA`. La pantalla debe mostrar la licencia
+Si el `id` no es 1, sustituyan el número que devolvió tinker para
+`QR-RESERVA-CONFIRMADA`. La pantalla debe mostrar la licencia
 `LIC-DEMO-001`, categoría B1, vigente hasta 2028-12-31, y un anticipo en
 efectivo (30 % de la renta).
 
 ### 6. Entrega
 
-Con sesión de coordinador, en `/entregas` busquen `QR-RESERVA-CONFIRMADA`
-(fechas relativas a hoy en America/Bogota). `QR-RESERVA-FUTURA` y
-`QR-RESERVA-VENCIDA` muestran el botón deshabilitado.
+En `/entregas` busquen `QR-RESERVA-CONFIRMADA` (fechas relativas a hoy en
+America/Bogota). `QR-RESERVA-FUTURA` y `QR-RESERVA-VENCIDA` muestran el
+botón deshabilitado.
 
 En el acta de la reserva entregable hoy:
 
@@ -178,8 +191,11 @@ Abran:
 /reservas/1/devolucion
 ```
 
-Comparen con el acta de salida (10 000 km, tanque lleno, fin contractual
-`2026-02-04 09:00`). Para enseñar cargos extra:
+El campo **Fin contractual** se muestra con `formatFechaHora` (fecha y hora
+en America/Bogota, `dd/mm/aaaa hh:mm a. m./p. m.`), el mismo formato de
+fecha y hora del resto de pantallas de devolución. El retraso se cobra
+contra esa hora. Comparen con el acta de salida (10 000 km, tanque
+lleno). Para enseñar cargos extra:
 
 1. Fecha y hora de regreso: `2026-02-09 10:00` (retraso).
 2. Kilometraje final: `10450` (exceso sobre los 200 km incluidos).
@@ -197,7 +213,8 @@ Para una devolución limpia, usen regreso `2026-02-04 09:00`, kilometraje
 
 ### 8. Pago y factura
 
-Cierren sesión e inicien como cajero: `cajero@renta.test` / `password`.
+Cierren sesión e inicien como cajero: `cajero@renta.test` / `password`
+(aterriza en `/pagos`).
 
 1. Abran `/reservas/1/pago`.
 2. Método **tarjeta**. Primera tarjeta: `4111111111110000` → rechazo,
@@ -246,19 +263,18 @@ retraso, 150 km de exceso, 3 cuartos de combustible y el daño).
   vigente.
 - **Pago por transferencia o efectivo:** la pasarela no pide número de
   tarjeta; el cobro se registra igual.
+- **Rol incorrecto:** un cajero recibe 403 en `/entregas`; un coordinador
+  no cobra.
 
 ## Verificación automatizada
-
-En `origin/dev` (`03026e5`, incluye SCRUM-37):
 
 ```text
 composer ci:check
 ```
 
-Resultado local: Pint, ESLint, build Vite, PHPStan 0 errores y Pest
-**103/103** pruebas, **546** aserciones. La cobertura al 100 % de `app/`
-la mide CI con PCOV; en un entorno sin PCOV ni Xdebug el hook local no
-bloquea.
+Cubre Pint, ESLint, build Vite, PHPStan y Pest (excluye el grupo `flow`).
+La cobertura al 100 % de `app/` la mide CI con PCOV; en un entorno sin
+PCOV ni Xdebug el hook local no bloquea.
 
 La prueba de humo `tests/Feature/MvpSmokeTest.php` cubre listado de
 reservas, detalle, entrega, devolución, pago y factura con los seeders.

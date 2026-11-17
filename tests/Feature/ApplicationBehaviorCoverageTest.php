@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rules\Password;
 
 test('all documented pages expose their Inertia contracts', function () {
@@ -273,8 +274,12 @@ test('production provider defaults are configured', function () {
     $method->invoke($provider);
 
     expect(Date::now())->toBeInstanceOf(CarbonImmutable::class)
-        ->and(Password::defaults())->toBeInstanceOf(Password::class);
+        ->and(Password::defaults())->toBeInstanceOf(Password::class)
+        ->and(url('/up'))->toStartWith('https://');
 
     app()->instance('env', $environment);
+    URL::forceScheme(null);
     $method->invoke($provider);
+
+    expect(url('/up'))->toStartWith('http://');
 });
