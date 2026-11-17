@@ -9,6 +9,8 @@ use App\Models\Reserva;
 use App\Models\User;
 use App\Models\Vehiculo;
 use Database\Seeders\DevolucionFacturadaSeeder;
+use Database\Seeders\MinimumCatalogSeeder;
+use Illuminate\Support\Facades\Hash;
 
 test('database seeder loads the catalog and flow fixtures', function () {
     $this->seed();
@@ -31,7 +33,20 @@ test('database seeder loads the catalog and flow fixtures', function () {
         ->and(Reserva::where('qr_codigo', 'QR-PAGO-RECHAZADO')->exists())->toBeTrue()
         ->and(Factura::where('numero', 'FAC-DEVOLUCION-PENDIENTE')->where('estado', FacturaEstado::Pendiente)->exists())->toBeTrue()
         ->and(Factura::where('numero', 'FAC-PAGO-RECHAZADO')->where('estado', FacturaEstado::Pendiente)->exists())->toBeTrue()
-        ->and(Pago::where('estado', PagoEstado::Rechazado)->exists())->toBeTrue();
+        ->and(Pago::where('estado', PagoEstado::Rechazado)->exists())->toBeTrue()
+        ->and(Hash::check('password', User::where('email', 'cliente@renta.test')->firstOrFail()->getAuthPassword()))->toBeTrue()
+        ->and(User::where('email', 'cliente@renta.test')->firstOrFail()->getAuthPassword())->toStartWith('$2y$04$');
+});
+
+test('minimum catalog seeder skips after the demo client already exists', function () {
+    $this->seed(MinimumCatalogSeeder::class);
+    $userId = User::where('email', 'cliente@renta.test')->value('id');
+
+    $this->seed(MinimumCatalogSeeder::class);
+
+    expect(User::where('email', 'cliente@renta.test')->value('id'))->toBe($userId)
+        ->and(User::count())->toBe(5)
+        ->and(Vehiculo::count())->toBe(3);
 });
 
 test('flow fixture seeders can run independently', function () {

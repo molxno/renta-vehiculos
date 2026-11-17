@@ -48,13 +48,22 @@ COPY --from=frontend /app/public/build ./public/build
 COPY docker/Caddyfile /etc/caddy/Caddyfile
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
 
-RUN chmod +x /usr/local/bin/entrypoint \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libcap2-bin \
+    && setcap -r /usr/local/bin/frankenphp || true \
+    && apt-get purge -y --auto-remove libcap2-bin \
+    && rm -rf /var/lib/apt/lists/* \
+    && chmod +x /usr/local/bin/entrypoint \
     && mkdir -p database storage/framework/cache/data storage/framework/sessions \
-        storage/framework/views storage/logs bootstrap/cache \
-    && chown -R www-data:www-data database storage bootstrap/cache
+        storage/framework/views storage/logs bootstrap/cache storage/app/public \
+    && ln -sfn /app/storage/app/public /app/public/storage \
+    && mkdir -p /data/caddy /config/caddy \
+    && chown -R www-data:www-data database storage bootstrap/cache public /data /config
 
-ENV PORT=80
+ENV PORT=10000
 
-EXPOSE 80
+EXPOSE 10000
+
+USER www-data
 
 ENTRYPOINT ["entrypoint"]
