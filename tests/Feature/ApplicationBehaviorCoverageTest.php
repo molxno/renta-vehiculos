@@ -160,7 +160,7 @@ test('all documented write routes validate and redirect', function () {
 
     $this->actingAs(User::factory()->cajero()->create())->post(route('pagos.store', $reservation), [
         'metodo' => MetodoPago::Efectivo->value,
-        'monto_centavos' => $invoice->total_centavos,
+        'monto_centavos' => $reservation->saldoAPagarCentavos($invoice->total_centavos),
     ])->assertRedirectToRoute('pagos.show', $reservation);
 });
 
@@ -222,7 +222,7 @@ test('models expose their casts and relationships', function () {
         [new Multa, ['monto_centavos'], ['reserva' => BelongsTo::class]],
         [new Pago, ['estado', 'metodo', 'monto_centavos'], ['reserva' => BelongsTo::class]],
         [new Poliza, ['vigencia_desde', 'vigencia_hasta'], ['vehiculo' => BelongsTo::class]],
-        [new Reserva, ['estado', 'inicio', 'fin', 'total_centavos'], [
+        [new Reserva, ['estado', 'inicio', 'fin', 'total_centavos', 'renta_neta_centavos'], [
             'user' => BelongsTo::class,
             'vehiculo' => BelongsTo::class,
             'convenio' => BelongsTo::class,

@@ -3,6 +3,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { index as listarDevoluciones } from '@/actions/App/Http/Controllers/DevolucionController';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
+import LiquidacionCierre from '@/components/LiquidacionCierre.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatFecha, formatFechaHora } from '@/lib/utils';
@@ -304,6 +305,11 @@ function enviar(): void {
                             {{ pesos(cobro.total_centavos) }}
                         </td>
                     </tr>
+                    <LiquidacionCierre
+                        :anticipos="cobro.anticipos"
+                        :saldo-centavos="cobro.saldo_centavos"
+                        :pesos="pesos"
+                    />
                 </Table>
             </Card>
 

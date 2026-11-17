@@ -23,7 +23,10 @@ final class CalculadoraDevolucionEstandar implements CalculadoraDevolucion
      *     subtotal_centavos: int,
      *     impuestos_centavos: int,
      *     total_centavos: int,
-     *     desglose: array<int, array{concepto: string, monto_centavos: int}>
+     *     desglose: array<int, array{concepto: string, monto_centavos: int}>,
+     *     anticipos: list<array{referencia: string, monto_centavos: int}>,
+     *     anticipos_centavos: int,
+     *     saldo_centavos: int
      * }
      */
     public function calcular(
@@ -32,11 +35,12 @@ final class CalculadoraDevolucionEstandar implements CalculadoraDevolucion
         array $condiciones = [],
     ): array {
         $reserva = Reserva::query()
-            ->with(['actaEntrega', 'contrato', 'danos', 'multas'])
+            ->with(['actaEntrega', 'contrato', 'danos', 'multas', 'pagos'])
             ->findOrFail($reservaId);
 
+        $rentaBase = $reserva->rentaNetaCentavos();
         $desglose = [
-            ['concepto' => 'Renta base', 'monto_centavos' => $reserva->total_centavos],
+            ['concepto' => 'Renta base', 'monto_centavos' => $rentaBase],
         ];
         $cargos = 0;
 
@@ -52,15 +56,17 @@ final class CalculadoraDevolucionEstandar implements CalculadoraDevolucion
             $cargos += $linea['monto_centavos'];
         }
 
-        $subtotal = $reserva->total_centavos + $cargos;
-        $impuestos = intdiv($subtotal * (int) config('devolucion.iva_porcentaje'), 100);
+        $subtotal = $rentaBase + $cargos;
+        $impuestos = Iva::de($subtotal);
+        $total = $subtotal + $impuestos;
 
         return [
             'cargos_centavos' => $cargos,
             'subtotal_centavos' => $subtotal,
             'impuestos_centavos' => $impuestos,
-            'total_centavos' => $subtotal + $impuestos,
+            'total_centavos' => $total,
             'desglose' => $desglose,
+            ...$reserva->resumenAnticiposYSaldo($total),
         ];
     }
 
