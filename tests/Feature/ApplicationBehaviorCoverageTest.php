@@ -30,6 +30,7 @@ use App\Models\Multa;
 use App\Models\Pago;
 use App\Models\Poliza;
 use App\Models\Reserva;
+use App\Models\ReservaHistorialEstado;
 use App\Models\Tarifa;
 use App\Models\User;
 use App\Models\Vehiculo;
@@ -233,7 +234,9 @@ test('models expose their casts and relationships', function () {
             'pagos' => HasMany::class,
             'multas' => HasMany::class,
             'danos' => HasMany::class,
+            'historialEstados' => HasMany::class,
         ]],
+        [new ReservaHistorialEstado, ['estado_anterior', 'estado_nuevo', 'ocurrio_at'], ['reserva' => BelongsTo::class]],
         [new Tarifa, ['valor_diario_centavos', 'vigente_desde', 'vigente_hasta'], ['vehiculo' => BelongsTo::class]],
         [new User, ['email_verified_at', 'password', 'rol'], [
             'licenciaConduccion' => HasOne::class,

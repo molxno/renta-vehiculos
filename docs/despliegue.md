@@ -46,7 +46,11 @@ CACHE_STORE=database
 QUEUE_CONNECTION=database
 SESSION_SECURE_COOKIE=true
 LOG_CHANNEL=stderr
+MAIL_MAILER=log
 ```
+
+`MAIL_MAILER=log` deja el correo de cambio de estado (RF-012) en el log del
+servicio; el plan Free no envía SMTP. El envío es síncrono (sin colas).
 
 `APP_KEY` es obligatoria. El script de arranque falla si falta; no se
 genera una clave nueva en cada reinicio.

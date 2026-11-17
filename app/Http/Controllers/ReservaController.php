@@ -126,7 +126,7 @@ final class ReservaController extends Controller
 
     public function show(Request $request, Reserva $reserva): Response
     {
-        $reserva->loadMissing(['vehiculo', 'actaEntrega', 'factura', 'pagos']);
+        $reserva->loadMissing(['vehiculo', 'actaEntrega', 'factura', 'pagos', 'historialEstados']);
         $usuario = $request->user();
 
         return inertia('Reservas/Show', [
@@ -217,25 +217,29 @@ final class ReservaController extends Controller
             [
                 'key' => 'confirmada',
                 'label' => 'Confirmada',
-                'at' => $confirmada ? $reserva->created_at?->toIso8601String() : null,
+                'at' => $reserva->fechaHito(ReservaEstado::Confirmada)?->toIso8601String()
+                    ?? ($confirmada ? $reserva->created_at?->toIso8601String() : null),
                 'done' => $confirmada,
             ],
             [
                 'key' => 'entregada',
                 'label' => 'Entregada',
-                'at' => $reserva->actaEntrega?->entregado_at?->toIso8601String(),
+                'at' => $reserva->fechaHito(ReservaEstado::Entregada)?->toIso8601String()
+                    ?? $reserva->actaEntrega?->entregado_at?->toIso8601String(),
                 'done' => $entregada,
             ],
             [
                 'key' => 'facturada',
                 'label' => 'Facturada',
-                'at' => $reserva->factura?->created_at?->toIso8601String(),
+                'at' => $reserva->fechaHito(ReservaEstado::Facturada)?->toIso8601String()
+                    ?? $reserva->factura?->created_at?->toIso8601String(),
                 'done' => $facturada,
             ],
             [
                 'key' => 'pagada',
                 'label' => 'Pagada',
-                'at' => $pagoAprobado?->created_at?->toIso8601String()
+                'at' => $reserva->fechaHito(ReservaEstado::Pagada)?->toIso8601String()
+                    ?? $pagoAprobado?->created_at?->toIso8601String()
                     ?? ($pagada ? $reserva->factura?->updated_at?->toIso8601String() : null),
                 'done' => $pagada,
             ],

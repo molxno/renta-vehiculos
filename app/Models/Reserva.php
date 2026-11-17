@@ -7,12 +7,14 @@ namespace App\Models;
 use App\Contracts\ReservaState;
 use App\Enums\PagoEstado;
 use App\Enums\ReservaEstado;
+use App\Events\ReservaEstadoCambiado;
 use App\States\Reserva\CanceladaState;
 use App\States\Reserva\ConfirmadaState;
 use App\States\Reserva\EntregadaState;
 use App\States\Reserva\FacturadaState;
 use App\States\Reserva\PagadaState;
 use App\States\Reserva\PendienteState;
+use Carbon\CarbonInterface;
 use Database\Factories\ReservaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Date;
 
 /**
  * @property ReservaEstado $estado
@@ -116,6 +119,25 @@ final class Reserva extends Model
         return $this->hasMany(Dano::class);
     }
 
+    /** @return HasMany<ReservaHistorialEstado, $this> */
+    public function historialEstados(): HasMany
+    {
+        return $this->hasMany(ReservaHistorialEstado::class)
+            ->orderBy('ocurrio_at')
+            ->orderBy('id');
+    }
+
+    public function fechaHito(ReservaEstado $estado): ?CarbonInterface
+    {
+        $this->loadMissing('historialEstados');
+
+        return $this->historialEstados
+            ->first(
+                fn (ReservaHistorialEstado $historial): bool => $historial->estado_nuevo === $estado,
+            )
+            ?->ocurrio_at;
+    }
+
     public function estadoMaquina(): ReservaState
     {
         return match ($this->estado) {
@@ -130,27 +152,27 @@ final class Reserva extends Model
 
     public function confirmar(): void
     {
-        $this->estadoMaquina()->confirmar($this);
+        $this->ejecutarTransicion(fn () => $this->estadoMaquina()->confirmar($this));
     }
 
     public function entregar(): void
     {
-        $this->estadoMaquina()->entregar($this);
+        $this->ejecutarTransicion(fn () => $this->estadoMaquina()->entregar($this));
     }
 
     public function devolver(): void
     {
-        $this->estadoMaquina()->devolver($this);
+        $this->ejecutarTransicion(fn () => $this->estadoMaquina()->devolver($this));
     }
 
     public function pagar(): void
     {
-        $this->estadoMaquina()->pagar($this);
+        $this->ejecutarTransicion(fn () => $this->estadoMaquina()->pagar($this));
     }
 
     public function cancelar(): void
     {
-        $this->estadoMaquina()->cancelar($this);
+        $this->ejecutarTransicion(fn () => $this->estadoMaquina()->cancelar($this));
     }
 
     public function estaEntregada(): bool
@@ -289,5 +311,21 @@ final class Reserva extends Model
         }
 
         return $this->contrato()->first()->condiciones ?? [];
+    }
+
+    /**
+     * @param  callable(): void  $transicion
+     */
+    private function ejecutarTransicion(callable $transicion): void
+    {
+        $estadoAnterior = $this->estado;
+        $transicion();
+
+        ReservaEstadoCambiado::dispatch(
+            $this,
+            $estadoAnterior,
+            $this->estado,
+            Date::now(),
+        );
     }
 }
