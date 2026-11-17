@@ -1,8 +1,12 @@
 name: Seguridad
 
-# GitHub-hosted runners stay off while the account is billing-locked.
-# Restore `push` and `pull_request` when Actions is unlocked.
 on:
+  push:
+    branches:
+      - dev
+      - qa
+      - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
