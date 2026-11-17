@@ -26,7 +26,7 @@ RUN printf '#!/bin/sh\nexec node /usr/local/lib/node_modules/npm/bin/npm-cli.js 
     && chmod +x /usr/local/bin/npm
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
