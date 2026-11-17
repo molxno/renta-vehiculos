@@ -29,5 +29,7 @@ it('renders the invoice HTML page with the documented breakdown', function () {
         ->assertJsonPath('props.invoice.totalCents', 53550000)
         ->assertJsonPath('props.invoice.currency', 'COP')
         ->assertJsonPath('props.invoice.numero', 'FAC-HTML-001')
-        ->assertJsonPath('props.invoice.desglose.0.concepto', 'Renta');
+        ->assertJsonPath('props.invoice.desglose.0.concepto', 'Renta')
+        ->assertJsonPath('props.invoice.saldoCents', 53550000)
+        ->assertJsonPath('props.invoice.anticipos', []);
 });

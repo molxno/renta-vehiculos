@@ -110,7 +110,7 @@ final class DevolucionController extends Controller
 
     public function show(Request $request, Reserva $reserva): RedirectResponse|Response
     {
-        $reserva->load(['user', 'vehiculo', 'actaDevolucion', 'factura']);
+        $reserva->load(['user', 'vehiculo', 'actaDevolucion', 'factura', 'pagos']);
 
         if (! $reserva->actaDevolucion instanceof ActaDevolucion || ! $reserva->factura instanceof Factura) {
             return to_route('devoluciones.create', $reserva);
@@ -138,6 +138,7 @@ final class DevolucionController extends Controller
                 'taxCents' => $reserva->factura->impuestos_centavos,
                 'totalCents' => $reserva->factura->total_centavos,
                 'desglose' => $reserva->factura->desglose,
+                ...$reserva->liquidacionInertia($reserva->factura->total_centavos),
             ],
             'pagoUrl' => $puedeCobrar ? route('pagos.create', $reserva) : null,
             'puedeCobrar' => $puedeCobrar,

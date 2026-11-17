@@ -18,7 +18,10 @@ interface CalculadoraDevolucion
      *     desglose: array<int, array{
      *         concepto: string,
      *         monto_centavos: int
-     *     }>
+     *     }>,
+     *     anticipos: list<array{referencia: string, monto_centavos: int}>,
+     *     anticipos_centavos: int,
+     *     saldo_centavos: int
      * }
      */
     public function calcular(

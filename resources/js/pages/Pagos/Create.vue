@@ -4,6 +4,7 @@ import { computed } from 'vue';
 import { index as listarPagos } from '@/actions/App/Http/Controllers/PagoController';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
+import LiquidacionCierre from '@/components/LiquidacionCierre.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { PagoFactura, PagoIntento, PagoMetodo } from '@/types';
@@ -210,6 +211,11 @@ function enviar(): void {
                             {{ pesos(invoice.totalCents) }}
                         </td>
                     </tr>
+                    <LiquidacionCierre
+                        :anticipos="invoice.anticipos"
+                        :saldo-centavos="invoice.saldoCents"
+                        :pesos="pesos"
+                    />
                 </Table>
                 <p v-else class="mt-4 text-sm text-slate-500">
                     Esta reserva no tiene una factura pendiente.

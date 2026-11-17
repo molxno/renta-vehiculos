@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { index as listarPagos } from '@/actions/App/Http/Controllers/PagoController';
 import Badge from '@/components/ui/Badge.vue';
 import Card from '@/components/ui/Card.vue';
+import LiquidacionCierre from '@/components/LiquidacionCierre.vue';
 import Table from '@/components/ui/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { PagoFactura, PagoIntento } from '@/types';
@@ -126,6 +127,11 @@ function etiquetaMetodo(metodo: string): string {
                             {{ pesos(invoice.totalCents) }}
                         </td>
                     </tr>
+                    <LiquidacionCierre
+                        :anticipos="invoice.anticipos"
+                        :saldo-centavos="invoice.saldoCents"
+                        :pesos="pesos"
+                    />
                 </Table>
 
                 <p

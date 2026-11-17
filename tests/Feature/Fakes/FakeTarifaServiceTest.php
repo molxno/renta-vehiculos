@@ -10,6 +10,26 @@ use App\Models\Vehiculo;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
+it('applies the shared VAT configuration to the rental quote', function () {
+    config(['devolucion.iva_porcentaje' => 10]);
+    $vehiculo = Vehiculo::factory()->create();
+    Tarifa::factory()->create([
+        'vehiculo_id' => $vehiculo->id,
+        'tipo_vehiculo' => $vehiculo->tipo,
+        'valor_diario_centavos' => 15000000,
+        'vigente_desde' => '2026-01-01',
+    ]);
+
+    $cotizacion = app(TarifaService::class)->cotizar(
+        $vehiculo->id,
+        Carbon::parse('2026-11-10 09:00:00'),
+        Carbon::parse('2026-11-12 09:00:00'),
+    );
+
+    expect($cotizacion['impuestos_centavos'])->toBe(3000000)
+        ->and($cotizacion['total_centavos'])->toBe(33000000);
+});
+
 it('calculates COP totals from the vehicle tariff and active agreement', function () {
     $vehiculo = Vehiculo::factory()->create();
     Tarifa::factory()->create([
@@ -33,8 +53,8 @@ it('calculates COP totals from the vehicle tariff and active agreement', functio
     expect($cotizacion)->toBe([
         'subtotal_centavos' => 30000000,
         'descuento_centavos' => 3000000,
-        'impuestos_centavos' => 5700000,
-        'total_centavos' => 32700000,
+        'impuestos_centavos' => 5130000,
+        'total_centavos' => 32130000,
         'moneda' => 'COP',
     ]);
 });

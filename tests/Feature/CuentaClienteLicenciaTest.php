@@ -197,7 +197,7 @@ describe('alerta de rechazo del cajero', function () {
         $this->from(route('pagos.create', $reservation))
             ->post(route('pagos.store', $reservation), [
                 'metodo' => 'tarjeta',
-                'monto_centavos' => $invoice->total_centavos,
+                'monto_centavos' => $reservation->saldoAPagarCentavos($invoice->total_centavos),
                 'numero_tarjeta' => '4111111111110000',
             ])
             ->assertRedirect(route('pagos.create', $reservation))

@@ -62,6 +62,7 @@ final class CrearReserva
                 'inicio' => $inicio,
                 'fin' => $fin,
                 'total_centavos' => $cotizacion['total_centavos'],
+                'renta_neta_centavos' => $cotizacion['subtotal_centavos'] - $cotizacion['descuento_centavos'],
                 'moneda' => $cotizacion['moneda'],
             ]);
         });
