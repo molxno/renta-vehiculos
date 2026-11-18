@@ -1,0 +1,58 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    name: Despliegue
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://rent-go-co67.onrender.com
+
+    steps:
+      - name: Disparar deploy en Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "${RENDER_DEPLOY_HOOK_URL}" ]; then
+            echo "Falta el secret RENDER_DEPLOY_HOOK_URL."
+            echo "Agrégalo en Settings → Secrets and variables → Actions con la URL del deploy hook de Render."
+            exit 1
+          fi
+          curl --fail --silent --show-error --request POST "${RENDER_DEPLOY_HOOK_URL}"
+
+      - name: Smoke test /up
+        run: |
+          echo "Esperando 60 s el arranque en frío del plan Free…"
+          sleep 60
+          deadline=$((SECONDS + 600))
+          while [ "${SECONDS}" -lt "${deadline}" ]; do
+            status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 30 https://rent-go-co67.onrender.com/up || echo 000)"
+            if [ "${status}" = "200" ]; then
+              echo "Smoke test OK: /up respondió 200"
+              exit 0
+            fi
+            echo "Esperando /up (status=${status})…"
+            sleep 20
+          done
+          echo "El health check /up nunca respondió 200 en 10 minutos"
+          exit 1
