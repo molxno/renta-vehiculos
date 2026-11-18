@@ -1,9 +1,11 @@
 # Despliegue en Render
 
 El MVP de demo corre como un **Web Service Free** en Render con runtime
-**Docker**, rama **`main`** y auto-deploy. Render termina TLS en su proxy;
-el contenedor escucha HTTP en un puerto sin privilegios (`PORT`, por
-defecto `10000`).
+**Docker** y rama **`main`**. El Auto-Deploy de Render debe quedar en
+**Off**: el despliegue lo dispara el workflow **CD** de GitHub Actions
+mediante el deploy hook, no el push a `main`. Render termina TLS en su
+proxy; el contenedor escucha HTTP en un puerto sin privilegios (`PORT`,
+por defecto `10000`).
 
 La imagen compila el frontend con Node 24 y sirve Laravel con FrankenPHP.
 Al arrancar, el entrypoint crea o actualiza una **SQLite efímera**, corre
@@ -17,17 +19,47 @@ El plan Free duerme el servicio. El primer request tras el idle provoca un
 **cold start de alrededor de un minuto** (build de contenedor ya hecho;
 el costo está en migrar, sembrar e `optimize`).
 
+## Flujo CI → CD
+
+```text
+PR → CI → merge a main → CI en main → CD (deploy hook de Render) → smoke test /up
+```
+
+```mermaid
+flowchart LR
+  PR[PR] --> CI[CI]
+  CI --> MergeMain[merge a main]
+  MergeMain --> CIMain[CI en main]
+  CIMain --> CD[CD]
+  CD --> Hook[deploy hook de Render]
+  Hook --> Smoke[smoke test /up]
+```
+
+1. Un PR dispara **CI** (Calidad, Pruebas, Seguridad, Docker).
+2. Tras el merge a `main`, CI vuelve a correr sobre esa rama.
+3. Si CI en `main` termina en verde, **CD** hace POST al deploy hook de
+   Render (`RENDER_DEPLOY_HOOK_URL`) y espera a que
+   `https://rent-go-co67.onrender.com/up` responda 200. Espera 60 s el
+   arranque en frío y reintenta hasta 10 minutos.
+4. `workflow_dispatch` en CD sirve para un redeploy manual.
+
+La URL pública es `https://rent-go-co67.onrender.com`. El secret
+`RENDER_DEPLOY_HOOK_URL` vive solo en GitHub Actions; si falta, CD falla
+con un mensaje claro y no despliega.
+
 ## Crear el servicio
 
 1. En Render, **New > Web Service** conectado al repositorio.
 2. Runtime **Docker**. Render usa el `Dockerfile` de la raíz.
-3. Rama **`main`**. Activa auto-deploy.
+3. Rama **`main`**. Auto-Deploy en **Off**.
 4. Health Check Path: `/up`.
 5. Render inyecta `PORT=10000`. El `Caddyfile` usa `{$PORT}`; no hace falta
    comando de inicio: el `ENTRYPOINT` es `entrypoint`.
+6. Copia la URL del **Deploy Hook** al secret de GitHub
+   `RENDER_DEPLOY_HOOK_URL`.
 
-No hace falta (ni conviene) el workflow `deploy.yml` para esta demo: Render
-construye y publica al llegar el merge a `main`.
+El job **Docker** de CI construye la imagen sin publicarla. El publish lo
+hace Render cuando CD dispara el hook.
 
 ## Variables de entorno
 
@@ -38,7 +70,7 @@ APP_NAME=Renta de vehículos
 APP_ENV=production
 APP_KEY=base64:...         # Generada fuera del repositorio
 APP_DEBUG=false
-APP_URL=https://<servicio>.onrender.com
+APP_URL=https://rent-go-co67.onrender.com
 DB_CONNECTION=sqlite
 DB_DATABASE=/app/database/database.sqlite
 SESSION_DRIVER=database
@@ -97,5 +129,6 @@ configuran en **Environment** de Render.
 ## Health check
 
 Laravel expone `/up`. En el plan Free, un 502 en el primer request suele
-ser el cold start: espera ~1 min y reintenta. Si `/up` no responde después
-de eso, el servicio se marca no saludable.
+ser el cold start: espera ~1 min y reintenta. CD hace esa espera y
+reintenta hasta 10 minutos. Si `/up` no responde 200, el job de CD falla
+y el servicio se marca no saludable.
