@@ -8,15 +8,14 @@ están disponibles; el trabajo funcional continúa por historias en Jira.
 
 ## Checks del repositorio
 
-| Check     | Insignia                                                                                                                                                                     |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CI        | [![CI](https://github.com/molxno/renta-vehiculos/actions/workflows/ci.yml/badge.svg)](https://github.com/molxno/renta-vehiculos/actions/workflows/ci.yml)                    |
-| Seguridad | [![Seguridad](https://github.com/molxno/renta-vehiculos/actions/workflows/security.yml/badge.svg)](https://github.com/molxno/renta-vehiculos/actions/workflows/security.yml) |
-| Deploy    | [![Deploy](https://github.com/molxno/renta-vehiculos/actions/workflows/deploy.yml/badge.svg)](https://github.com/molxno/renta-vehiculos/actions/workflows/deploy.yml)        |
+| Check | Insignia                                                                                                                                                  |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CI    | [![CI](https://github.com/molxno/renta-vehiculos/actions/workflows/ci.yml/badge.svg)](https://github.com/molxno/renta-vehiculos/actions/workflows/ci.yml) |
+| CD    | [![CD](https://github.com/molxno/renta-vehiculos/actions/workflows/cd.yml/badge.svg)](https://github.com/molxno/renta-vehiculos/actions/workflows/cd.yml) |
 
-La integración se hace hacia `dev`. Los checks obligatorios son `CI /
-Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad /
-Secretos` y `Deploy / Build Docker`.
+La integración se hace hacia `dev`. Los checks obligatorios de CI son
+`CI / Calidad`, `CI / Pruebas`, `CI / Seguridad` y `CI / Docker`. Tras CI
+verde en `main`, CD despliega en Render y comprueba `/up`.
 
 ## Stack
 
@@ -276,11 +275,10 @@ Los controladores no contienen reglas de negocio.
 
 Antes de integrar, la rama debe tener verdes estos checks:
 
-| Workflow  | Checks                                             |
-| --------- | -------------------------------------------------- |
-| CI        | `CI / Calidad`, `CI / Pruebas y cobertura`         |
-| Seguridad | `Seguridad / Dependencias`, `Seguridad / Secretos` |
-| Deploy    | `Deploy / Build Docker`                            |
+| Workflow | Checks                                                          |
+| -------- | --------------------------------------------------------------- |
+| CI       | `CI / Calidad`, `CI / Pruebas`, `CI / Seguridad`, `CI / Docker` |
+| CD       | Despliegue en Render y smoke test `/up` (solo `main` verde)     |
 
 ## Agentes de IA y despliegue
 

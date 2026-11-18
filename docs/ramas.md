@@ -25,29 +25,57 @@ La configuración de los rulesets se realiza
 manualmente cuando el check esté estable; este documento no modifica la
 configuración de GitHub.
 
+## Flujo CI/CD
+
+Hay dos workflows: **CI** (`.github/workflows/ci.yml`) y **CD**
+(`.github/workflows/cd.yml`).
+
+```text
+PR → CI → merge a main → CI en main → CD (deploy hook de Render) → smoke test /up
+```
+
+```mermaid
+flowchart LR
+  PR[PR] --> CI[CI]
+  CI --> MergeMain[merge a main]
+  MergeMain --> CIMain[CI en main]
+  CIMain --> CD[CD]
+  CD --> Hook[deploy hook de Render]
+  Hook --> Smoke[smoke test /up]
+```
+
+CI corre en cada `pull_request` y en cada `push` a `dev`, `qa` y `main`.
+Tiene cuatro jobs en paralelo: **Calidad**, **Pruebas**, **Seguridad** y
+**Docker**. En un PR, un push nuevo cancela el run anterior de esa rama.
+
+CD solo arranca cuando CI termina en verde en `main` (o con
+`workflow_dispatch` para un redeploy manual). Dispara el deploy hook de
+Render y espera a que `https://rent-go-co67.onrender.com/up` responda 200.
+El Auto-Deploy de Render debe quedar en **Off**: el despliegue lo dispara
+CD, no el push a `main`.
+
+El hook `.githooks/pre-push` sigue ejecutando `composer ci:check` en la
+máquina que hace push, como puerta local.
+
 ## Checks obligatorios por rama
 
-La puerta de calidad vigente es el hook `.githooks/pre-push`, que ejecuta
-`composer ci:check` en la máquina que hace push. GitHub Actions quedó en
-`workflow_dispatch` porque la cuenta de GitHub está bloqueada por facturación
-y los runners alojados no arrancan. Eso no es un fallo de código. Cuando
-Actions vuelva a estar disponible, se restauran los disparos `push` y
-`pull_request` en `.github/workflows/` y, si el check ya es estable, se
-vuelven a exigir en el ruleset.
+El ruleset de `main` debe exigir los cuatro checks de CI: **Calidad**,
+**Pruebas**, **Seguridad** y **Docker**. En GitHub aparecen como
+`CI / Calidad`, `CI / Pruebas`, `CI / Seguridad` y `CI / Docker`.
 
-| Rama                    | Checks obligatorios                                                                                                                                                                                |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `feature/*` hacia `dev` | `composer ci:check` (hook local). GitHub: `CI / Calidad`, `CI / Pruebas y cobertura`, `Seguridad / Dependencias`, `Seguridad / Secretos`, `Deploy / Build Docker` cuando Actions esté desbloqueado |
-| `dev`                   | Igual que `feature/*` hacia `dev`                                                                                                                                                                  |
-| `qa`                    | Igual que `feature/*` hacia `dev`                                                                                                                                                                  |
-| `main`                  | Igual que `feature/*` hacia `dev`                                                                                                                                                                  |
+| Rama                    | Checks obligatorios                                                                                            |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `feature/*` hacia `dev` | `composer ci:check` (hook local). GitHub: `CI / Calidad`, `CI / Pruebas`, `CI / Seguridad`, `CI / Docker`      |
+| `dev`                   | Igual que `feature/*` hacia `dev`                                                                              |
+| `qa`                    | Igual que `feature/*` hacia `dev`                                                                              |
+| `main`                  | `CI / Calidad`, `CI / Pruebas`, `CI / Seguridad`, `CI / Docker`. Tras CI verde, CD despliega y hace smoke test |
 
 ## Cobertura
 
 El hook local ejecuta `composer test:coverage` solo cuando detecta PCOV o
 Xdebug; sin driver muestra un aviso y no bloquea. La medición canónica es
-`vendor/bin/pest --coverage --min=100` con PCOV, en local o en GitHub Actions
-cuando los runners vuelvan a estar disponibles.
+`vendor/bin/pest --coverage --min=100` con PCOV, en local o en el job
+**Pruebas** de CI.
 El umbral actual es **100 %**: la tercera medición alcanzó 100 % en todos
 los archivos incluidos, por lo que `composer test:coverage` conserva
 `--min=100`. Las iteraciones anteriores alcanzaron 56.6 % y 96.8 %; se
